@@ -1,0 +1,40 @@
+CREATE DATABASE CinemaSystem;
+USE CinemaSystem;
+
+
+CREATE USER datn FOR LOGIN datn;
+GO
+
+ALTER ROLE db_owner ADD MEMBER datn;
+GO
+
+
+CREATE TABLE roles
+(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(20) UNIQUE NOT NULL
+);
+GO
+
+CREATE TABLE users
+(
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    enabled BIT DEFAULT 1
+);
+DROP TABLE users
+GO
+
+CREATE TABLE user_roles
+(
+    user_id UNIQUEIDENTIFIER NOT NULL,
+    role_id INT NOT NULL,
+    PRIMARY key (role_id, user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
+DROP TABLE user_roles
+GO
+
