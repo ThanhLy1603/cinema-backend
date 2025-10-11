@@ -8,6 +8,7 @@ INSERT INTO roles VALUES
 ('CUSTOMER');
 GO
 
+-- Nhập liệu cho bảng users
 
 INSERT INTO users(username, password, email, enabled) VALUES
 -- Ly
@@ -40,6 +41,8 @@ INSERT INTO users(username, password, email, enabled) VALUES
 ('MyStaff', '$2a$10$bbvAcEp3Bcov0irbT24Xnuef9YHpSZBYnuXktTQ7S.nnYOvS7ABli', 'my@example.com', 1),
 ('MyCustomer', '$2a$10$bbvAcEp3Bcov0irbT24Xnuef9YHpSZBYnuXktTQ7S.nnYOvS7ABli', 'my@example.com', 1);
 GO
+
+-- Nhập liệu cho bảng user_roles
 
 -- ADMIN
 INSERT INTO user_roles (user_id, role_id)
