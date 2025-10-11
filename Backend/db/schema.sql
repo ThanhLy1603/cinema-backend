@@ -1,6 +1,11 @@
-CREATE DATABASE CinemaSystem;
-USE CinemaSystem;
+CREATE LOGIN datn WITH PASSWORD = 'Datn@12345';
+GO
 
+CREATE DATABASE CinemaSystem;
+GO
+
+USE CinemaSystem;
+GO
 
 CREATE USER datn FOR LOGIN datn;
 GO
