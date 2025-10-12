@@ -6,7 +6,6 @@ import com.example.backend.service.AuthService;
 import com.example.backend.service.CustomerDetailsService;
 import com.example.backend.service.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.naming.AuthenticationException;
 import java.util.Map;
 
 @RestController
