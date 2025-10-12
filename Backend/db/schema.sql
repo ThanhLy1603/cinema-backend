@@ -43,3 +43,15 @@ CREATE TABLE user_roles
 DROP TABLE user_roles
 GO
 
+
+
+SELECT name
+FROM sys.default_constraints
+WHERE parent_object_id = OBJECT_ID('users');
+
+
+ALTER TABLE users
+DROP CONSTRAINT DF__users__id__440B1D61;
+
+ALTER TABLE users
+DROP CONSTRAINT DF__users__enabled__44FF419A;
