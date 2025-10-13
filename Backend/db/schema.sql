@@ -44,7 +44,6 @@ DROP TABLE user_roles
 GO
 
 
-
 SELECT name
 FROM sys.default_constraints
 WHERE parent_object_id = OBJECT_ID('users');
