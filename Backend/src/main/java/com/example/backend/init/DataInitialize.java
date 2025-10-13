@@ -55,9 +55,9 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             String password = passwordEncoder.encode("Datn12345");
 
             for (String name : users) {
-                Users userAdmin = new Users(name + "ADMIN", password, name.toLowerCase() + "@gmail.com", true);
-                Users userStaff = new Users(name + "STAFF", password, name.toLowerCase() + "@gmail.com", true);
-                Users userCustomer = new Users(name + "CUSTOMER", password, name.toLowerCase() + "@gmail.com", true);
+                Users userAdmin = new Users(name + "Admin", password, name.toLowerCase() + "@gmail.com", true);
+                Users userStaff = new Users(name + "Staff", password, name.toLowerCase() + "@gmail.com", true);
+                Users userCustomer = new Users(name + "Customer", password, name.toLowerCase() + "@gmail.com", true);
 
                 userRepository.saveAll(Arrays.asList(userAdmin, userStaff, userCustomer));
             }
