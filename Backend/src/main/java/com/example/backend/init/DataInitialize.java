@@ -24,7 +24,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void initializeRole() {
+    public void initializeRoles() {
         if (roleRepository.count() == 0) {
             List<String> roleNames = Arrays.asList("ADMIN", "STAFF", "CUSTOMER");
 
@@ -41,7 +41,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     }
 
     @Override
-    public void initializeUserAndUserRole() {
+    public void initializeUserAndUserRoles() {
         if (userRepository.count() == 0) {
             String password = passwordEncoder.encode("Datn12345");
 
@@ -72,7 +72,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        initializeRole();
-        initializeUserAndUserRole();
+        initializeRoles();
+        initializeUserAndUserRoles();
     }
 }
