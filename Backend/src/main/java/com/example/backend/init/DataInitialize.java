@@ -9,11 +9,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class DataInitialize implements EntityInitialize, CommandLineRunner {
+
     @Autowired
     private RoleRepository roleRepository;
 
@@ -24,87 +24,55 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void RoleInitialize() {
+    public void initializeRole() {
         if (roleRepository.count() == 0) {
-            String[] roleName = {"ADMIN", "STAFF", "CUSTOMER"};
+            List<String> roleNames = Arrays.asList("ADMIN", "STAFF", "CUSTOMER");
 
-            for (String name : roleName) {
+            for (String name : roleNames) {
                 Role role = new Role();
                 role.setName(name);
                 roleRepository.save(role);
             }
 
-            System.out.println("Role đã được khởi tạo thành công");
+            System.out.println("Role đã được khởi tạo thành công!");
         } else {
-            System.out.println("Role đã có dữ liệu rồi, không cần khởi tạo");
+            System.out.println("Role đã có dữ liệu, không cần khởi tạo lại.");
         }
     }
 
     @Override
-    public void UserInitialize() {
+    public void initializeUserAndUserRole() {
         if (userRepository.count() == 0) {
-            Role roleAdmin = roleRepository.findByName("ADMIN").orElse(null);
-            Role roleUser = roleRepository.findByName("CUSTOMER").orElse(null);
-            Role roleStaff = roleRepository.findByName("STAFF").orElse(null);
-
-            System.out.println("Role Admin: " + roleAdmin);
-            System.out.println("Role User: " + roleUser);
-            System.out.println("Role Staff: " + roleStaff);
-
-            List<String> users = Arrays.asList("Ly", "Thang", "Thien", "Quan", "Kiet", "My");
             String password = passwordEncoder.encode("Datn12345");
 
-            for (String name : users) {
-                Users userAdmin = new Users(name + "Admin", password, name.toLowerCase() + "@gmail.com", true);
-                Users userStaff = new Users(name + "Staff", password, name.toLowerCase() + "@gmail.com", true);
-                Users userCustomer = new Users(name + "Customer", password, name.toLowerCase() + "@gmail.com", true);
+            Role adminRole = roleRepository.findByName("ADMIN").orElse(null);
+            Role staffRole = roleRepository.findByName("STAFF").orElse(null);
+            Role customerRole = roleRepository.findByName("CUSTOMER").orElse(null);
+
+            List<String> names = Arrays.asList("Ly", "Thang", "Thien", "Quan", "Kiet", "My");
+
+            for (String name : names) {
+                Users userAdmin = new Users(name + "Admin", password, name.toLowerCase() + "admin@gmail.com", true);
+                userAdmin.setRoles(new HashSet<>(List.of(adminRole)));
+
+                Users userStaff = new Users(name + "Staff", password, name.toLowerCase() + "staff@gmail.com", true);
+                userStaff.setRoles(new HashSet<>(List.of(staffRole)));
+
+                Users userCustomer = new Users(name + "Customer", password, name.toLowerCase() + "customer@gmail.com", true);
+                userCustomer.setRoles(new HashSet<>(List.of(customerRole)));
 
                 userRepository.saveAll(Arrays.asList(userAdmin, userStaff, userCustomer));
             }
 
-            System.out.println("User đã được khởi tạo thành công");
+            System.out.println("User và UserRole đã được khởi tạo thành công!");
         } else {
-            System.out.println("User đã có dữ liệu rồi. Không cần khởi tạo");
+            System.out.println("User đã có dữ liệu, không cần khởi tạo lại.");
         }
-    }
-
-    @Override
-    public void UserRoleInitialize() {
-        List<Users> allUsers = userRepository.findAll();
-
-        if (allUsers.isEmpty()) {
-            System.out.println("Chưa có User nào để thêm role. Vui lòng tạo User trước");
-            return;
-        }
-
-        Role roleAdmin = roleRepository.findByName("ADMIN").orElse(null);
-        Role roleCustomer = roleRepository.findByName("CUSTOMER").orElse(null);
-        Role roleStaff = roleRepository.findByName("STAFF").orElse(null);
-
-        if (roleAdmin == null || roleCustomer == null || roleStaff == null) {
-            System.out.println("Không tìm thấy role. Vui lòng khởi tạo role");
-            return;
-        }
-
-        for (Users user : allUsers) {
-            if (user.getUsername().endsWith("STAFF")) {
-                user.getRoles().add(roleStaff);
-            } else if (user.getUsername().endsWith("ADMIN")) {
-                user.getRoles().add(roleAdmin);
-            } else if (user.getUsername().endsWith("CUSTOMER")) {
-                user.getRoles().add(roleCustomer);
-            }
-
-            userRepository.save(user);
-        }
-
-        System.out.println("UserRole đã khởi tạo thành công");
     }
 
     @Override
     public void run(String... args) throws Exception {
-        RoleInitialize();
-        UserInitialize();
-        UserRoleInitialize();
+        initializeRole();
+        initializeUserAndUserRole();
     }
 }
