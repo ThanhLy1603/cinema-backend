@@ -1,7 +1,6 @@
 package com.example.backend.config;
 
 import com.example.backend.filter.JwtAuthenticationFilter;
-import com.example.backend.service.CustomerDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
