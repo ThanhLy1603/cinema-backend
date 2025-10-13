@@ -2,5 +2,5 @@ package com.example.backend.init;
 
 public interface EntityInitialize {
     public void initializeRoles();
-    public void initializeUserAndUserRoles();
+    public void initializeUsersAndUserRoles();
 }

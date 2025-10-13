@@ -41,7 +41,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     }
 
     @Override
-    public void initializeUserAndUserRoles() {
+    public void initializeUsersAndUserRoles() {
         if (userRepository.count() == 0) {
             String password = passwordEncoder.encode("Datn12345");
 
@@ -73,6 +73,6 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         initializeRoles();
-        initializeUserAndUserRoles();
+        initializeUsersAndUserRoles();
     }
 }
