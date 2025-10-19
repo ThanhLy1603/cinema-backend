@@ -1,58 +1,64 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class Users {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uniqueidentifier")
-    private UUID id;
+@Builder
+public class Users implements UserDetails {
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Id
+    @Column(length = 50, nullable = false)
     private String username;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "enabled")
-    private Boolean enabled;
+    @Column(nullable = false)
+    private Boolean enabled = true;
 
+    // Quan hệ 1-1 với user_profiles
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserProfile profile;
+
+    // Quan hệ nhiều-nhiều với roles
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
     private Set<Role> roles = new HashSet<>();
 
-    public Users(String username, String password, String email, boolean enabled) {
+    public Users(String username, String password, String email, Boolean enabled) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.enabled = enabled;
     }
 
-    public Users(String username, String password, String email, boolean enabled, Set<Role> roles) {
-        this.id = UUID.randomUUID();
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.enabled = enabled;
-        this.roles = roles;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> (GrantedAuthority) () -> "ROLE_" + role.getName())
+                .collect(Collectors.toSet());
     }
+
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return enabled; }
 }

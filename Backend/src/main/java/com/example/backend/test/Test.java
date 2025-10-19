@@ -18,7 +18,5 @@ public class Test implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("Hello World");
         System.out.println("Hash of Datn12345: " + passwordEncoder.encode("Datn12345"));
-
-        System.out.println("User details: " + customerDetailsService.loadUserByUsername("lycustomer@gmail.com"));
     }
 }
