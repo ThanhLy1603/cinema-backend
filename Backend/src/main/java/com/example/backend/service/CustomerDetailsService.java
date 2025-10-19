@@ -20,12 +20,20 @@ public class CustomerDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
+        Users user = null;
 
-        var authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+        if (input.contains("@")) {
+            user = userRepository.findByEmail(input)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + input));
+        }
+        else {
+            user = userRepository.findByUsername(input)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + input));
+        }
+
+        var authorities = user.getUserRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole().getName()))
                 .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(

@@ -1,32 +1,33 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.UUID;
+import lombok.*;
 
 @Entity
-@Table(name = "user_roles")
 @IdClass(UserRoleId.class)
-@Data
-@AllArgsConstructor
+@Table(name = "user_roles")
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserRole {
+
     @Id
-    @Column(name = "user_id")
-    private UUID userId;
+    @Column(name = "username")
+    private String username;
 
     @Id
     @Column(name = "role_id")
-    private Long roleId;
+    private Integer roleId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    // Liên kết đến Users
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "username", insertable = false, updatable = false)
     private Users user;
 
-    @ManyToOne
+    // Liên kết đến Role
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", insertable = false, updatable = false)
     private Role role;
 }
