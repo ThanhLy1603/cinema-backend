@@ -19,6 +19,7 @@ CREATE TABLE roles
     id INT IDENTITY(1,1) PRIMARY KEY,
     name VARCHAR(20) UNIQUE NOT NULL
 );
+DROP TABLE roles
 GO
 
 CREATE TABLE users
@@ -26,7 +27,7 @@ CREATE TABLE users
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
     enabled BIT DEFAULT 1
 );
 DROP TABLE users
@@ -43,6 +44,9 @@ CREATE TABLE user_roles
 DROP TABLE user_roles
 GO
 
+SELECT * FROM user_roles
+SELECT * FROM users
+SELECT * FROM roles
 
 SELECT name
 FROM sys.default_constraints
@@ -54,3 +58,6 @@ DROP CONSTRAINT DF__users__id__440B1D61;
 
 ALTER TABLE users
 DROP CONSTRAINT DF__users__enabled__44FF419A;
+
+
+SELECT * FROM users
