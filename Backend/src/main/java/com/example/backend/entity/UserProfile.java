@@ -23,20 +23,23 @@ public class UserProfile {
     @JoinColumn(name = "username", referencedColumnName = "username")
     private Users user;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name", length = 100, columnDefinition = "NVARCHAR(100)")
     private String fullName;
 
     private Boolean gender;
 
-    @Column(length = 20)
+    @Column(length = 20, columnDefinition = "NVARCHAR(20)")
     private String phone;
 
-    @Column(length = 255)
+    @Column(length = 255, columnDefinition = "NVARCHAR(255)")
     private String address;
 
     @Temporal(TemporalType.DATE)
     private Date birthday;
 
-    @Column(name = "avatar_url", length = 255)
+    @Column(name = "avatar_url", length = 255, columnDefinition = "NVARCHAR(255)")
     private String avatarUrl;
+
+    public UserProfile(String username, String fullName, boolean gender, String number, String address, Date birthday, String avatarUrl) {
+    }
 }

@@ -24,24 +24,19 @@ public class Users implements UserDetails {
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(length = 100, nullable = false, unique = true)
+    @Column(length = 100, nullable = false, unique = true, columnDefinition = "NVARCHAR(100)")
     private String email;
 
     @Column(nullable = false)
     private Boolean enabled = true;
 
-    // Quan hệ 1-1 với user_profiles
+    // Quan hệ 1-1 với UserProfile
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfile profile;
 
-    // Quan hệ nhiều-nhiều với roles
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    // Quan hệ 1-n với UserRole
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRole> userRoles = new HashSet<>();
 
     public Users(String username, String password, String email, Boolean enabled) {
         this.username = username;
@@ -52,8 +47,8 @@ public class Users implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> (GrantedAuthority) () -> "ROLE_" + role.getName())
+        return userRoles.stream()
+                .map(userRole -> (GrantedAuthority) () -> "ROLE_" + userRole.getRole().getName())
                 .collect(Collectors.toSet());
     }
 

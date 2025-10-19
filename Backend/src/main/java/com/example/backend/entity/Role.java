@@ -22,6 +22,7 @@ public class Role {
     @Column(length = 20, nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<Users> users = new HashSet<>();
+    // Quan hệ 1-n với UserRole
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRole> userRoles = new HashSet<>();
 }
