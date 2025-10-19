@@ -18,6 +18,4 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-
 }
