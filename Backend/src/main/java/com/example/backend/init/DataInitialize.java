@@ -5,6 +5,7 @@ import com.example.backend.entity.UserProfile;
 import com.example.backend.entity.UserRole;
 import com.example.backend.entity.Users;
 import com.example.backend.repository.RoleRepository;
+import com.example.backend.repository.UserProfileRepository;
 import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -23,6 +24,9 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserProfileRepository userProfileRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -79,7 +83,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     @Override
     @Transactional
     public void initializeUserProfiles() {
-        if (userRepository.count() == 0) {
+        if (userProfileRepository.count() == 0) {
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             List<Users> users = userRepository.findAll();
