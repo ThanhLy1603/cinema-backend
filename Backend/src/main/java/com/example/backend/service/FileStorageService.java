@@ -23,9 +23,9 @@ public class FileStorageService {
         }
 
         if (originalFilename.matches(IMAGE_FILE_PATTERN)) {
-            folder = VIDEO_DIR;
-        } else if (originalFilename.matches(IMAGE_DIR)) {
             folder = IMAGE_DIR;
+        } else if (originalFilename.matches(VIDEO_FILE_PATTERN)){
+            folder = VIDEO_DIR;
         } else {
             throw new IOException("Định dạng file không được hỗ trợ: " + originalFilename);
         }
