@@ -1,5 +1,6 @@
 package com.example.backend.restapi;
 
+import com.example.backend.controller.AuthController;
 import com.example.backend.dto.*;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.CustomerDetailsService;
@@ -20,13 +21,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthRestApi {
+public class AuthRestApi implements AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final CustomerDetailsService customerDetailsService;
     private final AuthService authService;
     private final OtpService otpService;
 
+    @Override
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
         try {
@@ -43,15 +45,18 @@ public class AuthRestApi {
 
             return ResponseEntity.ok(new LoginResponse(token));
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("error", "Invalid username and password"));
+            return ResponseEntity.ok(new ApiResponse("error", "Invalid username or password."));
         }
     }
+
+    @Override
     @PostMapping("/send-otp")
     public ResponseEntity<ApiResponse> sendOtp(@RequestBody OtpRequest request) {
         otpService.sendOtp(request.email());
         return ResponseEntity.ok(new ApiResponse("success", "Đã gửi mã OTP tới email!"));
     }
 
+    @Override
     @PostMapping("/verify-otp")
     public ResponseEntity<ApiResponse> verifyOtp(@RequestBody VerifyOtpRequest request) {
         boolean valid = otpService.verifyOtp(request.email(), request.otp());
@@ -60,6 +65,7 @@ public class AuthRestApi {
                 : ResponseEntity.badRequest().body(new ApiResponse("error", "OTP sai hoặc hết hạn!"));
     }
 
+    @Override
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
