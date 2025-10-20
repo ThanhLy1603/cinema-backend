@@ -33,52 +33,58 @@ public class AuthService {
     //otp đăng ký
     @Transactional
     public ApiResponse register(RegisterRequest request) {
-        // 1️⃣ Kiểm tra trùng username
-        if (userRepository.existsByUsername(request.username())) {
-            throw new RuntimeException("Tên đăng nhập đã tồn tại: " + request.username());
+        try {
+            // 1️⃣ Kiểm tra trùng username
+            if (userRepository.existsByUsername(request.username())) {
+                throw new RuntimeException("Tên đăng nhập đã tồn tại: " + request.username());
+            }
+
+            // 2️⃣ Mã hóa mật khẩu
+            String encodedPassword = passwordEncoder.encode(request.password());
+
+            // 3️⃣ Tạo đối tượng Users
+            Users user = new Users();
+            user.setUsername(request.username());
+            user.setPassword(encodedPassword);
+            user.setEmail(request.email()); // hoặc nhận email riêng nếu có
+            user.setEnabled(true);
+
+            // 4️⃣ Gán vai trò mặc định là CUSTOMER
+            Role customerRole = roleRepository.findByName("CUSTOMER")
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy role CUSTOMER"));
+            UserRole userRole = new UserRole();
+            userRole.setUsername(request.username());
+            userRole.setRoleId(customerRole.getId());
+            userRole.setUser(user);
+            userRole.setRole(customerRole);
+            user.getUserRoles().add(userRole);
+
+            // 5️⃣ Tạo hồ sơ cá nhân (UserProfile)
+            UserProfile profile = new UserProfile();
+            profile.setUser(user);
+            profile.setFullName(request.fullName());
+            profile.setGender(request.gender());
+            profile.setPhone(request.phone());
+            profile.setAddress(request.address());
+            profile.setAvatarUrl("avatar.jpg");
+
+            // Gộp ngày/tháng/năm thành Date
+            LocalDate birthday = LocalDate.of(request.year(), request.month(), request.day());
+            Date date = Date.from(birthday.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            profile.setBirthday(date);
+
+            // Gán 2 chiều
+            user.setProfile(profile);
+
+            // 6️⃣ Lưu user (JPA tự cascade lưu cả UserRole và UserProfile)
+            userRepository.save(user);
+            System.out.println(" Đăng ký thành công:" + user.getUsername());
+            return new ApiResponse("status", "Register success.");
+        } catch (Exception e) {
+            // Rollback tự động do @Transactional, chỉ cần log để theo dõi
+            System.err.println("Lỗi khi đăng ký user {}: {}" + request.username() + e.getMessage());
+            return new ApiResponse("error", "Đăng ký thất bại: " + e.getMessage());
         }
-
-        // 2️⃣ Mã hóa mật khẩu
-        String encodedPassword = passwordEncoder.encode(request.password());
-
-        // 3️⃣ Tạo đối tượng Users
-        Users user = new Users();
-        user.setUsername(request.username());
-        user.setPassword(encodedPassword);
-        user.setEmail(request.email()); // hoặc nhận email riêng nếu có
-        user.setEnabled(true);
-
-        // 4️⃣ Gán vai trò mặc định là CUSTOMER
-        Role customerRole = roleRepository.findByName("CUSTOMER")
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy role CUSTOMER"));
-        UserRole userRole = new UserRole();
-        userRole.setUsername(request.username());
-        userRole.setRoleId(customerRole.getId());
-        userRole.setUser(user);
-        userRole.setRole(customerRole);
-        user.getUserRoles().add(userRole);
-
-        // 5️⃣ Tạo hồ sơ cá nhân (UserProfile)
-        UserProfile profile = new UserProfile();
-        profile.setUser(user);
-        profile.setFullName(request.fullName());
-        profile.setGender(request.gender());
-        profile.setPhone(request.phone());
-        profile.setAddress(request.address());
-        profile.setAvatarUrl("avatar.jpg");
-
-        // Gộp ngày/tháng/năm thành Date
-        LocalDate birthday = LocalDate.of(request.year(), request.month(), request.day());
-        Date date = Date.from(birthday.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        profile.setBirthday(date);
-
-        // Gán 2 chiều
-        user.setProfile(profile);
-
-        // 6️⃣ Lưu user (JPA tự cascade lưu cả UserRole và UserProfile)
-        userRepository.save(user);
-
-        return new ApiResponse("status", "Register success.");
     }
 }
 

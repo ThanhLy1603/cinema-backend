@@ -5,7 +5,7 @@ import com.example.backend.dto.*;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.CustomerDetailsService;
 import com.example.backend.service.JwtService;
-import com.example.backend.service.OtpService;
+import com.example.backend.service.OtpRegisterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -26,7 +24,7 @@ public class AuthRestApi implements AuthController {
     private final JwtService jwtService;
     private final CustomerDetailsService customerDetailsService;
     private final AuthService authService;
-    private final OtpService otpService;
+    private final OtpRegisterService otpRegisterService;
 
     @Override
     @PostMapping("/login")
@@ -51,15 +49,15 @@ public class AuthRestApi implements AuthController {
 
     @Override
     @PostMapping("/send-otp")
-    public ResponseEntity<ApiResponse> sendOtp(@RequestBody OtpRequest request) {
-        otpService.sendOtp(request.email());
+    public ResponseEntity<ApiResponse> sendOtpRegister(@RequestBody OtpRequest request) {
+        otpRegisterService.sendOtp(request.email());
         return ResponseEntity.ok(new ApiResponse("success", "Đã gửi mã OTP tới email!"));
     }
 
     @Override
     @PostMapping("/verify-otp")
-    public ResponseEntity<ApiResponse> verifyOtp(@RequestBody VerifyOtpRequest request) {
-        boolean valid = otpService.verifyOtp(request.email(), request.otp());
+    public ResponseEntity<ApiResponse> verifyOtpRegister(@RequestBody VerifyOtpRequest request) {
+        boolean valid = otpRegisterService.verifyOtp(request.email(), request.otp());
         return valid
                 ? ResponseEntity.ok(new ApiResponse("success", "OTP hợp lệ!"))
                 : ResponseEntity.badRequest().body(new ApiResponse("error", "OTP sai hoặc hết hạn!"));

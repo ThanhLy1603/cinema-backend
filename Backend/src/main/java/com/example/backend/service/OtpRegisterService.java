@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
-public class OtpService {
+public class OtpRegisterService {
 
     private final JavaMailSender mailSender;
     private final Map<String, String> otpStore = new ConcurrentHashMap<>();
