@@ -79,67 +79,70 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     @Override
     @Transactional
     public void initializeUserProfiles() {
-        if (userRepository.count() == 0) return;
+        if (userRepository.count() == 0) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        List<Users> users = userRepository.findAll();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            List<Users> users = userRepository.findAll();
 
-        for (Users user : users) {
-            try {
-                if (user.getProfile() != null) continue;
+            for (Users user : users) {
+                try {
+                    if (user.getProfile() != null) continue;
 
-                UserProfile profile = new UserProfile();
-                profile.setUser(user);
-                user.setProfile(profile);
-                profile.setAvatarUrl("avatar.jpg");
+                    UserProfile profile = new UserProfile();
+                    profile.setUser(user);
+                    user.setProfile(profile);
+                    profile.setAvatarUrl("avatar.jpg");
 
-                String username = user.getUsername();
-                if (username.startsWith("Ly")) {
-                    profile.setFullName("Nguyễn Thành Lý");
-                    profile.setGender(true);
-                    profile.setPhone("090100000" + getLastDigit(username));
-                    profile.setAddress("Bình Thạnh, TP.HCM");
-                    profile.setBirthday(sdf.parse("2000-03-16"));
-                } else if (username.startsWith("Thang")) {
-                    profile.setFullName("Trương Cẩm Thắng");
-                    profile.setGender(true);
-                    profile.setPhone("090200000" + getLastDigit(username));
-                    profile.setAddress("Quận 3, TP.HCM");
-                    profile.setBirthday(sdf.parse("1997-08-21"));
-                } else if (username.startsWith("Thien")) {
-                    profile.setFullName("Trần Lê Duy Thiện");
-                    profile.setGender(true);
-                    profile.setPhone("090300000" + getLastDigit(username));
-                    profile.setAddress("Tân Bình, TP.HCM");
-                    profile.setBirthday(sdf.parse("2002-08-25"));
-                } else if (username.startsWith("Quan")) {
-                    profile.setFullName("Nguyễn Khắc Quân");
-                    profile.setGender(true);
-                    profile.setPhone("090400000" + getLastDigit(username));
-                    profile.setAddress("Thủ Đức, TP.HCM");
-                    profile.setBirthday(sdf.parse("1999-05-30"));
-                } else if (username.startsWith("Kiet")) {
-                    profile.setFullName("Đinh Anh Kiệt");
-                    profile.setGender(true);
-                    profile.setPhone("090500000" + getLastDigit(username));
-                    profile.setAddress("Gò Vấp, TP.HCM");
-                    profile.setBirthday(sdf.parse("2002-02-11"));
-                } else if (username.startsWith("My")) {
-                    profile.setFullName("Lê Hải My");
-                    profile.setGender(false);
-                    profile.setPhone("090600000" + getLastDigit(username));
-                    profile.setAddress("Phú Nhuận, TP.HCM");
-                    profile.setBirthday(sdf.parse("1997-01-13"));
+                    String username = user.getUsername();
+                    if (username.startsWith("Ly")) {
+                        profile.setFullName("Nguyễn Thành Lý");
+                        profile.setGender(true);
+                        profile.setPhone("090100000" + getLastDigit(username));
+                        profile.setAddress("Bình Thạnh, TP.HCM");
+                        profile.setBirthday(sdf.parse("2000-03-16"));
+                    } else if (username.startsWith("Thang")) {
+                        profile.setFullName("Trương Cẩm Thắng");
+                        profile.setGender(true);
+                        profile.setPhone("090200000" + getLastDigit(username));
+                        profile.setAddress("Quận 3, TP.HCM");
+                        profile.setBirthday(sdf.parse("1997-08-21"));
+                    } else if (username.startsWith("Thien")) {
+                        profile.setFullName("Trần Lê Duy Thiện");
+                        profile.setGender(true);
+                        profile.setPhone("090300000" + getLastDigit(username));
+                        profile.setAddress("Tân Bình, TP.HCM");
+                        profile.setBirthday(sdf.parse("2002-08-25"));
+                    } else if (username.startsWith("Quan")) {
+                        profile.setFullName("Nguyễn Khắc Quân");
+                        profile.setGender(true);
+                        profile.setPhone("090400000" + getLastDigit(username));
+                        profile.setAddress("Thủ Đức, TP.HCM");
+                        profile.setBirthday(sdf.parse("1999-05-30"));
+                    } else if (username.startsWith("Kiet")) {
+                        profile.setFullName("Đinh Anh Kiệt");
+                        profile.setGender(true);
+                        profile.setPhone("090500000" + getLastDigit(username));
+                        profile.setAddress("Gò Vấp, TP.HCM");
+                        profile.setBirthday(sdf.parse("2002-02-11"));
+                    } else if (username.startsWith("My")) {
+                        profile.setFullName("Lê Hải My");
+                        profile.setGender(false);
+                        profile.setPhone("090600000" + getLastDigit(username));
+                        profile.setAddress("Phú Nhuận, TP.HCM");
+                        profile.setBirthday(sdf.parse("1997-01-13"));
+                    }
+
+                    userRepository.save(user); // cascade lưu profile
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                userRepository.save(user); // cascade lưu profile
-
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        }
 
-        System.out.println("✅ Đã khởi tạo bảng USER_PROFILES thành công!");
+            System.out.println("✅ Đã khởi tạo bảng USER_PROFILES thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng USER_PROFILES đã có dữ liệu, bỏ qua.");
+        }
     }
 
     private int getLastDigit(String username) {
