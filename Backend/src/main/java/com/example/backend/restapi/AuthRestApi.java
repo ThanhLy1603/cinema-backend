@@ -2,10 +2,7 @@ package com.example.backend.restapi;
 
 import com.example.backend.controller.AuthController;
 import com.example.backend.dto.*;
-import com.example.backend.service.AuthService;
-import com.example.backend.service.CustomerDetailsService;
-import com.example.backend.service.JwtService;
-import com.example.backend.service.OtpRegisterService;
+import com.example.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +22,8 @@ public class AuthRestApi implements AuthController {
     private final CustomerDetailsService customerDetailsService;
     private final AuthService authService;
     private final OtpRegisterService otpRegisterService;
+    private final OtpForgotPassService otpForgotPassService;
+
 
     @Override
     @PostMapping("/login")
@@ -68,4 +67,25 @@ public class AuthRestApi implements AuthController {
     public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
+
+    @PostMapping("/send-otp-forgot")
+    public ResponseEntity<ApiResponse> sendOtpForgot(@RequestBody OtpRequest request) {
+        otpForgotPassService.sendOtp(request.email());
+        return ResponseEntity.ok(new ApiResponse("success", "Đã gửi mã OTP tới email!"));
+    }
+
+    @PostMapping("/verify-otp-forgot")
+    public ResponseEntity<ApiResponse> verifyOtpForgot(@RequestBody VerifyOtpRequest request)  {
+        boolean valid = otpForgotPassService.verifyOtp(request.email(), request.otp());
+        return valid
+                ? ResponseEntity.ok(new ApiResponse("success", "OTP hợp lệ!"))
+                : ResponseEntity.badRequest().body(new ApiResponse("error", "OTP sai hoặc hết hạn!"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
+    }
+
+
 }

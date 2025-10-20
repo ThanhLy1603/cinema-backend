@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.RegisterRequest;
+import com.example.backend.dto.ResetPasswordRequest;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.UserProfile;
 import com.example.backend.entity.UserRole;
@@ -86,5 +87,16 @@ public class AuthService {
             return new ApiResponse("error", "Đăng ký thất bại: " + e.getMessage());
         }
     }
+
+    @Transactional
+    public ApiResponse resetPassword(ResetPasswordRequest request) {
+        Users user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + request.email()));
+        String encodedPassword = passwordEncoder.encode(request.newPassword());
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+        return new ApiResponse("success","Đặt lại mật khẩu thành công cho tài khoản " + request.email());
+    }
+
 }
 
