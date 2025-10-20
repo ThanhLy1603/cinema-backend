@@ -7,19 +7,15 @@ import com.example.backend.entity.UserProfile;
 import com.example.backend.entity.UserRole;
 import com.example.backend.entity.Users;
 import com.example.backend.repository.RoleRepository;
-import com.example.backend.repository.UserProfileRepository;
 import com.example.backend.repository.UserRepository;
-import com.example.backend.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
 
 @Service
@@ -33,12 +29,6 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    private final UserRepository userRepo;
-    private final RoleRepository roleRepo;
-    private final UserProfileRepository profileRepo;
-    private final UserRoleRepository userRoleRepo;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     //otp đăng ký
     @Transactional
