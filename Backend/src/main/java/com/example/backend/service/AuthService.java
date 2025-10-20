@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.RegisterResponse;
+import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.UserProfile;
@@ -32,7 +32,7 @@ public class AuthService {
 
     //otp đăng ký
     @Transactional
-    public RegisterResponse register(RegisterRequest request) {
+    public ApiResponse register(RegisterRequest request) {
         // 1️⃣ Kiểm tra trùng username
         if (userRepository.existsByUsername(request.username())) {
             throw new RuntimeException("Tên đăng nhập đã tồn tại: " + request.username());
@@ -78,7 +78,7 @@ public class AuthService {
         // 6️⃣ Lưu user (JPA tự cascade lưu cả UserRole và UserProfile)
         userRepository.save(user);
 
-        return new RegisterResponse("status", "Register success.");
+        return new ApiResponse("status", "Register success.");
     }
 }
 
