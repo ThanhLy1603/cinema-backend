@@ -1,7 +1,6 @@
 package com.example.backend.restapi;
 
 import com.example.backend.dto.*;
-import com.example.backend.entity.Users;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.CustomerDetailsService;
 import com.example.backend.service.JwtService;
@@ -48,21 +47,21 @@ public class AuthRestApi {
         }
     }
     @PostMapping("/send-otp")
-    public ResponseEntity<RegisterResponse> sendOtp(@RequestBody OtpRequest request) {
+    public ResponseEntity<ApiResponse> sendOtp(@RequestBody OtpRequest request) {
         otpService.sendOtp(request.email());
-        return ResponseEntity.ok(new RegisterResponse("success", "Đã gửi mã OTP tới email!"));
+        return ResponseEntity.ok(new ApiResponse("success", "Đã gửi mã OTP tới email!"));
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<RegisterResponse> verifyOtp(@RequestBody VerifyOtpRequest request) {
+    public ResponseEntity<ApiResponse> verifyOtp(@RequestBody VerifyOtpRequest request) {
         boolean valid = otpService.verifyOtp(request.email(), request.otp());
         return valid
-                ? ResponseEntity.ok(new RegisterResponse("success", "OTP hợp lệ!"))
-                : ResponseEntity.badRequest().body(new RegisterResponse("error", "OTP sai hoặc hết hạn!"));
+                ? ResponseEntity.ok(new ApiResponse("success", "OTP hợp lệ!"))
+                : ResponseEntity.badRequest().body(new ApiResponse("error", "OTP sai hoặc hết hạn!"));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 }
