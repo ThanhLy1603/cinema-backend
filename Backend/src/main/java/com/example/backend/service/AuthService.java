@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.RegisterResponse;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.UserProfile;
@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,41 +39,56 @@ public class AuthService {
     private final UserProfileRepository profileRepo;
     private final UserRoleRepository userRoleRepo;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     //otp đăng ký
     @Transactional
-    public ApiResponse register(RegisterRequest req) {
-        if (userRepo.existsByUsername(req.username()))
-            return new ApiResponse("error", "Email đã tồn tại!");
+    public RegisterResponse register(RegisterRequest request) {
+        // 1️⃣ Kiểm tra trùng username
+        if (userRepository.existsByUsername(request.username())) {
+            throw new RuntimeException("Tên đăng nhập đã tồn tại: " + request.username());
+        }
 
-        Users user = Users.builder()
-                .username(req.username())
-                .email(req.username())
-                .password(encoder.encode(req.password()))
-                .enabled(true)
-                .build();
-        userRepo.save(user);
+        // 2️⃣ Mã hóa mật khẩu
+        String encodedPassword = passwordEncoder.encode(request.password());
 
-        Role role = roleRepo.findByName("CUSTOMER")
-                .orElseThrow(() -> new RuntimeException("Role CUSTOMER chưa có trong DB"));
-        userRoleRepo.save(UserRole.builder()
-                .username(user.getUsername())
-                .roleId(role.getId())
-                .build());
+        // 3️⃣ Tạo đối tượng Users
+        Users user = new Users();
+        user.setUsername(request.username());
+        user.setPassword(encodedPassword);
+        user.setEmail(request.email()); // hoặc nhận email riêng nếu có
+        user.setEnabled(true);
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(req.nam(), req.thang() - 1, req.ngay());
-        UserProfile profile = UserProfile.builder()
-                .username(user.getUsername())
-                .user(user)
-                .fullName(req.fullName())
-                .gender(req.gender())
-                .phone(req.phone())
-                .address(req.address())
-                .birthday(cal.getTime())
-                .build();
-        profileRepo.save(profile);
+        // 4️⃣ Gán vai trò mặc định là CUSTOMER
+        Role customerRole = roleRepository.findByName("CUSTOMER")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy role CUSTOMER"));
+        UserRole userRole = new UserRole();
+        userRole.setUsername(request.username());
+        userRole.setRoleId(customerRole.getId());
+        userRole.setUser(user);
+        userRole.setRole(customerRole);
+        user.getUserRoles().add(userRole);
 
-        return new ApiResponse("success", "Đăng ký tài khoản thành công!");
+        // 5️⃣ Tạo hồ sơ cá nhân (UserProfile)
+        UserProfile profile = new UserProfile();
+        profile.setUser(user);
+        profile.setFullName(request.fullName());
+        profile.setGender(request.gender());
+        profile.setPhone(request.phone());
+        profile.setAddress(request.address());
+        profile.setAvatarUrl("avatar.jpg");
+
+        // Gộp ngày/tháng/năm thành Date
+        LocalDate birthday = LocalDate.of(request.year(), request.month(), request.day());
+        Date date = Date.from(birthday.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        profile.setBirthday(date);
+
+        // Gán 2 chiều
+        user.setProfile(profile);
+
+        // 6️⃣ Lưu user (JPA tự cascade lưu cả UserRole và UserProfile)
+        userRepository.save(user);
+
+        return new RegisterResponse("status", "Register success.");
     }
 }
 
