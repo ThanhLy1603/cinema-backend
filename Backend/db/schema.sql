@@ -19,6 +19,10 @@ DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS user_roles;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS films;
+DROP TABLE IF EXISTS film_categories;
+
 GO
 
 -- Bảng roles
@@ -60,6 +64,54 @@ CREATE TABLE user_profiles (
 );
 GO
 
+CREATE TABLE categories
+(
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    name NVARCHAR(255) NOT NULL UNIQUE,
+    is_deleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+CREATE TABLE films (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    name NVARCHAR(255) NOT NULL,
+    country NVARCHAR(100),
+    director NVARCHAR(255),
+    actor NVARCHAR(MAX), 
+    description NVARCHAR(MAX),
+    duration INT,
+    poster NVARCHAR(255),
+    trailer NVARCHAR(255),
+    release_date DATE,
+    
+    status NVARCHAR(20) NOT NULL DEFAULT 'active',
+    CONSTRAINT CHK_FilmStatus CHECK (status IN ('active', 'inactive', 'upcoming')),
+    
+    is_deleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+CREATE TABLE film_categories (
+    -- ID bản ghi trung gian có thể là INT hoặc UUID, dùng INT cho dễ đọc và index nhanh hơn nếu cần
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), 
+    
+    -- Khóa ngoại phải là UNIQUEIDENTIFIER
+    film_id UNIQUEIDENTIFIER NOT NULL,
+    category_id UNIQUEIDENTIFIER NOT NULL,
+    
+    -- Khóa ngoại
+    CONSTRAINT FK_FC_Film FOREIGN KEY (film_id) 
+        REFERENCES films(id) 
+        ON DELETE CASCADE,
+        
+    CONSTRAINT FK_FC_Category FOREIGN KEY (category_id) 
+        REFERENCES categories(id) 
+        ON DELETE CASCADE,
+    
+    -- Ràng buộc duy nhất
+    CONSTRAINT UQ_FilmCategory UNIQUE (film_id, category_id) 
+);
+GO
 
 SELECT * FROM user_roles
 SELECT * FROM users

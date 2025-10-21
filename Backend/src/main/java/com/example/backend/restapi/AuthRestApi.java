@@ -107,7 +107,7 @@ public class AuthRestApi implements AuthController {
         String email = request.email();
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
 
-        boolean exists = userRepository.existsByEmail(request.email());
+        boolean exists = userRepository.existsByEmail(email);
 
         if (!email.matches(emailRegex)) {
             return ResponseEntity.ok(new ApiResponse("error", "Email không hợp lệ"));
