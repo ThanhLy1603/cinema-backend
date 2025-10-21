@@ -2,6 +2,7 @@ package com.example.backend.restapi;
 
 import com.example.backend.controller.AuthController;
 import com.example.backend.dto.*;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class AuthRestApi implements AuthController {
     private final AuthService authService;
     private final OtpRegisterService otpRegisterService;
     private final OtpForgotPassService otpForgotPassService;
+    private final UserRepository userRepository;
 
     @Override
     @PostMapping("/login")
@@ -84,5 +86,25 @@ public class AuthRestApi implements AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
         return ResponseEntity.ok(authService.resetPassword(request));
+    }
+
+    @PostMapping("/check-username")
+    public ResponseEntity<ApiResponse> checkUsername(@RequestBody CheckUsernameRequest request) {
+        boolean exists = userRepository.existsByUsername(request.username());
+        if (exists) {
+            return ResponseEntity.ok(new ApiResponse("error", "Tên đăng nhập đã tồn tại"));
+        }
+        return ResponseEntity.ok(new ApiResponse("success", "Tên đăng nhập hợp lệ"));
+    }
+
+    @PostMapping("/check-email")
+    public ResponseEntity<ApiResponse> checkEmail(@RequestBody CheckEmailRequest request) {
+        boolean exists = userRepository.existsByEmail(request.email());
+
+        System.out.println("email: " + userRepository.findByEmail(request.email()));
+        if (exists) {
+            return ResponseEntity.ok(new ApiResponse("error", "Email đã được sử dụng"));
+        }
+        return ResponseEntity.ok(new ApiResponse("success", "Email hợp lệ"));
     }
 }
