@@ -80,7 +80,7 @@ public class AuthService {
             // 6️⃣ Lưu user (JPA tự cascade lưu cả UserRole và UserProfile)
             userRepository.save(user);
             System.out.println(" Đăng ký thành công:" + user.getUsername());
-            return new ApiResponse("status", "Register success.");
+            return new ApiResponse("status", "Đăng ký thành công.");
         } catch (Exception e) {
             // Rollback tự động do @Transactional, chỉ cần log để theo dõi
             System.err.println("Lỗi khi đăng ký user {}: {}" + request.username() + e.getMessage());

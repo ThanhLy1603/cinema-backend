@@ -104,7 +104,14 @@ public class AuthRestApi implements AuthController {
     @Override
     @PostMapping("/check-email")
     public ResponseEntity<ApiResponse> checkEmail(@RequestBody CheckEmailRequest request) {
+        String email = request.email();
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+
         boolean exists = userRepository.existsByEmail(request.email());
+
+        if (!email.matches(emailRegex)) {
+            return ResponseEntity.ok(new ApiResponse("error", "Email không hợp lệ"));
+        }
 
         System.out.println("email: " + userRepository.findByEmail(request.email()));
         if (exists) {
