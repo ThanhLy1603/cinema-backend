@@ -69,12 +69,14 @@ public class AuthRestApi implements AuthController {
         return ResponseEntity.ok(authService.register(request));
     }
 
+    @Override
     @PostMapping("/send-otp-forgot")
     public ResponseEntity<ApiResponse> sendOtpForgot(@RequestBody OtpRequest request) {
         otpForgotPassService.sendOtp(request.email());
         return ResponseEntity.ok(new ApiResponse("success", "Đã gửi mã OTP tới email!"));
     }
 
+    @Override
     @PostMapping("/verify-otp-forgot")
     public ResponseEntity<ApiResponse> verifyOtpForgot(@RequestBody VerifyOtpRequest request)  {
         boolean valid = otpForgotPassService.verifyOtp(request.email(), request.otp());
@@ -83,11 +85,13 @@ public class AuthRestApi implements AuthController {
                 : ResponseEntity.badRequest().body(new ApiResponse("error", "OTP sai hoặc hết hạn!"));
     }
 
+    @Override
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
         return ResponseEntity.ok(authService.resetPassword(request));
     }
 
+    @Override
     @PostMapping("/check-username")
     public ResponseEntity<ApiResponse> checkUsername(@RequestBody CheckUsernameRequest request) {
         boolean exists = userRepository.existsByUsername(request.username());
@@ -97,6 +101,7 @@ public class AuthRestApi implements AuthController {
         return ResponseEntity.ok(new ApiResponse("success", "Tên đăng nhập hợp lệ"));
     }
 
+    @Override
     @PostMapping("/check-email")
     public ResponseEntity<ApiResponse> checkEmail(@RequestBody CheckEmailRequest request) {
         boolean exists = userRepository.existsByEmail(request.email());

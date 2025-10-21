@@ -9,4 +9,9 @@ public interface AuthController {
     public ResponseEntity<ApiResponse> sendOtpRegister(@RequestBody OtpRequest request);
     public ResponseEntity<ApiResponse> verifyOtpRegister(@RequestBody VerifyOtpRequest request);
     public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request);
+    public ResponseEntity<ApiResponse> sendOtpForgot(@RequestBody OtpRequest request);
+    public ResponseEntity<ApiResponse> verifyOtpForgot(@RequestBody VerifyOtpRequest request);
+    public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request);
+    public ResponseEntity<ApiResponse> checkUsername(@RequestBody CheckUsernameRequest request);
+    public ResponseEntity<ApiResponse> checkEmail(@RequestBody CheckEmailRequest request);
 }
