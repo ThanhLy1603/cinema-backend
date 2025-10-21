@@ -24,7 +24,6 @@ public class AuthRestApi implements AuthController {
     private final OtpRegisterService otpRegisterService;
     private final OtpForgotPassService otpForgotPassService;
 
-
     @Override
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
@@ -86,6 +85,4 @@ public class AuthRestApi implements AuthController {
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
         return ResponseEntity.ok(authService.resetPassword(request));
     }
-
-
 }
