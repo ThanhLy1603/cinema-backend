@@ -1,12 +1,11 @@
 package com.example.backend.init;
 
-import com.example.backend.entity.Role;
-import com.example.backend.entity.UserProfile;
-import com.example.backend.entity.UserRole;
-import com.example.backend.entity.Users;
+import com.example.backend.entity.*;
+import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserProfileRepository;
 import com.example.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,19 +16,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
+@RequiredArgsConstructor
 public class DataInitialize implements EntityInitialize, CommandLineRunner {
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserProfileRepository userProfileRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final CategoryRepository categoryRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -149,6 +142,52 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         }
     }
 
+    @Override
+    @Transactional
+    public void initializeCategories() {
+        if (categoryRepository.count() == 0) {
+            List<String> categoryNames = Arrays.asList(
+                    "Hành động",
+                    "Khoa học viễn tưởng",
+                    "Giả tưởng",
+                    "Kịch tính",
+                    "Tâm lý",
+                    "Hài hước",
+                    "Kinh dị",
+                    "Lãng mạn",
+                    "Phiêu lưu",
+                    "Gia đình",
+                    "Hoạt hình",
+                    "Tội phạm",
+                    "Bí ẩn",
+                    "Tài liệu"
+            );
+
+            for (String name : categoryNames) {
+                // Kiểm tra xem thể loại đã tồn tại trong DB chưa
+                Category existingCategory = categoryRepository.findByName(name);
+
+                if (existingCategory == null) {
+                    // Nếu chưa tồn tại, tạo Entity mới và lưu vào DB
+                    Category newCategory = new Category();
+                    newCategory.setName(name);
+                    newCategory.setDeleted(true); // is_deleted = 0
+
+                    categoryRepository.save(newCategory);
+                    // System.out.println("Đã thêm thể loại: " + name); // Tùy chọn để debug
+                }
+            }
+            System.out.println("✅ Đã khởi tạo bảng CATEGORY thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng CATEGORY đã có dữ liệu, bỏ qua.");
+        }
+    }
+
+    @Override
+    public void initializeFilmsAndFilmCategories() {
+
+    }
+
     private int getLastDigit(String username) {
         if (username.endsWith("Admin")) return 1;
         if (username.endsWith("Staff")) return 2;
@@ -162,5 +201,6 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeRoles();
         initializeUsersAndUserRoles();
         initializeUserProfiles();
+        initializeCategories();
     }
 }

@@ -19,9 +19,10 @@ DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS user_roles;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
+
+DROP TABLE IF EXISTS film_categories;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS films;
-DROP TABLE IF EXISTS film_categories;
 
 GO
 
@@ -117,6 +118,10 @@ SELECT * FROM user_roles
 SELECT * FROM users
 SELECT * FROM roles
 SELECT * FROM user_profiles
+SELECT * FROM categories
+SELECT * FROM films
+SELECT * FROM film_categories
+
 
 SELECT name
 FROM sys.default_constraints
