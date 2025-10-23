@@ -22,11 +22,11 @@ public class UserProfileAPI implements UserProfileController {
 
 
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> showProfile(@PathVariable String id) {
-        UserProfileResponse response = userProfileService.getProfile(id);
+    @GetMapping("/{username}")
+    public ResponseEntity<Object> showProfile(@PathVariable String username) {
+        UserProfileResponse response = userProfileService.getProfile(username);
         if (response.username() == null) {
-            return ResponseEntity.ok(new ApiResponse("error", "User profile not found for id: " + id));
+            return ResponseEntity.ok(new ApiResponse("error", "User profile not found for id: " + username));
         }
         return ResponseEntity.ok(response);
     }
