@@ -2,30 +2,33 @@ package com.example.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 
 @Entity
 @Table(name = "films")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Film {
+
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "name", nullable = false, length = 255)
+    @Column(name = "name", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String name;
 
-    @Column(name = "country", length = 255)
+    @Column(name = "country", length = 255, columnDefinition = "NVARCHAR(100)")
     private String country;
 
-    @Column(name = "director", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "director", columnDefinition = "NVARCHAR(255)")
     private String director;
+
+    @Column(name = "actor", columnDefinition = "NVARCHAR(MAX)")
+    private String actor;
 
     @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
@@ -40,17 +43,30 @@ public class Film {
     private String trailer;
 
     @Column(name = "release_date")
-    @Temporal(TemporalType.DATE)
-    private Date releaseDate;
+    private LocalDate releaseDate;
 
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
-    @Column(name = "is_deleted",nullable = false)
-    private boolean isDeleted;
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = true;
 
+    @Builder.Default
     @OneToMany(mappedBy = "film", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<FilmCategory> filmCategories;
+    private Set<FilmCategory> filmCategories = new HashSet<>();
+
+    public Set<Category> getCategories() {
+        Set<Category> categories = new HashSet<>();
+
+        for (FilmCategory filmCategory : filmCategories) {
+            if (filmCategory.getCategory() != null && !filmCategory.getCategory().isDeleted()) {
+                categories.add(filmCategory.getCategory());
+            }
+        }
+
+        return categories;
+    }
 }

@@ -188,8 +188,8 @@ VALUES
     'Toi_thay_hoa_vang_tren_co_xanh_poster.jpg', 'Toi_thay_hoa_vang_tren_co_xanh_trailer.mp4', '2015-10-02', 'active', 0),
 
 -- 19. Tù Chiến Trên Không (Con Air)
-(N'Tù Chiến Trên Không', N'Mỹ', N'Simon West', N'Nicolas Cage, John Cusack, John Malkovich', 
-    N'Cựu biệt kích Cameron Poe được trả tự do sau 8 năm tù, nhưng anh phải đối mặt với một chuyến bay cuối cùng trên chiếc máy bay vận chuyển những tên tội phạm nguy hiểm nhất. Khi nhóm tù nhân nổi loạn, Poe phải hợp tác với nhân viên an ninh để ngăn chặn một cuộc đào tẩu hàng loạt.', 115, 
+(N'Tử Chiến Trên Không', N'Mỹ', N'Lê Nhật Quang', N'Thái Hoà, Kaity Nguyễn, Thanh Sơn, Xuân Phúc',
+    N'"Tử Chiến Trên Không" kể về Bình, chuyên viên cảnh vệ hàng không, vô tình rơi vào cuộc đối đầu sinh tử khi chuyến bay anh đi bị nhóm không tặc do Long cầm đầu khống chế. Trong 15 phút sau khi cất cánh, máy bay trở thành chiến trường. Bình cùng phi hành đoàn và hành khách phải phối hợp chống trả, ngăn chặn âm mưu tàn độc của bọn cướp, bảo vệ tính mạng mọi người giữa bầu trời không lối thoát.', 115,
     'Tu_chien_tren_khong_poster.jpg', 'Tu_chien_tren_khong_trailer.mp4', '1997-06-06', 'inactive', 0),
     
 -- 20. Your Name

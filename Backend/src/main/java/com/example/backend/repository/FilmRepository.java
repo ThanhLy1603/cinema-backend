@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface FilmRepository extends JpaRepository<Film, UUID> {
+    public Film getFilmById(UUID id);
 }
