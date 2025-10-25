@@ -20,8 +20,6 @@ import java.util.Optional;
 public class UserProfileAPI implements UserProfileController {
     private final UserProfileService userProfileService;
 
-
-
     @GetMapping("/{username}")
     public ResponseEntity<Object> showProfile(@PathVariable String username) {
         UserProfileResponse response = userProfileService.getProfile(username);

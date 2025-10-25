@@ -42,5 +42,4 @@ public class UserProfileService {
             return new UserProfileResponse(null, null, null, null, null, null, null,null);
         }
     }
-
 }
