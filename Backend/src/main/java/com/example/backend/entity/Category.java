@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Category {
     @Id
     @GeneratedValue
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Column(name = "name", nullable = false, unique = true, length = 255, columnDefinition = "NVARCHAR(255)")
