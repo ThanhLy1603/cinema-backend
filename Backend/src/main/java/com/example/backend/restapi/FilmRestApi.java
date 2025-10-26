@@ -2,7 +2,7 @@ package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmController;
 import com.example.backend.dto.FilmResponse;
-import com.example.backend.entity.CategoryResponse;
+import com.example.backend.dto.CategoryResponse;
 import com.example.backend.service.FilmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

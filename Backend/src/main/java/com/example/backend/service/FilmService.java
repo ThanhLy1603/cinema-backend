@@ -1,8 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.FilmResponse;
-import com.example.backend.entity.Category;
-import com.example.backend.entity.CategoryResponse;
+import com.example.backend.dto.CategoryResponse;
 import com.example.backend.entity.Film;
 import com.example.backend.repository.FilmRepository;
 import jakarta.transaction.Transactional;
