@@ -58,9 +58,6 @@ public class Film {
     @EqualsAndHashCode.Exclude
     private Set<FilmCategory> filmCategories = new HashSet<>();
 
-    public Film(String s, String nhậtBản, String makotoShinkai, String s1, String s2, int i, String s3, String video, LocalDate of, String active, boolean b) {
-    }
-
     public Set<Category> getCategories() {
         Set<Category> categories = new HashSet<>();
 

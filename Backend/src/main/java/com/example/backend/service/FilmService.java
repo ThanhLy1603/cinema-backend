@@ -49,6 +49,10 @@ public class FilmService {
         List<CategoryResponse> categories = film.getCategories().stream()
                 .map(category -> new CategoryResponse(category.getId(), category.getName()))
                 .collect(Collectors.toList());
+        System.out.println("film: " + film);
+        System.out.println("film categories: " + film.getCategories());
+        System.out.println("film_categories: " + film.getFilmCategories());
+        System.out.println("categories: " + categories);
 
         return ResponseEntity.ok(categories);
     }

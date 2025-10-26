@@ -171,7 +171,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
                     // Nếu chưa tồn tại, tạo Entity mới và lưu vào DB
                     Category newCategory = new Category();
                     newCategory.setName(name);
-                    newCategory.setDeleted(true); // is_deleted = 0
+                    newCategory.setDeleted(false); // is_deleted = 0
 
                     categoryRepository.save(newCategory);
                     // System.out.println("Đã thêm thể loại: " + name); // Tùy chọn để debug
@@ -203,7 +203,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f1.setTrailer("5cms_trailer.mp4");
             f1.setReleaseDate(LocalDate.of(2007, 3, 3));
             f1.setStatus("active");
-            f1.setDeleted(true);
+            f1.setDeleted(false);
             films.add(f1);
 
             Film f2 = new Film();
@@ -217,7 +217,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f2.setTrailer("Alice_in_borderland_3_trailer.mp4");
             f2.setReleaseDate(LocalDate.of(2025, 10, 1));
             f2.setStatus("upcoming");
-            f2.setDeleted(true);
+            f2.setDeleted(false);
             films.add(f2);
 
             Film f3 = new Film();
@@ -231,7 +231,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f3.setTrailer("Avatar_3_trailer.mp4");
             f3.setReleaseDate(LocalDate.of(2025, 12, 19));
             f3.setStatus("upcoming");
-            f3.setDeleted(true);
+            f3.setDeleted(false);
             films.add(f3);
 
             Film f4 = new Film();
@@ -245,7 +245,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f4.setTrailer("Bo_5_sieu_dang_cap_trailer.mp4");
             f4.setReleaseDate(LocalDate.of(2025, 5, 15));
             f4.setStatus("upcoming");
-            f4.setDeleted(true);
+            f4.setDeleted(false);
             films.add(f4);
 
             Film f5 = new Film();
@@ -259,7 +259,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f5.setTrailer("Bup_be_sat_nhan_trailer.mp4");
             f5.setReleaseDate(LocalDate.of(2023, 1, 6));
             f5.setStatus("active");
-            f5.setDeleted(true);
+            f5.setDeleted(false);
             films.add(f5);
 
             Film f6 = new Film();
@@ -273,7 +273,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f6.setTrailer("Conan_movie_20_trailer.mp4");
             f6.setReleaseDate(LocalDate.of(2016, 4, 16));
             f6.setStatus("active");
-            f6.setDeleted(true);
+            f6.setDeleted(false);
             films.add(f6);
 
             Film f7 = new Film();
@@ -287,7 +287,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f7.setTrailer("Deadpool_3_trailer.mp4");
             f7.setReleaseDate(LocalDate.of(2024, 7, 26));
             f7.setStatus("active");
-            f7.setDeleted(true);
+            f7.setDeleted(false);
             films.add(f7);
 
             Film f8 = new Film();
@@ -301,7 +301,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f8.setTrailer("Death_race_3_trailer.mp4");
             f8.setReleaseDate(LocalDate.of(2013, 1, 22));
             f8.setStatus("inactive");
-            f8.setDeleted(true);
+            f8.setDeleted(false);
             films.add(f8);
 
             Film f9 = new Film();
@@ -315,7 +315,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f9.setTrailer("Doraemon_movie_44_trailer.mp4");
             f9.setReleaseDate(LocalDate.of(2025, 3, 1));
             f9.setStatus("upcoming");
-            f9.setDeleted(true);
+            f9.setDeleted(false);
             films.add(f9);
 
             Film f10 = new Film();
@@ -329,7 +329,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f10.setTrailer("Fast_and_furious_7_trailer.mp4");
             f10.setReleaseDate(LocalDate.of(2015, 4, 3));
             f10.setStatus("active");
-            f10.setDeleted(true);
+            f10.setDeleted(false);
             films.add(f10);
 
             Film f11 = new Film();
@@ -343,7 +343,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f11.setTrailer("Mad_max_trailer.mp4");
             f11.setReleaseDate(LocalDate.of(2015, 5, 15));
             f11.setStatus("active");
-            f11.setDeleted(true);
+            f11.setDeleted(false);
             films.add(f11);
 
             Film f12 = new Film();
@@ -357,7 +357,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f12.setTrailer("Mat_biec_trailer.mp4");
             f12.setReleaseDate(LocalDate.of(2019, 12, 20));
             f12.setStatus("active");
-            f12.setDeleted(true);
+            f12.setDeleted(false);
             films.add(f12);
 
             Film f13 = new Film();
@@ -371,7 +371,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f13.setTrailer("Nam_muoi_muoi_lam_trailer.mp4");
             f13.setReleaseDate(LocalDate.of(2024, 3, 8));
             f13.setStatus("upcoming");
-            f13.setDeleted(true);
+            f13.setDeleted(false);
             films.add(f13);
 
             Film f14 = new Film();
@@ -385,7 +385,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f14.setTrailer("Nha_gia_tien_trailer.mp4");
             f14.setReleaseDate(LocalDate.of(2023, 11, 20));
             f14.setStatus("active");
-            f14.setDeleted(true);
+            f14.setDeleted(false);
             films.add(f14);
 
             Film f15 = new Film();
@@ -399,7 +399,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f15.setTrailer("Pacific_rim_trailer.mp4");
             f15.setReleaseDate(LocalDate.of(2013, 7, 12));
             f15.setStatus("active");
-            f15.setDeleted(true);
+            f15.setDeleted(false);
             films.add(f15);
 
             Film f16 = new Film();
@@ -413,7 +413,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f16.setTrailer("Spirited_away_trailer.mp4");
             f16.setReleaseDate(LocalDate.of(2001, 7, 20));
             f16.setStatus("active");
-            f16.setDeleted(true);
+            f16.setDeleted(false);
             films.add(f16);
 
             Film f17 = new Film();
@@ -427,7 +427,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f17.setTrailer("Tenki_no_ko_trailer.mp4");
             f17.setReleaseDate(LocalDate.of(2019, 7, 19));
             f17.setStatus("active");
-            f17.setDeleted(true);
+            f17.setDeleted(false);
             films.add(f17);
 
             Film f18 = new Film();
@@ -441,7 +441,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f18.setTrailer("Toi_thay_hoa_vang_tren_co_xanh_trailer.mp4");
             f18.setReleaseDate(LocalDate.of(2015, 10, 2));
             f18.setStatus("active");
-            f18.setDeleted(true);
+            f18.setDeleted(false);
             films.add(f18);
 
             Film f19 = new Film();
@@ -455,7 +455,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f19.setTrailer("Tu_chien_tren_khong_trailer.mp4");
             f19.setReleaseDate(LocalDate.of(1997, 6, 6));
             f19.setStatus("inactive");
-            f19.setDeleted(true);
+            f19.setDeleted(false);
             films.add(f19);
 
             Film f20 = new Film();
@@ -469,7 +469,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f20.setTrailer("Your_name_trailer.mp4");
             f20.setReleaseDate(LocalDate.of(2016, 8, 26));
             f20.setStatus("active");
-            f20.setDeleted(true);
+            f20.setDeleted(false);
             films.add(f20);
 
             // Lưu phim
@@ -518,7 +518,6 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             System.out.println("ℹ️ Bảng FILM và FILM_CATEGORY đã có dữ liệu, bỏ qua khởi tạo.");
         }
     }
-
 
 
     private int getLastDigit(String username) {
