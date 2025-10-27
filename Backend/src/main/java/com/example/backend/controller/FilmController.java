@@ -10,6 +10,6 @@ import java.util.UUID;
 
 public interface FilmController {
     public ResponseEntity<List<FilmResponse>> getAllFilms();
-    public ResponseEntity<FilmResponse> getFilmById(@PathVariable UUID id);
+    public ResponseEntity<Object> getFilmById(@PathVariable UUID id);
     public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(@PathVariable UUID id);
 }

@@ -1,5 +1,7 @@
 package com.example.backend.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public record UserProfileUpdateRequest(String lastName,
                                        String firstName,
                                        Boolean gender,
@@ -8,5 +10,5 @@ public record UserProfileUpdateRequest(String lastName,
                                        int day,
                                        int month,
                                        int year,
-                                       String avatarUrl) {
+                                       MultipartFile avatarUrl) {
 }

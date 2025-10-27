@@ -21,22 +21,17 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class UserProfileAPI implements UserProfileController {
 
-
     private final UserProfileService userProfileService;
 
-
-    @PutMapping("/{username}/changepassword")
-    public ResponseEntity<ApiResponse> changePassword(String username,ChangePasswordRequest request) {
-
-        return ResponseEntity.ok(userProfileService.changepassword(username,request));
-
+    @PutMapping("/{username}/change-password")
+    public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok(userProfileService.changePassword(username,request));
     }
 
-    @PutMapping("/{username}/updateprofile")
-    public ResponseEntity<ApiResponse> updateProfile(String username, UserProfileUpdateRequest request) {
+    @PutMapping("/{username}/update-profile")
+    public ResponseEntity<ApiResponse> updateProfile(@PathVariable String username, @ModelAttribute UserProfileUpdateRequest request) {
         return ResponseEntity.ok(userProfileService.updateProfile(username, request));
     }
-
 
     @GetMapping("/{username}")
     public ResponseEntity<Object> showProfile(String username) {
@@ -46,6 +41,4 @@ public class UserProfileAPI implements UserProfileController {
         }
         return ResponseEntity.ok(response);
     }
-
-
 }

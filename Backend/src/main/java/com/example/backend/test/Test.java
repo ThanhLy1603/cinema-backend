@@ -1,7 +1,9 @@
 package com.example.backend.test;
 
 import com.example.backend.entity.Film;
+import com.example.backend.entity.Users;
 import com.example.backend.repository.FilmRepository;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.CustomerDetailsService;
 import com.example.backend.service.FilmService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -20,11 +23,23 @@ public class Test implements CommandLineRunner {
     private FilmRepository filmRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private CustomerDetailsService customerDetailsService;
 
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Hello World");
         System.out.println("Hash of Datn12345: " + passwordEncoder.encode("Datn12345"));
+
+//        Optional<Users> userOpt = userRepository.findById("LyStaff");
+//        if (userOpt.isPresent()) {
+//            Users user = userOpt.get();
+//            System.out.println("Username: " + user.getUsername());
+//        } else {
+//            System.out.println("Không tìm thấy người dùng LyStaff");
+//        }
+
     }
 }

@@ -1,9 +1,11 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.FilmResponse;
 import com.example.backend.dto.CategoryResponse;
 import com.example.backend.entity.Film;
 import com.example.backend.repository.FilmRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,42 +21,34 @@ public class FilmService {
     private final FilmRepository filmRepository;
 
     @Transactional
-    public ResponseEntity<List<FilmResponse>> getAllFilms() {
-        List<FilmResponse> films = filmRepository.findAll().stream()
+    public List<FilmResponse> getAllFilms() {
+        List<FilmResponse> films = filmRepository.findByIsDeletedFalse().stream()
                 .map(this::toFilmResponse)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(films);
+        return films;
     }
 
     @Transactional
-    public ResponseEntity<FilmResponse> getFilmById(UUID id) {
-        Film film = filmRepository.findById(id).orElse(null);
+    public Object getFilmById(UUID id) {
+        Film film = filmRepository.findFilmByIdAndIsDeletedFalse(id);
 
-        if (film == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(toFilmResponse(film));
+        return (film == null) ? new ApiResponse("error", "film not found") : toFilmResponse(film);
     }
 
     @Transactional
-    public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(UUID id) {
-        Film film = filmRepository.findById(id).orElse(null);
+    public List<CategoryResponse> getCategoriesByFilmId(UUID id) {
+        Film film = filmRepository.findFilmByIdAndIsDeletedFalse(id);
 
         if (film == null) {
-            return ResponseEntity.notFound().build();
+            System.out.println(("Không tìm thấy phim với ID: " + id));
         }
 
         List<CategoryResponse> categories = film.getCategories().stream()
                 .map(category -> new CategoryResponse(category.getId(), category.getName()))
                 .collect(Collectors.toList());
-        System.out.println("film: " + film);
-        System.out.println("film categories: " + film.getCategories());
-        System.out.println("film_categories: " + film.getFilmCategories());
-        System.out.println("categories: " + categories);
 
-        return ResponseEntity.ok(categories);
+        return categories;
     }
 
     private FilmResponse toFilmResponse(Film film) {

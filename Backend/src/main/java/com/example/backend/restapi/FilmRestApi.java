@@ -23,18 +23,18 @@ public class FilmRestApi implements FilmController {
     @Override
     @GetMapping("")
     public ResponseEntity<List<FilmResponse>> getAllFilms() {
-        return filmService.getAllFilms();
+        return ResponseEntity.ok(filmService.getAllFilms());
     }
 
     @Override
     @GetMapping("/{id}")
-    public ResponseEntity<FilmResponse> getFilmById(@PathVariable UUID id) {
-        return filmService.getFilmById(id);
+    public ResponseEntity<Object> getFilmById(@PathVariable UUID id) {
+        return ResponseEntity.ok(filmService.getFilmById(id));
     }
 
     @Override
     @GetMapping("/{id}/categories")
     public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(@PathVariable UUID id) {
-        return filmService.getCategoriesByFilmId(id);
+        return  ResponseEntity.ok(filmService.getCategoriesByFilmId(id));
     }
 }
