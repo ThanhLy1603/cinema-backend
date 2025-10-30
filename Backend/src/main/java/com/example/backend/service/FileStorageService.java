@@ -5,6 +5,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 public class FileStorageService {
@@ -46,4 +49,40 @@ public class FileStorageService {
 
         return fileName;
     }
+
+    public boolean deleteFile(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return true; // Không có tên file để xóa
+        }
+
+        try {
+            // 1. Xác định loại file (ảnh hay video) để tìm đúng thư mục
+            String folder;
+            if (fileName.toLowerCase().matches(IMAGE_FILE_PATTERN)) {
+                folder = IMAGE_DIR;
+            } else if (fileName.toLowerCase().matches(VIDEO_FILE_PATTERN)) {
+                folder = VIDEO_DIR;
+            } else {
+                // Nếu không xác định được loại file, không thể xóa
+                System.err.println("Không thể xác định loại file để xóa: " + fileName);
+                return false;
+            }
+
+            // 2. Tạo đường dẫn tuyệt đối đến file
+            Path filePath = Paths.get(folder, fileName);
+
+            // 3. Thực hiện xóa vật lý
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                return true;
+            } else {
+                // File không tồn tại vẫn được coi là thành công (đã xóa)
+                return true;
+            }
+        } catch (IOException e) {
+            System.err.println("Lỗi khi xóa file " + fileName + ": " + e.getMessage());
+            return false;
+        }
+    }
+
 }

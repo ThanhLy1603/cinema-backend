@@ -7,7 +7,10 @@ import com.example.backend.dto.CategoryResponse;
 import com.example.backend.service.FilmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,27 +39,19 @@ public class FilmRestApi implements FilmController {
         return  ResponseEntity.ok(filmService.getCategoriesByFilmId(id));
     }
 
-    // CREATE: POST /api/films
     @Override
-    @PostMapping("")
-    public ResponseEntity<FilmResponse> createFilm(@RequestBody FilmRequest filmRequest) {
-        FilmResponse newFilm = filmService.createFilm(filmRequest);
-        return ResponseEntity.status(201).body(newFilm);
+    public ResponseEntity<FilmResponse> createFilm(FilmRequest filmRequest) {
+        return null;
     }
 
-    // UPDATE: PUT /api/films/{id}
     @Override
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateFilm(@PathVariable UUID id, @RequestBody FilmRequest filmRequest) {
-        Object result = filmService.updateFilm(id, filmRequest);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<FilmResponse> updateFilm(UUID id, FilmRequest filmRequest) {
+        return null;
     }
 
-    // DELETE: DELETE /api/films/{id} (Xóa logic)
     @Override
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteFilm(@PathVariable UUID id) {
-        Object result = filmService.deleteFilm(id);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Void> deleteFilm(UUID id) {
+        return null;
     }
 }
+
