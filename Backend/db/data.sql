@@ -155,7 +155,7 @@ VALUES
 -- 12. Mắt Biếc
 (N'Mắt Biếc', N'Việt Nam', N'Victor Vũ', N'Trần Nghĩa, Trúc Anh, Trần Phong', 
     N'Dựa trên tiểu thuyết của Nguyễn Nhật Ánh, bộ phim kể về mối tình đơn phương đầy day dứt của chàng thư sinh Ngạn dành cho cô bạn Mắt Biếc Hà Lan. Bối cảnh từ làng Đo Đo yên bình đến thành phố đầy cám dỗ, nơi tình cảm chân thành phải đối mặt với sự thay đổi của thời gian và số phận.', 117, 
-    'Mac_biec_poster.jpeg', 'Mat_biec_trailer.mp4', '2019-12-20', 'active', 0),
+    'Mat_biec_poster.jpeg', 'Mat_biec_trailer.mp4', '2019-12-20', 'active', 0),
     
 -- 13. Năm Mười Muơi Lâm (Giả định dựa trên tên file)
 (N'Năm Mười Mười Lâm', N'Việt Nam', N'Tấn Hoàng Phong', N'Trần Phong, Huỳnh Tú Uyên, Trần Vân Anh', 
@@ -188,8 +188,8 @@ VALUES
     'Toi_thay_hoa_vang_tren_co_xanh_poster.jpg', 'Toi_thay_hoa_vang_tren_co_xanh_trailer.mp4', '2015-10-02', 'active', 0),
 
 -- 19. Tù Chiến Trên Không (Con Air)
-(N'Tù Chiến Trên Không', N'Mỹ', N'Simon West', N'Nicolas Cage, John Cusack, John Malkovich', 
-    N'Cựu biệt kích Cameron Poe được trả tự do sau 8 năm tù, nhưng anh phải đối mặt với một chuyến bay cuối cùng trên chiếc máy bay vận chuyển những tên tội phạm nguy hiểm nhất. Khi nhóm tù nhân nổi loạn, Poe phải hợp tác với nhân viên an ninh để ngăn chặn một cuộc đào tẩu hàng loạt.', 115, 
+(N'Tử Chiến Trên Không', N'Mỹ', N'Lê Nhật Quang', N'Thái Hoà, Kaity Nguyễn, Thanh Sơn, Xuân Phúc',
+    N'"Tử Chiến Trên Không" kể về Bình, chuyên viên cảnh vệ hàng không, vô tình rơi vào cuộc đối đầu sinh tử khi chuyến bay anh đi bị nhóm không tặc do Long cầm đầu khống chế. Trong 15 phút sau khi cất cánh, máy bay trở thành chiến trường. Bình cùng phi hành đoàn và hành khách phải phối hợp chống trả, ngăn chặn âm mưu tàn độc của bọn cướp, bảo vệ tính mạng mọi người giữa bầu trời không lối thoát.', 115,
     'Tu_chien_tren_khong_poster.jpg', 'Tu_chien_tren_khong_trailer.mp4', '1997-06-06', 'inactive', 0),
     
 -- 20. Your Name
@@ -206,7 +206,7 @@ CROSS JOIN categories AS C
 WHERE (F.name = N'5 Centimeters Per Second' AND C.name IN (N'Tình Cảm', N'Chính Kịch'))
    OR (F.name = N'Alice in Borderland 3' AND C.name IN (N'Hành Động', N'Khoa Học Viễn Tưởng', N'Chính Kịch'))
    OR (F.name = N'Avatar 3' AND C.name IN (N'Khoa Học Viễn Tưởng', N'Hành Động', N'Phiêu Lưu'))
-   OR (F.name = N'Bố Già 5 Siêu Đẳng Cấp' AND C.name IN (N'Hành Động', N'Hài')) 
+   OR (F.name = N'Bố Già 5 Siêu Đẳng Cấp' AND C.name IN (N'Hành Động', N'Hài hước'))
    OR (F.name = N'Búp Bê Sát Nhân' AND C.name IN (N'Kinh Dị', N'Hành Động'))
    OR (F.name = N'Conan Movie 20: The Darkest Nightmare' AND C.name IN (N'Hoạt Hình', N'Trinh Thám', N'Hành Động'))
    OR (F.name = N'Deadpool 3' AND C.name IN (N'Hành Động', N'Hài', N'Khoa Học Viễn Tưởng'))
@@ -214,13 +214,13 @@ WHERE (F.name = N'5 Centimeters Per Second' AND C.name IN (N'Tình Cảm', N'Ch�
    OR (F.name = N'Doraemon Movie 44: Nobita''s Earth Symphony' AND C.name IN (N'Hoạt Hình', N'Gia Đình', N'Phiêu Lưu'))
    OR (F.name = N'Fast and Furious 7' AND C.name IN (N'Hành Động', N'Phiêu Lưu'))
    OR (F.name = N'Mắt Biếc' AND C.name IN (N'Tình Cảm', N'Chính Kịch'))
-   OR (F.name = N'Năm Mười Mười Lâm' AND C.name IN (N'Hài', N'Gia Đình'))
+   OR (F.name = N'Năm Mười Mười Lâm' AND C.name IN (N'Hài hước', N'Gia Đình'))
    OR (F.name = N'Nhà Gia Tiên' AND C.name IN (N'Tâm Linh', N'Kinh Dị'))
    OR (F.name = N'Pacific Rim' AND C.name IN (N'Khoa Học Viễn Tưởng', N'Hành Động'))
    OR (F.name = N'Spirited Away' AND C.name IN (N'Hoạt Hình', N'Giả Tưởng', N'Phiêu Lưu'))
    OR (F.name = N'Weathering with You' AND C.name IN (N'Hoạt Hình', N'Tình Cảm', N'Giả Tưởng'))
    OR (F.name = N'Tôi Thấy Hoa Vàng Trên Cỏ Xanh' AND C.name IN (N'Gia Đình', N'Chính Kịch', N'Tình Cảm'))
-   OR (F.name = N'Tù Chiến Trên Không' AND C.name IN (N'Hành Động', N'Chính Kịch'))
+   OR (F.name = N'Tử Chiến Trên Không' AND C.name IN (N'Hành Động', N'Chính Kịch'))
    OR (F.name = N'Your Name' AND C.name IN (N'Hoạt Hình', N'Tình Cảm', N'Giả Tưởng'));
 
 SELECT * FROM roles

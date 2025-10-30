@@ -15,7 +15,7 @@ import java.util.UUID;
 public class FilmCategory {
     @Id
     @GeneratedValue
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

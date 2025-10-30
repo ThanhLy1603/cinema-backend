@@ -1,8 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.RegisterRequest;
-import com.example.backend.dto.ResetPasswordRequest;
+import com.example.backend.dto.*;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.UserProfile;
 import com.example.backend.entity.UserRole;
@@ -10,10 +8,16 @@ import com.example.backend.entity.Users;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -22,14 +26,37 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final CustomerDetailsService customerDetailsService;
+    private final JwtService jwtService;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    @Transactional
+    public Object login(LoginRequest request) {
+        try {
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password());
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+            authenticationManager.authenticate(authToken);
+
+            UserDetails userDetails = customerDetailsService.loadUserByUsername(request.username());
+            System.out.println("User details: " + userDetails.getUsername() + ", " +
+                    userDetails.getAuthorities());
+
+            String token = jwtService.generateToken(userDetails);
+
+            return new LoginResponse(token);
+
+        } catch (DisabledException e) {
+            return new ApiResponse("error", "Tài khoản đã bị vô hiệu hóa");
+        } catch (BadCredentialsException e) {
+            return new ApiResponse("error", "Sai tên đăng nhập hoặc mật khẩu");
+        } catch (Exception e) {
+            return new ApiResponse("error", "Lỗi khi kết nối đến máy chủ");
+        }
+    }
 
     //otp đăng ký
     @Transactional

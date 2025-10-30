@@ -7,6 +7,8 @@ import com.example.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,22 +31,7 @@ public class AuthRestApi implements AuthController {
     @Override
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
-        try {
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    request.username(),
-                    request.password()
-            );
-
-            authenticationManager.authenticate(authToken);
-
-            UserDetails userDetails = customerDetailsService.loadUserByUsername(request.username());
-            System.out.println("User details: " + userDetails.getUsername() + ", " + userDetails.getPassword() + ", " + userDetails.getAuthorities());
-            String token = jwtService.generateToken(userDetails);
-
-            return ResponseEntity.ok(new LoginResponse(token));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new ApiResponse("error", "Invalid username or password."));
-        }
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @Override

@@ -122,6 +122,7 @@ SELECT * FROM categories
 SELECT * FROM films
 SELECT * FROM film_categories
 
+UPDATE user_profiles SET avatar_url = 'avatar.jpg' WHERE username like 'LyStaff'
 
 SELECT name
 FROM sys.default_constraints
@@ -137,3 +138,6 @@ EXEC sp_help 'user_roles';
 
 
 SELECT * FROM users
+
+SELECT * FROM Films WHERE name like N'Tôi Thấy Hoa Vàng Trên Cỏ Xanh'
+SELECT * FROM film_categories WHERE film_id like 0x718ABFD14D68FC4F879282AF16F2E27A
