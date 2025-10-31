@@ -1,6 +1,7 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmController;
+import com.example.backend.dto.FilmRequest;
 import com.example.backend.dto.FilmResponse;
 import com.example.backend.dto.CategoryResponse;
 import com.example.backend.service.FilmService;
@@ -37,4 +38,20 @@ public class FilmRestApi implements FilmController {
     public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(@PathVariable UUID id) {
         return  ResponseEntity.ok(filmService.getCategoriesByFilmId(id));
     }
+
+    @Override
+    public ResponseEntity<FilmResponse> createFilm(FilmRequest filmRequest) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<FilmResponse> updateFilm(UUID id, FilmRequest filmRequest) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteFilm(UUID id) {
+        return null;
+    }
 }
+

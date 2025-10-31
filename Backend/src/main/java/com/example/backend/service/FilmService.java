@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.FilmRequest;
 import com.example.backend.dto.FilmResponse;
 import com.example.backend.dto.CategoryResponse;
 import com.example.backend.entity.Film;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmRepository filmRepository;
+    private final FileStorageService fileStorageService;
 
     @Transactional
     public List<FilmResponse> getAllFilms() {
@@ -66,5 +68,62 @@ public class FilmService {
                 film.getStatus(),
                 film.isDeleted()
         );
+    }
+    @Transactional
+    public FilmResponse createFilm(FilmRequest filmRequest) {
+        Film film = toFilmEntity(filmRequest);
+        film.setId(UUID.randomUUID()); // Đảm bảo ID mới cho phim
+        film.setDeleted(false); // Đảm bảo không bị xóa mặc định
+        return toFilmResponse(filmRepository.save(film));
+    }
+
+    // Cập nhật phim
+    @Transactional
+    public FilmResponse updateFilm(UUID id, FilmRequest filmRequest) {
+        Film existingFilm = filmRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Film not found with id " + id));
+
+        // Cập nhật thông tin từ request
+        existingFilm.setName(filmRequest.name());
+        existingFilm.setCountry(filmRequest.country());
+        existingFilm.setDirector(filmRequest.director());
+        existingFilm.setActor(filmRequest.actor());
+        existingFilm.setDescription(filmRequest.description());
+        existingFilm.setDuration(filmRequest.duration());
+        existingFilm.setReleaseDate(filmRequest.releaseDate());
+        existingFilm.setStatus(filmRequest.status());
+        // Cập nhật poster và trailer
+        existingFilm.setPoster(filmRequest.poster());
+        existingFilm.setTrailer(filmRequest.trailer());
+
+        return toFilmResponse(filmRepository.save(existingFilm));
+    }
+
+    // Xóa mềm phim (chuyển isDeleted thành true)
+    @Transactional
+    public void deleteFilm(UUID id) {
+        Film film = filmRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Film not found with id " + id));
+
+        film.setDeleted(true); // Xóa mềm
+        filmRepository.save(film);
+    }
+
+    // Phương thức chuyển đổi FilmRequest sang Film Entity (cần thiết cho POST/PUT)
+    private Film toFilmEntity(FilmRequest filmRequest) {
+        return Film.builder()
+                .id(filmRequest.id())
+                .name(filmRequest.name())
+                .country(filmRequest.country())
+                .director(filmRequest.director())
+                .actor(filmRequest.actor())
+                .description(filmRequest.description())
+                .duration(filmRequest.duration())
+                .poster(filmRequest.poster())
+                .trailer(filmRequest.trailer())
+                .releaseDate(filmRequest.releaseDate())
+                .status(filmRequest.status())
+                .isDeleted(filmRequest.isDeleted())
+                .build();
     }
 }
