@@ -1,8 +1,9 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmController;
+import com.example.backend.dto.FilmRequest;
 import com.example.backend.dto.FilmResponse;
-import com.example.backend.entity.CategoryResponse;
+import com.example.backend.dto.CategoryResponse;
 import com.example.backend.service.FilmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,18 +24,34 @@ public class FilmRestApi implements FilmController {
     @Override
     @GetMapping("")
     public ResponseEntity<List<FilmResponse>> getAllFilms() {
-        return filmService.getAllFilms();
+        return ResponseEntity.ok(filmService.getAllFilms());
     }
 
     @Override
     @GetMapping("/{id}")
-    public ResponseEntity<FilmResponse> getFilmById(@PathVariable UUID id) {
-        return filmService.getFilmById(id);
+    public ResponseEntity<Object> getFilmById(@PathVariable UUID id) {
+        return ResponseEntity.ok(filmService.getFilmById(id));
     }
 
     @Override
     @GetMapping("/{id}/categories")
     public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(@PathVariable UUID id) {
-        return filmService.getCategoriesByFilmId(id);
+        return  ResponseEntity.ok(filmService.getCategoriesByFilmId(id));
+    }
+
+    @Override
+    public ResponseEntity<FilmResponse> createFilm(FilmRequest filmRequest) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<FilmResponse> updateFilm(UUID id, FilmRequest filmRequest) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteFilm(UUID id) {
+        return null;
     }
 }
+

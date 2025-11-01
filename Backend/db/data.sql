@@ -155,7 +155,7 @@ VALUES
 -- 12. Mắt Biếc
 (N'Mắt Biếc', N'Việt Nam', N'Victor Vũ', N'Trần Nghĩa, Trúc Anh, Trần Phong', 
     N'Dựa trên tiểu thuyết của Nguyễn Nhật Ánh, bộ phim kể về mối tình đơn phương đầy day dứt của chàng thư sinh Ngạn dành cho cô bạn Mắt Biếc Hà Lan. Bối cảnh từ làng Đo Đo yên bình đến thành phố đầy cám dỗ, nơi tình cảm chân thành phải đối mặt với sự thay đổi của thời gian và số phận.', 117, 
-    'Mac_biec_poster.jpeg', 'Mat_biec_trailer.mp4', '2019-12-20', 'active', 0),
+    'Mat_biec_poster.jpeg', 'Mat_biec_trailer.mp4', '2019-12-20', 'active', 0),
     
 -- 13. Năm Mười Muơi Lâm (Giả định dựa trên tên file)
 (N'Năm Mười Mười Lâm', N'Việt Nam', N'Tấn Hoàng Phong', N'Trần Phong, Huỳnh Tú Uyên, Trần Vân Anh', 
@@ -214,7 +214,7 @@ WHERE (F.name = N'5 Centimeters Per Second' AND C.name IN (N'Tình Cảm', N'Ch�
    OR (F.name = N'Doraemon Movie 44: Nobita''s Earth Symphony' AND C.name IN (N'Hoạt Hình', N'Gia Đình', N'Phiêu Lưu'))
    OR (F.name = N'Fast and Furious 7' AND C.name IN (N'Hành Động', N'Phiêu Lưu'))
    OR (F.name = N'Mắt Biếc' AND C.name IN (N'Tình Cảm', N'Chính Kịch'))
-   OR (F.name = N'Năm Mười Mười Lâm' AND C.name IN (N'Hài', N'Gia Đình'))
+   OR (F.name = N'Năm Mười Mười Lâm' AND C.name IN (N'Hài hước', N'Gia Đình'))
    OR (F.name = N'Nhà Gia Tiên' AND C.name IN (N'Tâm Linh', N'Kinh Dị'))
    OR (F.name = N'Pacific Rim' AND C.name IN (N'Khoa Học Viễn Tưởng', N'Hành Động'))
    OR (F.name = N'Spirited Away' AND C.name IN (N'Hoạt Hình', N'Giả Tưởng', N'Phiêu Lưu'))

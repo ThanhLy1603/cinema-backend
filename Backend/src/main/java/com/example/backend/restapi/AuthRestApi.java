@@ -31,30 +31,7 @@ public class AuthRestApi implements AuthController {
     @Override
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
-        try {
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(request.username(), request.password());
-
-            authenticationManager.authenticate(authToken);
-
-            UserDetails userDetails = customerDetailsService.loadUserByUsername(request.username());
-            System.out.println("User details: " + userDetails.getUsername() + ", " +
-                    userDetails.getAuthorities());
-
-            String token = jwtService.generateToken(userDetails);
-
-            return ResponseEntity.ok(new LoginResponse(token));
-
-        } catch (DisabledException e) {
-            return ResponseEntity.status(403)
-                    .body(new ApiResponse("error", "Tài khoản đã bị vô hiệu hóa"));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(401)
-                    .body(new ApiResponse("error", "Sai tên đăng nhập hoặc mật khẩu"));
-        } catch (Exception e) {
-            return ResponseEntity.status(500)
-                    .body(new ApiResponse("error", "Lỗi khi kết nối đến máy chủ"));
-        }
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @Override

@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class Users implements UserDetails {
-
     @Id
     @Column(length = 50, nullable = false)
     private String username;
@@ -31,7 +30,7 @@ public class Users implements UserDetails {
     private Boolean enabled = true;
 
     // Quan hệ 1-1 với UserProfile
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfile profile;
 
     // Quan hệ 1-n với UserRole
