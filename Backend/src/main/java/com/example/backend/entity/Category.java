@@ -6,6 +6,8 @@ import lombok.*;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "categories")
@@ -24,8 +26,11 @@ public class Category {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<FilmCategory> filmCategory;
+
+
 }
