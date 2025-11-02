@@ -14,8 +14,8 @@ import java.util.*;
 public class Film {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "BINARY(16)")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "UNIQUEIDENTIFIER ")
     private UUID id;
 
     @Column(name = "name", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
@@ -51,6 +51,9 @@ public class Film {
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = true;
+
+    @OneToMany(mappedBy = "film")
+    private List<Schedule> schedules;
 
     @Builder.Default
     @OneToMany(mappedBy = "film", cascade = CascadeType.ALL, orphanRemoval = true)

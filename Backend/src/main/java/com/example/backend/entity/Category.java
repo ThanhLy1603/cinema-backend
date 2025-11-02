@@ -14,11 +14,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Category {
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "BINARY(16)")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 255, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "name", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @Column(name = "is_deleted", nullable = false)

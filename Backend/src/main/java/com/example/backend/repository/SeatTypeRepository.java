@@ -1,6 +1,6 @@
 package com.example.backend.repository;
 
-import com.example.backend.entity.Category;
+import com.example.backend.entity.SeatType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, UUID> {
-    List<Category> findByIsDeletedIsFalse();
-    Category findByName(String name);
+public interface SeatTypeRepository extends JpaRepository<SeatType, UUID> {
+    List<SeatType> findAllByIsDeletedFalse();
+    SeatType findByName(String name);
 }
