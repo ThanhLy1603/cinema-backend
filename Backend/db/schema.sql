@@ -30,6 +30,8 @@ DROP TABLE IF EXISTS rooms;
 DROP TABLE IF EXISTS seat_types;
 DROP TABLE IF EXISTS show_times;
 
+DROP TABLE IF EXISTS products;
+
 
 GO
 
@@ -172,6 +174,16 @@ CREATE TABLE schedules (
     CONSTRAINT FK_Schedule_Film FOREIGN KEY (film_id) REFERENCES films(id),
     CONSTRAINT FK_Schedule_Room FOREIGN KEY (room_id) REFERENCES rooms(id),
     CONSTRAINT FK_Schedule_ShowTime FOREIGN KEY (show_time_id) REFERENCES show_times(id)
+);
+GO
+
+CREATE TABLE products 
+(
+   id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+   name NVARCHAR(100) NOT NULL,
+   description NVARCHAR(MAX) NOT NULL,
+   poster NVARCHAR(255),
+   is_deleted BIT DEFAULT 0
 );
 GO
 

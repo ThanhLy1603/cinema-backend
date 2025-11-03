@@ -11,4 +11,5 @@ public interface EntityInitialize {
     public void initializeShowTimes();
     public void initializeSeats();
     public void initializeSchedules();
+    public void initializeFoods();
 }

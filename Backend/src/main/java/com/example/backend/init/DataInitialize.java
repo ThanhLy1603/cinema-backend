@@ -3,7 +3,6 @@ package com.example.backend.init;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -28,6 +27,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private final ShowTimeRepository showTimeRepository;
     private final SeatTypeRepository seatTypeRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -726,6 +726,41 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         }
     }
 
+    @Override
+    @Transactional
+    public void initializeFoods() {
+        if (productRepository.count() == 0) {
+
+            List<Food> foods = Arrays.asList(
+                    new Food(null, "Aquafina",
+                            "01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim",
+                            "Aquafina_poster.png", false),
+
+                    new Food(null, "Pepsi 220z",
+                            "01 nước Pepsi 220z. Nhận trong ngày xem phim",
+                            "Pepsi_220z_poster.png", false),
+
+                    new Food(null, "Bắp rang vị ngọt 440z",
+                            "01 bắp 440z vị ngọt. Nhận trong ngày xem phim",
+                            "Bap_ngot_poster.png", false),
+
+                    new Food(null, "Bắp rang vị phô mai 440z",
+                            "01 bắp 440z vị phô mai. Nhận trong ngày xem phim",
+                            "Bap_pho_mai_poster.png", false),
+
+                    new Food(null,
+                            "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z",
+                            "01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim",
+                            "Combo_bapngot_pepsi_xucxich_poster.png", false)
+            );
+
+            productRepository.saveAll(foods);
+            System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng PRODUCTS đã có dữ liệu, bỏ qua.");
+        }
+    }
+
 
 
     private int getLastDigit(String username) {
@@ -748,5 +783,6 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeShowTimes();
         initializeSeats();
         initializeSchedules();
+        initializeFoods();
     }
 }

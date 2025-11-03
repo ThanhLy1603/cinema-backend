@@ -36,10 +36,10 @@ public class Film {
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "poster", length = 255)
+    @Column(name = "poster", length = 255, columnDefinition = "NVARCHAR(255)")
     private String poster;
 
-    @Column(name = "trailer", length = 255)
+    @Column(name = "trailer", length = 255, columnDefinition = "NVARCHAR(255)")
     private String trailer;
 
     @Column(name = "release_date")

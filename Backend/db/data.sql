@@ -419,10 +419,19 @@ GO
 
 SELECT 'Đã nhập liệu thành công 80 bản ghi mới cho bảng schedules.' AS Result;
 
+-- Nhập liệu cho bảng foods
+INSERT INTO products (name, description, poster, is_deleted)
+VALUES
+(N'Aquafina', N'01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim', N'Aquafina_poster.png', 0),
+(N'Pepsi 2020z', N'01 nước Pepsi 200z. Nhận trong ngày xem phim', N'Pepsi_220z_poster.png', 0),
+(N'Bắp rang vị ngọt 440z', N'01 bắp 440z vị ngọt. Nhận trong ngày xem phim', N'Bap_ngot_poster.png', 0),
+(N'Bắp rang vị phô mai 440z', N'01 bắp 440z vị phô mai. Nhận trong ngày xem phim', N'Bap_pho_mai_poster.png', 0),
+(N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z', N'01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim', N'Combo_bapngot_pepsi_xucxich_poster.png', 0);
+
 
 SELECT * FROM user_roles
 SELECT * FROM users
-SELECT * FROM roles
+SELECT * FROM rolesW
 SELECT * FROM user_profiles
 SELECT * FROM categories
 SELECT * FROM films
@@ -432,6 +441,8 @@ SELECT * FROM rooms
 SELECT * FROM show_times
 SELECT * FROM seats
 SELECT * FROM schedules
+
+SELECT * FROM foods
 
 
 SELECT 
@@ -477,7 +488,7 @@ FROM
 JOIN 
     seat_types ST ON S.seat_type_id = ST.id
 WHERE 
-    S.room_id = '76c91195-dac4-4ef3-891b-f9fe41d4aeae' 
+    S.room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' 
 GROUP BY 
     ST.name;
 
@@ -488,7 +499,7 @@ SELECT
 FROM 
     seats
 WHERE 
-    room_id = '1d0bd470-b5b7-4437-b201-6155d1be7bd0' and seat_type_id = 'eccf0df2-df4f-4eb7-a10b-29a3836e9b18'
+    room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' and seat_type_id = 'e0df25aa-3113-4494-a753-b55abf97652d'
 ORDER BY 
     SeatNumber 
 ASC
