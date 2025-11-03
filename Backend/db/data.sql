@@ -442,7 +442,7 @@ SELECT * FROM show_times
 SELECT * FROM seats
 SELECT * FROM schedules
 
-SELECT * FROM foods
+SELECT * FROM products
 
 
 SELECT 
