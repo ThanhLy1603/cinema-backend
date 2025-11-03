@@ -14,30 +14,38 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/showtimes")
+@CrossOrigin(origins = "http://localhost:5173") // hoặc domain FE của bạn
 public class ShowTimeController {
 
     @Autowired
     private ShowTimeService service;
 
-    //GET all
+    // 🔹 GET all
     @GetMapping
     public ResponseEntity<List<ShowTimeResponse>> getAll() {
-        List<ShowTimeResponse> list = service.getAll()
-                .stream()
-                .map(st -> new ShowTimeResponse(st.getStartTime(), st.getIsDeleted()))
+        List<ShowTimeResponse> list = service.getAll().stream()
+                .map(st -> new ShowTimeResponse(
+                        st.getId(),
+                        st.getStartTime(),
+                        st.getIsDeleted()
+                ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
 
-    //GET by ID
+    // 🔹 GET by ID
     @GetMapping("/{id}")
     public ResponseEntity<ShowTimeResponse> getById(@PathVariable UUID id) {
         return service.getById(id)
-                .map(st -> ResponseEntity.ok(new ShowTimeResponse(st.getStartTime(), st.getIsDeleted())))
+                .map(st -> ResponseEntity.ok(new ShowTimeResponse(
+                        st.getId(),
+                        st.getStartTime(),
+                        st.getIsDeleted()
+                )))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    //POST
+    // 🔹 POST: tạo mới
     @PostMapping
     public ResponseEntity<ShowTimeResponse> create(@RequestBody ShowTimeRequest request) {
         ShowTime showTime = new ShowTime();
@@ -45,21 +53,30 @@ public class ShowTimeController {
         showTime.setIsDeleted(request.isDeleted() != null ? request.isDeleted() : false);
 
         ShowTime created = service.create(showTime);
-        return ResponseEntity.ok(new ShowTimeResponse(created.getStartTime(), created.getIsDeleted()));
+        return ResponseEntity.ok(new ShowTimeResponse(
+                created.getId(),
+                created.getStartTime(),
+                created.getIsDeleted()
+        ));
     }
 
-    //PUT
+    // 🔹 PUT: cập nhật
     @PutMapping("/{id}")
     public ResponseEntity<ShowTimeResponse> update(@PathVariable UUID id, @RequestBody ShowTimeRequest request) {
-        ShowTime showTime = new ShowTime();
-        showTime.setStartTime(request.startTime());
-        showTime.setIsDeleted(request.isDeleted());
-
-        ShowTime updated = service.update(id, showTime);
-        return ResponseEntity.ok(new ShowTimeResponse(updated.getStartTime(), updated.getIsDeleted()));
+        ShowTime updated = service.update(id, new ShowTime(
+                id,
+                request.startTime(),
+                request.isDeleted(),
+                null
+        ));
+        return ResponseEntity.ok(new ShowTimeResponse(
+                updated.getId(),
+                updated.getStartTime(),
+                updated.getIsDeleted()
+        ));
     }
 
-    //DELETE
+    // 🔹 DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
