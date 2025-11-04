@@ -1,41 +1,38 @@
 package com.example.backend.restapi;
 
+import com.example.backend.controller.ShowTimeManageController;
+import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.ShowTimeManageRequest;
 import com.example.backend.dto.ShowTimeManageResponse;
 import com.example.backend.entity.ShowTime;
 import com.example.backend.service.ShowTimeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/showtimes")
-public class ShowTimeManageRestApi {
+@RequestMapping("/api/admin/show-times")
+@RequiredArgsConstructor
+public class ShowTimeManageRestApi implements ShowTimeManageController {
 
     private final ShowTimeService service;
 
-    public ShowTimeManageRestApi(ShowTimeService service) {
-        this.service = service;
+    @GetMapping("")
+    public ResponseEntity<List<ShowTimeManageResponse>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping
-    public List<ShowTimeManageResponse> getAll() {
-        return service.getAll().stream()
-                .map(st -> new ShowTimeManageResponse(st.getId(), st.getStartTime()))
-                .toList();
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> create(@RequestBody ShowTimeManageRequest request) {
+        return ResponseEntity.ok(service.create(request));
     }
 
-    @PostMapping
-    public ShowTimeManageResponse create(@RequestBody ShowTimeManageRequest request) {
-        ShowTime showTime = new ShowTime();
-        showTime.setStartTime(request.startTime());
-        ShowTime created = service.create(showTime);
-        return new ShowTimeManageResponse(created.getId(), created.getStartTime());
-    }
-
-    @DeleteMapping("/{id}")
-    public void softDelete(@PathVariable UUID id) {
-        service.delete(id);
+    @Override
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ApiResponse> delete(UUID id) {
+        return ResponseEntity.ok(service.delete(id));
     }
 }
