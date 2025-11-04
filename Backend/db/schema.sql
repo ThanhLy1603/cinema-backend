@@ -32,7 +32,6 @@ DROP TABLE IF EXISTS show_times;
 
 DROP TABLE IF EXISTS products;
 
-
 GO
 
 -- Bảng roles

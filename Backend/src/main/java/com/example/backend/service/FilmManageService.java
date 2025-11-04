@@ -1,18 +1,18 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.CategoryResponse;
-import com.example.backend.dto.FilmManageResponse;
-import com.example.backend.dto.FilmRequest;
-import com.example.backend.dto.FilmResponse;
+import com.example.backend.dto.*;
 import com.example.backend.entity.Category;
 import com.example.backend.entity.Film;
+import com.example.backend.entity.FilmCategory;
 import com.example.backend.repository.CategoryRepository;
+import com.example.backend.repository.FilmCategoryRepository;
 import com.example.backend.repository.FilmRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +23,34 @@ import java.util.stream.Collectors;
 public class FilmManageService {
     private final FilmRepository filmRepository;
     private final CategoryRepository categoryRepository;
+    private final FileStorageService fileStorageService;
+    private final FilmCategoryRepository filmCategoryRepository;
+
+    @Transactional
+    public ApiResponse createFilm(FilmManageRequest request) throws IOException {
+        System.out.println("film request: " + request);
+        Film film = new Film();
+        film.setName(request.name());
+        film.setCountry(request.country());
+        film.setDirector(request.director());
+        film.setActor(request.actor());
+        film.setDescription(request.description());
+        film.setDuration(request.duration());
+        film.setReleaseDate(request.releaseDate());
+        film.setStatus(request.status());
+
+        // 2. Lưu poster/trailer nếu có
+//        if (request.poster() != null && !request.poster().isEmpty()) {
+//            String poster = fileStorageService.saveFile(request.poster());
+//            film.setPoster(poster);
+//        }
+//        if (request.trailer() != null && !request.trailer().isEmpty()) {
+//            String trailer = fileStorageService.saveFile(request.trailer());
+//            film.setTrailer(trailer);
+//        }
+
+        return new ApiResponse("success", "Thêm phim mới thành công");
+    }
 
     @Transactional
     public List<FilmManageResponse> getAllFilms() {
@@ -56,13 +84,7 @@ public class FilmManageService {
         return categories;
     }
 
-//    @Transactional
-//    public FilmResponse createFilm(FilmRequest filmRequest) {
-//        Film film = toFilmEntity(filmRequest);
-//        film.setId(UUID.randomUUID()); // Đảm bảo ID mới cho phim
-//        film.setDeleted(false); // Đảm bảo không bị xóa mặc định
-//        return toFilmResponse(filmRepository.save(film));
-//    }
+
 
     // Cập nhật phim
     @Transactional

@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ShowTimeRepository extends JpaRepository<ShowTime, UUID> {
     List<ShowTime> findByIsDeletedFalseOrderByStartTimeAsc();
+    List<ShowTime> findByIsDeletedFalse();
 }
