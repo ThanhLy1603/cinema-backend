@@ -1,11 +1,10 @@
 package com.example.backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalTime;
 import java.util.UUID;
 
 public record ShowTimeManageResponse(
-        @JsonProperty("id") UUID id,
-        @JsonProperty("startTime") LocalTime startTime,
-        @JsonProperty("isDeleted") boolean isDeleted
+        UUID id,
+        @JsonFormat(pattern = "HH:mm") LocalTime startTime
 ) {}

@@ -1,8 +1,8 @@
 package com.example.backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalTime;
 
 public record ShowTimeManageRequest(
-        @JsonProperty("startTime") LocalTime startTime
+        @JsonFormat(pattern = "HH:mm") LocalTime startTime
 ) {}

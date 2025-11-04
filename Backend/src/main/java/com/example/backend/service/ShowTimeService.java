@@ -6,97 +6,58 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional
 public class ShowTimeService {
+
     @Autowired
     private ShowTimeRepository repository;
-
-    // GET ALL
+    @Transactional
+    //LẤY GIỜ CHƯA ẨN
     public List<ShowTime> getAll() {
-        return repository.findAll();
+        return repository.findByIsDeletedFalseOrderByStartTimeAsc();
     }
 
-    public Optional<ShowTime> getById(UUID id) {
-        return repository.findById(id);
-    }
-
-    // POST
+    // THÊM GIỜ CHIẾU
     public ShowTime create(ShowTime showTime) {
         LocalTime newTime = showTime.getStartTime();
 
-        //Thêm kiểm tra giờ hợp lệ nhưng không đổi luồng cũ
-        if (!isValidShowTime(newTime)) {
-            throw new RuntimeException("Giờ chiếu phải nằm trong khoảng từ 08:00 đến 23:59.");
+        if (newTime == null)
+            throw new RuntimeException("Giờ chiếu không được để trống!");
+
+        // Nếu giờ chiếu < 8:00 hoặc > 24:00 -> báo lỗi
+        if (newTime.isBefore(LocalTime.of(8, 0)) || newTime.isAfter(LocalTime.of(23, 59))) {
+            throw new RuntimeException("Giờ chiếu phải nằm trong khoảng 08:00 - 24:00!");
         }
 
-        // ⚡ Giữ nguyên logic cũ kiểm tra trùng giờ
+        // Ép kiểu LocalTime sang LocalDateTime giả định (để tránh lỗi khi DB là DATETIME)
+        LocalDateTime newDateTime = LocalDateTime.of(LocalDate.of(2000, 1, 1), newTime);
+
+        // Kiểm tra trùng giờ (so sánh giờ và phút, không ngày)
         boolean exists = repository.findAll().stream()
-                .anyMatch(st -> st.getStartTime().equals(newTime) && !st.getIsDeleted());
-        if (exists) {
-            throw new RuntimeException("Giờ chiếu " + newTime + " đã tồn tại. Hãy nhập giờ khác.");
-        }
+                .filter(st -> !st.getIsDeleted()) // chỉ kiểm tra giờ đang hoạt động
+                .anyMatch(st -> st.getStartTime()
+                        .truncatedTo(ChronoUnit.MINUTES)
+                        .equals(newTime.truncatedTo(ChronoUnit.MINUTES)));
+
+        if (exists)
+            throw new RuntimeException("Giờ chiếu " + newTime + " đã tồn tại!");
 
         showTime.setIsDeleted(false);
         return repository.saveAndFlush(showTime);
     }
 
-    // PUT
-    public ShowTime update(UUID id, ShowTime data) {
-        ShowTime showTime = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giờ chiếu."));
-        LocalTime newTime = data.getStartTime();
-        if (newTime == null) {
-            throw new RuntimeException("Giờ chiếu không hợp lệ hoặc bị thiếu.");
-        }
-
-        if (!isValidShowTime(newTime)) {
-            throw new RuntimeException("Giờ chiếu phải nằm trong khoảng từ 08:00 đến 23:59.");
-        }
-
-        boolean duplicate = repository.findAll().stream()
-                .anyMatch(st -> !st.getId().equals(id)
-                        && st.getStartTime().equals(newTime)
-                        && !st.getIsDeleted());
-
-        if (duplicate) {
-            throw new RuntimeException("Giờ chiếu " + newTime + " đã tồn tại. Hãy nhập giờ khác.");
-        }
-
-        showTime.setStartTime(newTime);
-        if (data.getIsDeleted() != null) {
-            showTime.setIsDeleted(data.getIsDeleted());
-        } else if (showTime.getIsDeleted() == null) {
-            showTime.setIsDeleted(false);
-        }
-        return repository.saveAndFlush(showTime);
-    }
-
-    // DELETE
+    // SOFT DELETE (ẩn, không xóa dữ liệu thật)
     public void delete(UUID id) {
-        repository.deleteById(id);
-    }
-
-    //Hàm kiểm tra giờ chiếu hợp lệ (rạp mở từ 08:00 → 24:00)
-    private boolean isValidShowTime(LocalTime time) {
-        if (time == null) return false;
-        LocalTime open = LocalTime.of(8, 0);
-        LocalTime close = LocalTime.of(23, 59);
-        return !time.isBefore(open) && !time.isAfter(close);
-    }
-
-    @Transactional
-    public ShowTime updateStatus(UUID id, boolean isDeleted) {
         ShowTime showTime = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giờ chiếu."));
-
-        showTime.setIsDeleted(isDeleted);
-        return repository.saveAndFlush(showTime);
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giờ chiếu!"));
+        showTime.setIsDeleted(true);
+        repository.saveAndFlush(showTime);
     }
-
 }
