@@ -6,8 +6,10 @@ import com.example.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +27,13 @@ public class ProductService {
     }
 
     private ProductResponse toProductResponse(Food food) {
-        return new ProductResponse(food.getName(), food.getDescription(), food.getPoster());
+        return new ProductResponse(food.getId(),food.getName(), food.getDescription(), food.getPoster());
+    }
+
+    @Transactional
+    public ProductResponse getProductById(@PathVariable UUID id) {
+        Food food = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        return toProductResponse(food);
     }
 }

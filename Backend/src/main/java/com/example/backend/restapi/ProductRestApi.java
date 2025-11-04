@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/products")
@@ -22,4 +23,12 @@ public class ProductRestApi implements ProductController {
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
+
+    @Override
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProductById(UUID id) {
+        return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+
 }
