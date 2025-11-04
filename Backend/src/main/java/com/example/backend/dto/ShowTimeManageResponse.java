@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalTime;
 import java.util.UUID;
 
-public record ShowTimeResponse(
+public record ShowTimeManageResponse(
         @JsonProperty("id") UUID id,
-        @JsonProperty("startTime") LocalTime startTime,
-        @JsonProperty("isDeleted") Boolean isDeleted
+        @JsonProperty("startTime") LocalTime startTime
 ) {}
