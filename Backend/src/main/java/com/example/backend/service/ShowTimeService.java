@@ -50,15 +50,15 @@ public class ShowTimeService {
     public ShowTime update(UUID id, ShowTime data) {
         ShowTime showTime = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giờ chiếu."));
-
         LocalTime newTime = data.getStartTime();
+        if (newTime == null) {
+            throw new RuntimeException("Giờ chiếu không hợp lệ hoặc bị thiếu.");
+        }
 
-        //Thêm kiểm tra giờ hợp lệ
         if (!isValidShowTime(newTime)) {
             throw new RuntimeException("Giờ chiếu phải nằm trong khoảng từ 08:00 đến 23:59.");
         }
 
-        // ⚡ Giữ nguyên logic cũ kiểm tra trùng giờ
         boolean duplicate = repository.findAll().stream()
                 .anyMatch(st -> !st.getId().equals(id)
                         && st.getStartTime().equals(newTime)
@@ -69,7 +69,11 @@ public class ShowTimeService {
         }
 
         showTime.setStartTime(newTime);
-        showTime.setIsDeleted(data.getIsDeleted());
+        if (data.getIsDeleted() != null) {
+            showTime.setIsDeleted(data.getIsDeleted());
+        } else if (showTime.getIsDeleted() == null) {
+            showTime.setIsDeleted(false);
+        }
         return repository.saveAndFlush(showTime);
     }
 
