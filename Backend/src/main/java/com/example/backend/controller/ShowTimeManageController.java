@@ -21,8 +21,10 @@ public interface ShowTimeManageController {
     ResponseEntity<ShowTimeManageResponse> create(@RequestBody ShowTimeManageRequest request);
 
     @PutMapping("/{id}")
-    ResponseEntity<ShowTimeManageResponse> update(@PathVariable UUID id,
-                                                  @RequestBody ShowTimeManageRequest request);
+    ResponseEntity<ShowTimeManageResponse> update(@PathVariable UUID id, @RequestBody ShowTimeManageRequest request);
+
+    @PatchMapping("/{id}/status")
+    ResponseEntity<Void> updateStatus(@PathVariable UUID id, @RequestParam boolean isDeleted);
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable UUID id);

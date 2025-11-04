@@ -6,5 +6,6 @@ import java.util.UUID;
 
 public record ShowTimeManageResponse(
         @JsonProperty("id") UUID id,
-        @JsonProperty("startTime") LocalTime startTime
+        @JsonProperty("startTime") LocalTime startTime,
+        @JsonProperty("isDeleted") boolean isDeleted
 ) {}

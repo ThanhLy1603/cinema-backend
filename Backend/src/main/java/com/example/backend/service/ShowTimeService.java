@@ -89,4 +89,14 @@ public class ShowTimeService {
         LocalTime close = LocalTime.of(23, 59);
         return !time.isBefore(open) && !time.isAfter(close);
     }
+
+    @Transactional
+    public ShowTime updateStatus(UUID id, boolean isDeleted) {
+        ShowTime showTime = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giờ chiếu."));
+
+        showTime.setIsDeleted(isDeleted);
+        return repository.saveAndFlush(showTime);
+    }
+
 }
