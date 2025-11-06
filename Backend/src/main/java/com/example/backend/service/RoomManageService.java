@@ -62,7 +62,7 @@ public class RoomManageService {
         return new ApiResponse("success", "Xóa phòng thành công");
     }
 
-    private RoomManageResponse toResponse(Room r) {
-        return new RoomManageResponse(r.getId(), r.getName(), r.getStatus().name(), r.isDeleted());
+    private RoomManageResponse toResponse(Room room) {
+        return new RoomManageResponse(room.getId(), room.getName(), room.getStatus().name());
     }
 }
