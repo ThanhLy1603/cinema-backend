@@ -2,8 +2,8 @@ package com.example.backend.service;
 
 
 import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.RoomRequest;
-import com.example.backend.dto.RoomResponse;
+import com.example.backend.dto.RoomMangeRequest;
+import com.example.backend.dto.RoomManageResponse;
 import com.example.backend.entity.Room;
 import com.example.backend.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class RoomService {
+public class RoomManageService {
     private final RoomRepository roomRepository;
 
     @Transactional(readOnly = true)
-    public List<RoomResponse> getAllRooms() {
+    public List<RoomManageResponse> getAllRooms() {
         return roomRepository.findByIsDeletedFalseOrderByNameAsc()
                 .stream()
                 .map(this::toResponse)
@@ -29,7 +29,7 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomResponse createRoom(RoomRequest request) {
+    public ApiResponse createRoom(RoomMangeRequest request) {
         Room room = new Room();
         room.setName(request.name());
         // default if null
@@ -39,18 +39,18 @@ public class RoomService {
             room.setStatus(Room.RoomStatus.active);
         }
         room.setDeleted(false);
-        Room saved = roomRepository.save(room);
-        return toResponse(saved);
+        roomRepository.save(room);
+        return new ApiResponse("sucess", "Thêm phòng chiếu thành công");
     }
 
     @Transactional
-    public RoomResponse updateRoom(UUID id, RoomRequest request) {
+    public ApiResponse updateRoom(UUID id, RoomMangeRequest request) {
         Room existing = roomRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Room not found: " + id));
         if (request.name() != null) existing.setName(request.name());
         if (request.status() != null) existing.setStatus(Room.RoomStatus.valueOf(request.status()));
-        Room saved = roomRepository.save(existing);
-        return toResponse(saved);
+        roomRepository.save(existing);
+        return new ApiResponse("sucess", "Sửa thông tin phòng chiếu thành công");
     }
 
     @Transactional
@@ -62,7 +62,7 @@ public class RoomService {
         return new ApiResponse("success", "Xóa phòng thành công");
     }
 
-    private RoomResponse toResponse(Room r) {
-        return new RoomResponse(r.getId(), r.getName(), r.getStatus().name(), r.isDeleted());
+    private RoomManageResponse toResponse(Room r) {
+        return new RoomManageResponse(r.getId(), r.getName(), r.getStatus().name(), r.isDeleted());
     }
 }

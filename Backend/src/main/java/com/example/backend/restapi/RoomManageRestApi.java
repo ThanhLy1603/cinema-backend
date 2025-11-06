@@ -1,9 +1,10 @@
 package com.example.backend.restapi;
 
+import com.example.backend.controller.RoomManageController;
 import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.RoomRequest;
-import com.example.backend.dto.RoomResponse;
-import com.example.backend.service.RoomService;
+import com.example.backend.dto.RoomMangeRequest;
+import com.example.backend.dto.RoomManageResponse;
+import com.example.backend.service.RoomManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,20 +16,22 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/rooms")
 @RequiredArgsConstructor
-public class RoomManageRestApi {
-    private final RoomService roomService;
+public class RoomManageRestApi implements RoomManageController {
+    private final RoomManageService roomManageService;
 
     // GET all rooms
+    @Override
     @GetMapping("")
-    public ResponseEntity<List<RoomResponse>> getAll() {
-        return ResponseEntity.ok(roomService.getAllRooms());
+    public ResponseEntity<List<RoomManageResponse>> getAll() {
+        return ResponseEntity.ok(roomManageService.getAllRooms());
     }
 
     // GET by id (optional)
+    @Override
     @GetMapping("/{id}")
-    public ResponseEntity<RoomResponse> getById(@PathVariable UUID id) {
+    public ResponseEntity<RoomManageResponse> getById(@PathVariable UUID id) {
         // Could implement service.getById
-        return ResponseEntity.ok(roomService.getAllRooms()
+        return ResponseEntity.ok(roomManageService.getAllRooms()
                 .stream()
                 .filter(r -> r.id().equals(id))
                 .findFirst()
@@ -36,20 +39,23 @@ public class RoomManageRestApi {
     }
 
     // POST create
+    @Override
     @PostMapping("")
-    public ResponseEntity<RoomResponse> create(@Validated @RequestBody RoomRequest request) {
-        return ResponseEntity.ok(roomService.createRoom(request));
+    public ResponseEntity<ApiResponse> create(@RequestBody RoomMangeRequest request) {
+        return ResponseEntity.ok(roomManageService.createRoom(request));
     }
 
     // PUT update
+    @Override
     @PutMapping("/{id}")
-    public ResponseEntity<RoomResponse> update(@PathVariable UUID id, @Validated @RequestBody RoomRequest request) {
-        return ResponseEntity.ok(roomService.updateRoom(id, request));
+    public ResponseEntity<ApiResponse> update(@PathVariable UUID id, @RequestBody RoomMangeRequest request) {
+        return ResponseEntity.ok(roomManageService.updateRoom(id, request));
     }
 
     // DELETE (soft)
+    @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> delete(@PathVariable UUID id) {
-        return ResponseEntity.ok(roomService.deleteRoom(id));
+        return ResponseEntity.ok(roomManageService.deleteRoom(id));
     }
 }
