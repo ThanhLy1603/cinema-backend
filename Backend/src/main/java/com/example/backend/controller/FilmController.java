@@ -14,9 +14,4 @@ public interface FilmController {
     public ResponseEntity<List<FilmResponse>> getAllFilms();
     public ResponseEntity<Object> getFilmById(@PathVariable UUID id);
     public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(@PathVariable UUID id);
-
-    // Thêm phương thức cho CRUD Admin:
-    public ResponseEntity<FilmResponse> createFilm(@RequestBody FilmRequest filmRequest);
-    public ResponseEntity<FilmResponse> updateFilm(@PathVariable UUID id, @RequestBody FilmRequest filmRequest);
-    public ResponseEntity<Void> deleteFilm(@PathVariable UUID id);
 }

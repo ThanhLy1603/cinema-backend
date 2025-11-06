@@ -13,5 +13,7 @@ import java.util.UUID;
 public interface FilmRepository extends JpaRepository<Film, UUID> {
     public List<Film> findByIsDeletedFalse();
     public Film findFilmByIdAndIsDeletedFalse(UUID id);
+    List<Film> findByIsDeletedFalseOrderByNameAsc();
+
 }
 

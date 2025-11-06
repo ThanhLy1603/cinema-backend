@@ -14,7 +14,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Role {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

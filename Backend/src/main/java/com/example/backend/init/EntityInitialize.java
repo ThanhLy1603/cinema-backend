@@ -6,4 +6,10 @@ public interface EntityInitialize {
     public void initializeUserProfiles();
     public void initializeCategories();
     public void initializeFilmsAndFilmCategories();
+    public void initializeSeatType();
+    public void initializeRooms();
+    public void initializeShowTimes();
+    public void initializeSeats();
+    public void initializeSchedules();
+    public void initializeFoods();
 }

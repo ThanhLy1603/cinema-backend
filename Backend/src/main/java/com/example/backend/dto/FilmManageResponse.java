@@ -1,12 +1,12 @@
 package com.example.backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.example.backend.entity.Category;
 
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
-public record FilmResponse(
+public record FilmManageResponse(
         UUID id,
         String name,
         String country,
@@ -17,5 +17,7 @@ public record FilmResponse(
         String poster,
         String trailer,
         LocalDate releaseDate,
-        String status
-) {}
+        String status,
+        Set<CategoryResponse> categories
+) {
+}

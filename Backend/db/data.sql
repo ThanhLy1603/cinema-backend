@@ -155,7 +155,7 @@ VALUES
 -- 12. Mắt Biếc
 (N'Mắt Biếc', N'Việt Nam', N'Victor Vũ', N'Trần Nghĩa, Trúc Anh, Trần Phong', 
     N'Dựa trên tiểu thuyết của Nguyễn Nhật Ánh, bộ phim kể về mối tình đơn phương đầy day dứt của chàng thư sinh Ngạn dành cho cô bạn Mắt Biếc Hà Lan. Bối cảnh từ làng Đo Đo yên bình đến thành phố đầy cám dỗ, nơi tình cảm chân thành phải đối mặt với sự thay đổi của thời gian và số phận.', 117, 
-    'Mat_biec_poster.jpeg', 'Mat_biec_trailer.mp4', '2019-12-20', 'active', 0),
+    'Mac_biec_poster.jpeg', 'Mat_biec_trailer.mp4', '2019-12-20', 'active', 0),
     
 -- 13. Năm Mười Muơi Lâm (Giả định dựa trên tên file)
 (N'Năm Mười Mười Lâm', N'Việt Nam', N'Tấn Hoàng Phong', N'Trần Phong, Huỳnh Tú Uyên, Trần Vân Anh', 
@@ -214,7 +214,7 @@ WHERE (F.name = N'5 Centimeters Per Second' AND C.name IN (N'Tình Cảm', N'Ch�
    OR (F.name = N'Doraemon Movie 44: Nobita''s Earth Symphony' AND C.name IN (N'Hoạt Hình', N'Gia Đình', N'Phiêu Lưu'))
    OR (F.name = N'Fast and Furious 7' AND C.name IN (N'Hành Động', N'Phiêu Lưu'))
    OR (F.name = N'Mắt Biếc' AND C.name IN (N'Tình Cảm', N'Chính Kịch'))
-   OR (F.name = N'Năm Mười Mười Lâm' AND C.name IN (N'Hài hước', N'Gia Đình'))
+   OR (F.name = N'Năm Mười Mười Lâm' AND C.name IN (N'Hài', N'Gia Đình'))
    OR (F.name = N'Nhà Gia Tiên' AND C.name IN (N'Tâm Linh', N'Kinh Dị'))
    OR (F.name = N'Pacific Rim' AND C.name IN (N'Khoa Học Viễn Tưởng', N'Hành Động'))
    OR (F.name = N'Spirited Away' AND C.name IN (N'Hoạt Hình', N'Giả Tưởng', N'Phiêu Lưu'))
@@ -223,9 +223,285 @@ WHERE (F.name = N'5 Centimeters Per Second' AND C.name IN (N'Tình Cảm', N'Ch�
    OR (F.name = N'Tử Chiến Trên Không' AND C.name IN (N'Hành Động', N'Chính Kịch'))
    OR (F.name = N'Your Name' AND C.name IN (N'Hoạt Hình', N'Tình Cảm', N'Giả Tưởng'));
 
-SELECT * FROM roles
-SELECT * FROM users
+-- Nhập liệu cho bảng seat_types
+INSERT INTO seat_types (name, is_deleted)
+VALUES 
+(N'Ghế Thường', 0),
+(N'Ghế VIP', 0),
+(N'Ghế Couple', 0);
+GO
+
+-- Nhập liệu cho bảng rooms
+INSERT INTO rooms (name, status, is_deleted)
+VALUES
+(N'Phòng 1', 'active', 0),
+(N'Phòng 2', 'active', 0),
+(N'Phòng 3', 'maintenance', 0),
+(N'Phòng VIP 1', 'active', 0);
+
+-- Nhập liệu cho bảng show_times
+INSERT INTO show_times (start_time)
+VALUES
+('07:00'),
+('08:00'),
+('09:00'),
+('10:00'),
+('11:00'),
+('12:00'),
+('13:00'),
+('14:00'),
+('15:00'),
+('16:00'),
+('17:00'),
+('18:00'),
+('19:00'),
+('20:00'),
+('21:00'),
+('22:00'),
+('23:00'),
+('00:00');
+
+-- Nhập liệu cho bảng ghế
+-- Bước 1 & 2: Lấy IDs (Giữ nguyên như trước)
+-- (Code lấy @RoomIDs và @SeatTypeIDs được lược bỏ để tập trung vào phần thay đổi)
+
+DECLARE @Rooms TABLE (room_name NVARCHAR(50), room_id UNIQUEIDENTIFIER);
+INSERT INTO @Rooms (room_name, room_id)
+SELECT name, id FROM rooms WHERE is_deleted = 0;
+
+DECLARE @Room1ID UNIQUEIDENTIFIER, @Room2ID UNIQUEIDENTIFIER, @Room3ID UNIQUEIDENTIFIER, @RoomVIP1ID UNIQUEIDENTIFIER;
+SELECT @Room1ID = room_id FROM @Rooms WHERE room_name = N'Phòng 1';
+SELECT @Room2ID = room_id FROM @Rooms WHERE room_name = N'Phòng 2';
+SELECT @Room3ID = room_id FROM @Rooms WHERE room_name = N'Phòng 3';
+SELECT @RoomVIP1ID = room_id FROM @Rooms WHERE room_name = N'Phòng VIP 1';
+
+DECLARE @SeatTypes TABLE (type_name NVARCHAR(30), type_id UNIQUEIDENTIFIER);
+INSERT INTO @SeatTypes (type_name, type_id)
+SELECT name, id FROM seat_types WHERE is_deleted = 0;
+
+DECLARE @ThuongID UNIQUEIDENTIFIER, @VipID UNIQUEIDENTIFIER, @CoupleID UNIQUEIDENTIFIER;
+SELECT @ThuongID = type_id FROM @SeatTypes WHERE type_name = N'Ghế Thường';
+SELECT @VipID = type_id FROM @SeatTypes WHERE type_name = N'Ghế VIP';
+SELECT @CoupleID = type_id FROM @SeatTypes WHERE type_name = N'Ghế Couple';
+
+
+-- Bước 3: Tạo Bảng tạm để lưu trữ cấu trúc ghế với Vị trí đầy đủ (Position + Số ghế)
+DECLARE @SeatLayout TABLE (
+    Position NVARCHAR(10) PRIMARY KEY, -- Ví dụ: A1, D48, K151
+    Seat_Type_ID UNIQUEIDENTIFIER
+);
+
+-- Hàm ánh xạ số ghế sang hàng chữ cái
+WITH SeatMapping AS (
+    SELECT
+        number,
+        CASE
+            WHEN number BETWEEN 1 AND 15 THEN 'A'
+            WHEN number BETWEEN 16 AND 30 THEN 'B'
+            WHEN number BETWEEN 31 AND 45 THEN 'C'
+            WHEN number BETWEEN 46 AND 60 THEN 'D'
+            WHEN number BETWEEN 61 AND 75 THEN 'E'
+            WHEN number BETWEEN 76 AND 90 THEN 'F'
+            WHEN number BETWEEN 91 AND 105 THEN 'G'
+            WHEN number BETWEEN 106 AND 120 THEN 'H'
+            WHEN number BETWEEN 121 AND 135 THEN 'I'
+            WHEN number BETWEEN 136 AND 150 THEN 'J'
+            WHEN number BETWEEN 151 AND 156 THEN 'K'
+        END AS RowLetter,
+        CASE
+            -- Ghế Thường (Trắng)
+            WHEN (number BETWEEN 1 AND 48 AND number NOT IN (49, 57)) OR 
+                 (number BETWEEN 58 AND 63) OR 
+                 (number BETWEEN 73 AND 78) OR 
+                 (number BETWEEN 88 AND 93) OR 
+                 (number BETWEEN 103 AND 150)
+            THEN @ThuongID
+            -- Ghế VIP (Vàng)
+            WHEN (number BETWEEN 49 AND 57) OR 
+                 (number BETWEEN 64 AND 72) OR 
+                 (number BETWEEN 79 AND 87) OR 
+                 (number BETWEEN 94 AND 102)
+            THEN @VipID
+            -- Ghế Couple (Xanh)
+            WHEN (number BETWEEN 151 AND 156)
+            THEN @CoupleID
+        END AS Seat_Type_ID
+    FROM (
+        -- Tạo dãy số từ 1 đến 156
+        SELECT TOP 156 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS number
+        FROM sys.objects A, sys.objects B, sys.objects C
+    ) AS Numbers
+)
+-- Chèn dữ liệu vào bảng tạm
+INSERT INTO @SeatLayout (Position, Seat_Type_ID)
+SELECT
+    RowLetter + CAST(number AS NVARCHAR(10)) AS Position,
+    Seat_Type_ID
+FROM SeatMapping
+WHERE Seat_Type_ID IS NOT NULL -- Đảm bảo không có lỗi logic
+
+-- Kiểm tra một số vị trí ví dụ:
+-- SELECT * FROM @SeatLayout WHERE Position IN ('A1', 'C45', 'D48', 'E72', 'K151') ORDER BY Position;
+
+
+-- Bước 4: Nhập liệu vào bảng seats cho TỪNG PHÒNG
+INSERT INTO seats (room_id, seat_type_id, position)
+SELECT @Room1ID, Seat_Type_ID, Position FROM @SeatLayout ORDER BY Position;
+
+INSERT INTO seats (room_id, seat_type_id, position)
+SELECT @Room2ID, Seat_Type_ID, Position FROM @SeatLayout ORDER BY Position;
+
+INSERT INTO seats (room_id, seat_type_id, position)
+SELECT @Room3ID, Seat_Type_ID, Position FROM @SeatLayout ORDER BY Position;
+
+INSERT INTO seats (room_id, seat_type_id, position)
+SELECT @RoomVIP1ID, Seat_Type_ID, Position FROM @SeatLayout ORDER BY Position;
+
+-- Hiển thị kết quả nhập liệu để kiểm tra
+SELECT 
+    R.name AS RoomName, 
+    S.position, 
+    ST.name AS SeatTypeName
+FROM seats S
+JOIN rooms R ON S.room_id = R.id
+JOIN seat_types ST ON S.seat_type_id = ST.id
+ORDER BY R.name, S.position;
+
+DELETE FROM seats
+
+-- Nhập liệu cho bảng schedules
+
+-- Lấy tất cả IDs của Phim và Suất Chiếu để sử dụng
+DECLARE @FilmIDs TABLE (RowNum INT, film_id UNIQUEIDENTIFIER);
+INSERT INTO @FilmIDs (RowNum, film_id)
+SELECT ROW_NUMBER() OVER (ORDER BY name), id FROM films WHERE is_deleted = 0;
+
+DECLARE @TimeIDs TABLE (RowNum INT, show_time_id UNIQUEIDENTIFIER);
+INSERT INTO @TimeIDs (RowNum, show_time_id)
+SELECT ROW_NUMBER() OVER (ORDER BY start_time), id FROM show_times WHERE is_deleted = 0;
+
+-- Lấy IDs của các Phòng
+DECLARE @Room1ID UNIQUEIDENTIFIER, @Room2ID UNIQUEIDENTIFIER, @Room3ID UNIQUEIDENTIFIER, @RoomVIP1ID UNIQUEIDENTIFIER;
+SELECT @Room1ID = id FROM rooms WHERE name = N'Phòng 1';
+SELECT @Room2ID = id FROM rooms WHERE name = N'Phòng 2';
+SELECT @Room3ID = id FROM rooms WHERE name = N'Phòng 3';
+SELECT @RoomVIP1ID = id FROM rooms WHERE name = N'Phòng VIP 1';
+
+-- Ngày chiếu bắt đầu (chọn một ngày mới để tránh xung đột với dữ liệu cũ)
+DECLARE @StartDate DATE = '2025-11-05';
+
+DECLARE @BaseSchedules TABLE (
+    film_id UNIQUEIDENTIFIER NOT NULL,
+    show_time_id UNIQUEIDENTIFIER NOT NULL,
+    schedule_date DATE NOT NULL
+);
+
+-- Tạo 20 bản ghi (lặp lại lịch chiếu 18 lần và thêm 2 bản ghi đầu tiên vào cuối)
+INSERT INTO @BaseSchedules (film_id, show_time_id, schedule_date)
+SELECT
+    F.film_id,
+    T.show_time_id,
+    @StartDate
+FROM
+    @FilmIDs F
+JOIN
+    @TimeIDs T ON T.RowNum = (F.RowNum % 18) + 1; -- Ánh xạ 20 phim vào 18 suất chiếu, 2 phim cuối dùng lại suất đầu
+
+INSERT INTO schedules (film_id, room_id, show_time_id, schedule_date)
+SELECT BS.film_id, @Room1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
+UNION ALL
+SELECT BS.film_id, @Room2ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
+UNION ALL
+SELECT BS.film_id, @Room3ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
+UNION ALL
+SELECT BS.film_id, @RoomVIP1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS;
+GO
+
+SELECT 'Đã nhập liệu thành công 80 bản ghi mới cho bảng schedules.' AS Result;
+
+-- Nhập liệu cho bảng foods
+INSERT INTO products (name, description, poster, is_deleted)
+VALUES
+(N'Aquafina', N'01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim', N'Aquafina_poster.png', 0),
+(N'Pepsi 2020z', N'01 nước Pepsi 200z. Nhận trong ngày xem phim', N'Pepsi_220z_poster.png', 0),
+(N'Bắp rang vị ngọt 440z', N'01 bắp 440z vị ngọt. Nhận trong ngày xem phim', N'Bap_ngot_poster.png', 0),
+(N'Bắp rang vị phô mai 440z', N'01 bắp 440z vị phô mai. Nhận trong ngày xem phim', N'Bap_pho_mai_poster.png', 0),
+(N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z', N'01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim', N'Combo_bapngot_pepsi_xucxich_poster.png', 0);
+
+
 SELECT * FROM user_roles
+SELECT * FROM users
+SELECT * FROM rolesW
 SELECT * FROM user_profiles
+SELECT * FROM categories
+SELECT * FROM films
+SELECT * FROM film_categories
+SELECT * FROM seat_types
+SELECT * FROM rooms
+SELECT * FROM show_times
+SELECT * FROM seats
+SELECT * FROM schedules
+
+SELECT * FROM products
+
+
+SELECT 
+    R.name AS TenPhong,
+    F.name AS TenPhim,
+    ST.start_time AS ThoiGianBatDau,
+    S.schedule_date AS NgayChieu
+FROM 
+    schedules S
+JOIN 
+    rooms R ON S.room_id = R.id
+JOIN 
+    films F ON S.film_id = F.id           -- JOIN với bảng films
+JOIN 
+    show_times ST ON S.show_time_id = ST.id -- JOIN với bảng show_times
+WHERE 
+    S.schedule_date = '2025-11-05' 
+ORDER BY 
+    R.name, 
+    ST.start_time;
+
+SELECT 
+    R.name AS RoomName,
+    COUNT(S.id) AS TotalSchedules
+FROM 
+    schedules S
+JOIN 
+    rooms R ON S.room_id = R.id
+WHERE 
+    S.schedule_date = '2025-11-05' -- Ngày mới được nhập
+GROUP BY 
+    R.name
+ORDER BY 
+    RoomName;
+
+SELECT * FROM seats WHERE room_id = '1d0bd470-b5b7-4437-b201-6155d1be7bd0' and seat_type_id = 'eccf0df2-df4f-4eb7-a10b-29a3836e9b18'
+
+SELECT 
+    ST.name AS 'LoaiGhe',
+    COUNT(S.seat_type_id) AS 'SoLuong'
+FROM 
+    seats S
+JOIN 
+    seat_types ST ON S.seat_type_id = ST.id
+WHERE 
+    S.room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' 
+GROUP BY 
+    ST.name;
+
+
+SELECT 
+    position,
+    CAST(SUBSTRING(position, 2, LEN(position) - 1) AS INT) AS SeatNumber
+FROM 
+    seats
+WHERE 
+    room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' and seat_type_id = 'e0df25aa-3113-4494-a753-b55abf97652d'
+ORDER BY 
+    SeatNumber 
+ASC
 
 SELECT username, email, password FROM users WHERE email = 'lycustomer@gmail.com';

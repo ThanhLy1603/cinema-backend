@@ -1,12 +1,13 @@
 package com.example.backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public record FilmResponse(
+public record FilmManageRequest(
         UUID id,
         String name,
         String country,
@@ -14,8 +15,10 @@ public record FilmResponse(
         String actor,
         String description,
         Integer duration,
-        String poster,
-        String trailer,
+        MultipartFile poster,
+        MultipartFile trailer,
         LocalDate releaseDate,
-        String status
-) {}
+        String status,
+        List<UUID> categoriesId
+) {
+}

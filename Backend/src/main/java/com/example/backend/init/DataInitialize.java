@@ -3,7 +3,6 @@ package com.example.backend.init;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -11,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 @Component
@@ -22,6 +22,12 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final FilmRepository filmRepository;
     private final FilmCategoryRepository filmCategoryRepository;
+    private final RoomRepository roomRepository;
+    private final SeatRepository seatRepository;
+    private final ShowTimeRepository showTimeRepository;
+    private final SeatTypeRepository seatTypeRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -201,7 +207,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f1.setDuration(63);
             f1.setPoster("5cms_poster.webp");
             f1.setTrailer("5cms_trailer.mp4");
-            f1.setReleaseDate(LocalDate.of(2007, 3, 3));
+            f1.setReleaseDate(LocalDate.of(2025, 11, 1));
             f1.setStatus("active");
             f1.setDeleted(false);
             films.add(f1);
@@ -215,7 +221,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f2.setDuration(120);
             f2.setPoster("Alice_in_border_land_3_poster.webp");
             f2.setTrailer("Alice_in_borderland_3_trailer.mp4");
-            f2.setReleaseDate(LocalDate.of(2025, 10, 1));
+            f2.setReleaseDate(LocalDate.of(2025, 12, 1));
             f2.setStatus("upcoming");
             f2.setDeleted(false);
             films.add(f2);
@@ -243,7 +249,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f4.setDuration(135);
             f4.setPoster("Bo_5_sieu_dang_cap_poster.jpg");
             f4.setTrailer("Bo_5_sieu_dang_cap_trailer.mp4");
-            f4.setReleaseDate(LocalDate.of(2025, 5, 15));
+            f4.setReleaseDate(LocalDate.of(2025, 12, 15));
             f4.setStatus("upcoming");
             f4.setDeleted(false);
             films.add(f4);
@@ -257,7 +263,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f5.setDuration(102);
             f5.setPoster("Bup_be_sat_nhan_poster.jpg");
             f5.setTrailer("Bup_be_sat_nhan_trailer.mp4");
-            f5.setReleaseDate(LocalDate.of(2023, 1, 6));
+            f5.setReleaseDate(LocalDate.of(2025, 11, 6));
             f5.setStatus("active");
             f5.setDeleted(false);
             films.add(f5);
@@ -271,7 +277,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f6.setDuration(112);
             f6.setPoster("Conan_movie_20_poster.jpg");
             f6.setTrailer("Conan_movie_20_trailer.mp4");
-            f6.setReleaseDate(LocalDate.of(2016, 4, 16));
+            f6.setReleaseDate(LocalDate.of(2025, 11, 16));
             f6.setStatus("active");
             f6.setDeleted(false);
             films.add(f6);
@@ -285,7 +291,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f7.setDuration(127);
             f7.setPoster("Deadpool_3_Poster.jpg");
             f7.setTrailer("Deadpool_3_trailer.mp4");
-            f7.setReleaseDate(LocalDate.of(2024, 7, 26));
+            f7.setReleaseDate(LocalDate.of(2025, 11, 26));
             f7.setStatus("active");
             f7.setDeleted(false);
             films.add(f7);
@@ -299,7 +305,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f8.setDuration(105);
             f8.setPoster("Death_race_3_poster.jpg");
             f8.setTrailer("Death_race_3_trailer.mp4");
-            f8.setReleaseDate(LocalDate.of(2013, 1, 22));
+            f8.setReleaseDate(LocalDate.of(2025, 10, 22));
             f8.setStatus("inactive");
             f8.setDeleted(false);
             films.add(f8);
@@ -313,7 +319,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f9.setDuration(108);
             f9.setPoster("Doraemon_movie_44_poster.jpg");
             f9.setTrailer("Doraemon_movie_44_trailer.mp4");
-            f9.setReleaseDate(LocalDate.of(2025, 3, 1));
+            f9.setReleaseDate(LocalDate.of(2025, 12, 1));
             f9.setStatus("upcoming");
             f9.setDeleted(false);
             films.add(f9);
@@ -327,7 +333,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f10.setDuration(137);
             f10.setPoster("Fast_and_furious_7_poster.jpg");
             f10.setTrailer("Fast_and_furious_7_trailer.mp4");
-            f10.setReleaseDate(LocalDate.of(2015, 4, 3));
+            f10.setReleaseDate(LocalDate.of(2025, 11, 3));
             f10.setStatus("active");
             f10.setDeleted(false);
             films.add(f10);
@@ -341,7 +347,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f11.setDuration(120);
             f11.setPoster("Mad_max_poster.jpg");
             f11.setTrailer("Mad_max_trailer.mp4");
-            f11.setReleaseDate(LocalDate.of(2015, 5, 15));
+            f11.setReleaseDate(LocalDate.of(2025, 11, 15));
             f11.setStatus("active");
             f11.setDeleted(false);
             films.add(f11);
@@ -355,7 +361,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f12.setDuration(117);
             f12.setPoster("Mat_biec_poster.jpeg");
             f12.setTrailer("Mat_biec_trailer.mp4");
-            f12.setReleaseDate(LocalDate.of(2019, 12, 20));
+            f12.setReleaseDate(LocalDate.of(2025, 11, 20));
             f12.setStatus("active");
             f12.setDeleted(false);
             films.add(f12);
@@ -369,7 +375,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f13.setDuration(100);
             f13.setPoster("Nam_muoi_muoi_lam_poster.jpg");
             f13.setTrailer("Nam_muoi_muoi_lam_trailer.mp4");
-            f13.setReleaseDate(LocalDate.of(2024, 3, 8));
+            f13.setReleaseDate(LocalDate.of(2025, 12, 8));
             f13.setStatus("upcoming");
             f13.setDeleted(false);
             films.add(f13);
@@ -383,7 +389,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f14.setDuration(95);
             f14.setPoster("Nha_gia_tien_poster.jpg");
             f14.setTrailer("Nha_gia_tien_trailer.mp4");
-            f14.setReleaseDate(LocalDate.of(2023, 11, 20));
+            f14.setReleaseDate(LocalDate.of(2025, 11, 20));
             f14.setStatus("active");
             f14.setDeleted(false);
             films.add(f14);
@@ -397,7 +403,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f15.setDuration(131);
             f15.setPoster("Pacific_rim_poster.webp");
             f15.setTrailer("Pacific_rim_trailer.mp4");
-            f15.setReleaseDate(LocalDate.of(2013, 7, 12));
+            f15.setReleaseDate(LocalDate.of(2025, 11, 12));
             f15.setStatus("active");
             f15.setDeleted(false);
             films.add(f15);
@@ -411,7 +417,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f16.setDuration(125);
             f16.setPoster("Spirited_away_poster.webp");
             f16.setTrailer("Spirited_away_trailer.mp4");
-            f16.setReleaseDate(LocalDate.of(2001, 7, 20));
+            f16.setReleaseDate(LocalDate.of(2025, 11, 20));
             f16.setStatus("active");
             f16.setDeleted(false);
             films.add(f16);
@@ -425,7 +431,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f17.setDuration(112);
             f17.setPoster("Tenki_no_ko_poster.jpg");
             f17.setTrailer("Tenki_no_ko_trailer.mp4");
-            f17.setReleaseDate(LocalDate.of(2019, 7, 19));
+            f17.setReleaseDate(LocalDate.of(2025, 11, 19));
             f17.setStatus("active");
             f17.setDeleted(false);
             films.add(f17);
@@ -439,7 +445,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f18.setDuration(103);
             f18.setPoster("Toi_thay_hoa_vang_tren_co_xanh_poster.jpg");
             f18.setTrailer("Toi_thay_hoa_vang_tren_co_xanh_trailer.mp4");
-            f18.setReleaseDate(LocalDate.of(2015, 10, 2));
+            f18.setReleaseDate(LocalDate.of(2025, 11, 2));
             f18.setStatus("active");
             f18.setDeleted(false);
             films.add(f18);
@@ -453,8 +459,8 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             f19.setDuration(115);
             f19.setPoster("Tu_chien_tren_khong_poster.jpg");
             f19.setTrailer("Tu_chien_tren_khong_trailer.mp4");
-            f19.setReleaseDate(LocalDate.of(1997, 6, 6));
-            f19.setStatus("inactive");
+            f19.setReleaseDate(LocalDate.of(2025, 10, 6));
+            f19.setStatus("active");
             f19.setDeleted(false);
             films.add(f19);
 
@@ -519,6 +525,243 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         }
     }
 
+    @Override
+    @Transactional
+    public void initializeSeatType() {
+        if (seatTypeRepository.count() == 0) {
+            List<String> seatTypeNames = Arrays.asList("Ghế Thường", "Ghế VIP", "Ghế Couple");
+            for (String name : seatTypeNames) {
+                SeatType seatType = new SeatType();
+                seatType.setName(name);
+                seatType.setDeleted(false);
+
+                seatTypeRepository.save(seatType);
+            }
+            System.out.println("✅ Đã khởi tạo bảng SEAT_TYPE thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng SEAT_TYPE đã có dữ liệu, bỏ qua.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void initializeRooms() {
+        if (roomRepository.count() == 0) {
+            List<String> roomNames = Arrays.asList("Phòng 1", "Phòng 2", "Phòng 3", "Phòng VIP 1");
+            for (String name : roomNames) {
+                Room room = new Room();
+                room.setName(name);
+                room.setDeleted(false);
+
+                roomRepository.save(room);
+            }
+            System.out.println("✅ Đã khởi tạo bảng ROOM thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng ROOM đã có dữ liệu, bỏ qua.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void initializeShowTimes() {
+        if (showTimeRepository.count() == 0) {
+
+            List<String> showTimeStrings = Arrays.asList(
+                    "07:00", "08:00", "09:00", "10:00",
+                    "11:00", "12:00", "13:00", "14:00",
+                    "15:00", "16:00", "17:00", "18:00",
+                    "19:00", "20:00", "21:00", "22:00",
+                    "23:00", "00:00"
+            );
+
+            for (String timeStr : showTimeStrings) {
+                ShowTime showTime = new ShowTime();
+
+                // Chuyển đổi chuỗi "HH:mm" thành LocalTime
+                showTime.setStartTime(LocalTime.parse(timeStr));
+
+                // Đặt isDeleted (nếu chưa gán mặc định trong Entity)
+                showTime.setIsDeleted(false);
+
+                showTimeRepository.save(showTime);
+            }
+
+            System.out.println("✅ Đã khởi tạo bảng SHOW_TIMES thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng SHOW_TIMES đã có dữ liệu, bỏ qua.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void initializeSeats() {
+
+        if (seatRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng SEATS đã có dữ liệu, bỏ qua khởi tạo.");
+            return;
+        }
+
+        List<Room> rooms = roomRepository.findByIsDeletedFalse();
+        if (rooms.isEmpty()) {
+            System.out.println("⚠️ Không tìm thấy phòng. Hãy thêm Room trước!");
+            return;
+        }
+
+        // Lấy seat types
+        SeatType thuong = seatTypeRepository.findByName("Ghế Thường");
+        SeatType vip = seatTypeRepository.findByName("Ghế VIP");
+        SeatType couple = seatTypeRepository.findByName("Ghế Couple");
+
+        if (thuong == null || vip == null || couple == null) {
+            System.out.println("❌ Chưa có dữ liệu bảng seat_types (Ghế Thường, VIP, Couple)");
+            return;
+        }
+
+        // Total seats: 1 → 156
+        int totalSeats = 156;
+
+        for (Room room : rooms) {
+
+            for (int number = 1; number <= totalSeats; number++) {
+
+                // Determine row letter
+                String rowLetter =
+                        (number <= 15)  ? "A" :
+                        (number <= 30)  ? "B" :
+                        (number <= 45)  ? "C" :
+                        (number <= 60)  ? "D" :
+                        (number <= 75)  ? "E" :
+                        (number <= 90)  ? "F" :
+                        (number <= 105) ? "G" :
+                        (number <= 120) ? "H" :
+                        (number <= 135) ? "I" :
+                        (number <= 150) ? "J" :
+                        "K";
+
+                // Determine SeatType
+                SeatType seatType;
+
+                // Ghế VIP
+                if ((number >= 49 && number <= 57) ||
+                        (number >= 64 && number <= 72) ||
+                        (number >= 79 && number <= 87) ||
+                        (number >= 94 && number <= 102)) {
+                    seatType = vip;
+                }
+                // Ghế Couple
+                else if (number >= 151 && number <= 156) {
+                    seatType = couple;
+                }
+                // Ghế Thường
+                else {
+                    seatType = thuong;
+                }
+
+                // Position like A1, B25, K156
+                String position = rowLetter + number;
+
+                Seat seat = new Seat();
+                seat.setRoom(room);
+                seat.setSeatType(seatType);
+                seat.setPosition(position);
+                seat.setDeleted(false);
+
+                seatRepository.save(seat);
+            }
+        }
+
+        System.out.println("✅ Đã khởi tạo bảng SEATS thành công!");
+    }
+
+    @Override
+    @Transactional
+    public void initializeSchedules() {
+        if (scheduleRepository.count() == 0) {
+
+            LocalDate startDate = LocalDate.of(2025, 11, 5);
+
+            List<Film> films = filmRepository.findByIsDeletedFalse();
+            List<ShowTime> showTimes = showTimeRepository.findByIsDeletedFalseOrderByStartTimeAsc();
+            List<Room> rooms = roomRepository.findByIsDeletedFalseOrderByNameAsc();
+
+            if (films.isEmpty() || showTimes.isEmpty() || rooms.isEmpty()) {
+                System.out.println("❌ Không thể khởi tạo SCHEDULES vì thiếu dữ liệu (Films/ShowTimes/Rooms)");
+                return;
+            }
+
+            List<Schedule> schedules = new ArrayList<>();
+
+            for (Film film : films) {
+                for (ShowTime showTime : showTimes) {
+                    for (Room room : rooms) {
+
+                        // kiểm tra trùng (unique constraint tránh lỗi)
+                        boolean exists = scheduleRepository
+                                .existsByRoomAndFilmAndShowTimeAndScheduleDate(
+                                        room, film, showTime, startDate
+                                );
+
+                        if (!exists) {
+                            Schedule schedule = Schedule.builder()
+                                    .film(film)
+                                    .room(room)
+                                    .showTime(showTime)
+                                    .scheduleDate(startDate)
+                                    .isDeleted(false)
+                                    .build();
+
+                            schedules.add(schedule);
+                        }
+                    }
+                }
+            }
+
+            scheduleRepository.saveAll(schedules);
+
+            System.out.println("✅ Đã khởi tạo bảng SCHEDULES thành công! Tổng: "
+                    + schedules.size() + " lịch chiếu.");
+
+        } else {
+            System.out.println("ℹ️ Bảng SCHEDULES đã có dữ liệu, bỏ qua.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void initializeFoods() {
+        if (productRepository.count() == 0) {
+
+            List<Food> foods = Arrays.asList(
+                    new Food(null, "Aquafina",
+                            "01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim",
+                            "Aquafina_poster.png", false),
+
+                    new Food(null, "Pepsi 220z",
+                            "01 nước Pepsi 220z. Nhận trong ngày xem phim",
+                            "Pepsi_220z_poster.png", false),
+
+                    new Food(null, "Bắp rang vị ngọt 440z",
+                            "01 bắp 440z vị ngọt. Nhận trong ngày xem phim",
+                            "Bap_ngot_poster.png", false),
+
+                    new Food(null, "Bắp rang vị phô mai 440z",
+                            "01 bắp 440z vị phô mai. Nhận trong ngày xem phim",
+                            "Bap_pho_mai_poster.png", false),
+
+                    new Food(null,
+                            "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z",
+                            "01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim",
+                            "Combo_bapngot_pepsi_xucxich_poster.png", false)
+            );
+
+            productRepository.saveAll(foods);
+            System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
+        } else {
+            System.out.println("ℹ️ Bảng PRODUCTS đã có dữ liệu, bỏ qua.");
+        }
+    }
+
+
 
     private int getLastDigit(String username) {
         if (username.endsWith("Admin")) return 1;
@@ -535,5 +778,11 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeUserProfiles();
         initializeCategories();
         initializeFilmsAndFilmCategories();
+        initializeSeatType();
+        initializeRooms();
+        initializeShowTimes();
+        initializeSeats();
+        initializeSchedules();
+        initializeFoods();
     }
 }

@@ -15,7 +15,7 @@ public class FileStorageService {
     private final String IMAGE_DIR = ROOT_DIR + "images" + File.separator;
     private final String VIDEO_DIR = ROOT_DIR + "videos" + File.separator;
 
-    private final String IMAGE_FILE_PATTERN = ".*\\.(jpg|jpeg|png|gif)$";
+    private final String IMAGE_FILE_PATTERN = ".*\\.(jpg|jpeg|png|gif|webp)$";
     private final String VIDEO_FILE_PATTERN = ".*\\.(mp4|mov|avi|mkv)$";
 
     public String saveFile(MultipartFile file) throws IOException {
