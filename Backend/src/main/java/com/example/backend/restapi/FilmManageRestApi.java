@@ -25,7 +25,7 @@ public class FilmManageRestApi implements FilmManageController {
 
     @Override
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+    public ResponseEntity<List<CategoryManageResponse>> getAllCategories() {
         return ResponseEntity.ok(filmManageService.getAllCategories());
     }
 
@@ -36,12 +36,14 @@ public class FilmManageRestApi implements FilmManageController {
     }
 
     @Override
-    public ResponseEntity<FilmResponse> updateFilm(UUID id, FilmRequest filmRequest) {
-        return null;
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse> updateFilm(@PathVariable UUID id, @ModelAttribute FilmManageRequest request) throws IOException {
+        return ResponseEntity.ok(filmManageService.updateFilm(id, request));
     }
 
     @Override
-    public ResponseEntity<Void> deleteFilm(UUID id) {
-        return null;
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ApiResponse> deleteFilm(@PathVariable UUID id) {
+        return  ResponseEntity.ok(filmManageService.deleteFilm(id));
     }
 }

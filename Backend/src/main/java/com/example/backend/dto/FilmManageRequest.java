@@ -19,6 +19,6 @@ public record FilmManageRequest(
         MultipartFile trailer,
         LocalDate releaseDate,
         String status,
-        List<UUID> categoriesId
+        String categoriesIdJSON
 ) {
 }

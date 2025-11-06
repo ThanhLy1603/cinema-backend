@@ -1,9 +1,8 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmController;
-import com.example.backend.dto.FilmRequest;
 import com.example.backend.dto.FilmResponse;
-import com.example.backend.dto.CategoryResponse;
+import com.example.backend.dto.CategoryManageResponse;
 import com.example.backend.service.FilmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +34,7 @@ public class FilmRestApi implements FilmController {
 
     @Override
     @GetMapping("/{id}/categories")
-    public ResponseEntity<List<CategoryResponse>> getCategoriesByFilmId(@PathVariable UUID id) {
+    public ResponseEntity<List<CategoryManageResponse>> getCategoriesByFilmId(@PathVariable UUID id) {
         return  ResponseEntity.ok(filmService.getCategoriesByFilmId(id));
     }
 }

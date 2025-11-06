@@ -1,7 +1,5 @@
 package com.example.backend.dto;
 
-import com.example.backend.entity.Category;
-
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
@@ -18,6 +16,6 @@ public record FilmManageResponse(
         String trailer,
         LocalDate releaseDate,
         String status,
-        Set<CategoryResponse> categories
+        Set<CategoryManageResponse> categories
 ) {
 }
