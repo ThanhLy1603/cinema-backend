@@ -1,18 +1,21 @@
 package com.example.backend.service;
 
+import com.example.backend.entity.FilmCategory;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.example.backend.dto.*;
 import com.example.backend.entity.Category;
 import com.example.backend.entity.Film;
-import com.example.backend.entity.FilmCategory;
 import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.FilmCategoryRepository;
 import com.example.backend.repository.FilmRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -25,10 +28,64 @@ public class FilmManageService {
     private final CategoryRepository categoryRepository;
     private final FileStorageService fileStorageService;
     private final FilmCategoryRepository filmCategoryRepository;
+    private final ObjectMapper objectMapper;
+
+    // Cập nhật phim
+    @Transactional
+    public ApiResponse updateFilm(UUID id, FilmManageRequest request) throws IOException {
+        Film existingFilm = filmRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Film not found with id " + id));
+
+        System.out.println("existingFilm: " + existingFilm);
+        System.out.println("filmRequest: " + request);
+        System.out.println("categories id JSON: " + request.categoriesIdJSON());
+
+        // Cập nhật thông tin từ request
+        existingFilm.setName(request.name());
+        existingFilm.setCountry(request.country());
+        existingFilm.setDirector(request.director());
+        existingFilm.setActor(request.actor());
+        existingFilm.setDescription(request.description());
+        existingFilm.setDuration(request.duration());
+        existingFilm.setReleaseDate(request.releaseDate());
+        existingFilm.setStatus(request.status());
+
+        if (request.poster() != null && !request.poster().isEmpty()) {
+            String poster = fileStorageService.saveFile(request.poster());
+            existingFilm.setPoster(poster);
+        }
+
+        if (request.trailer() != null && !request.trailer().isEmpty()) {
+            String trailer = fileStorageService.saveFile(request.trailer());
+            existingFilm.setTrailer(trailer);
+        }
+
+        List<UUID> newCategoriesId = objectMapper.readValue(
+                request.categoriesIdJSON(),
+                new TypeReference<>(){}
+        );
+
+        filmCategoryRepository.deleteAllByFilmId(existingFilm.getId());
+
+        for (UUID categoryId : newCategoriesId) {
+            Category category =  categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new EntityNotFoundException("Category " + categoryId));
+
+            FilmCategory filmCategory = new FilmCategory();
+            filmCategory.setCategory(category);
+            filmCategory.setFilm(existingFilm);
+            filmCategoryRepository.save(filmCategory);
+        }
+
+        filmRepository.save(existingFilm);
+
+        return new ApiResponse("sucess", "Sửa phim thành công");
+    }
 
     @Transactional
     public ApiResponse createFilm(FilmManageRequest request) throws IOException {
         System.out.println("film request: " + request);
+        System.out.println("categories JSON: " + request.categoriesIdJSON());
         Film film = new Film();
         film.setName(request.name());
         film.setCountry(request.country());
@@ -38,16 +95,36 @@ public class FilmManageService {
         film.setDuration(request.duration());
         film.setReleaseDate(request.releaseDate());
         film.setStatus(request.status());
+        film.setDeleted(false);
 
-        // 2. Lưu poster/trailer nếu có
-//        if (request.poster() != null && !request.poster().isEmpty()) {
-//            String poster = fileStorageService.saveFile(request.poster());
-//            film.setPoster(poster);
-//        }
-//        if (request.trailer() != null && !request.trailer().isEmpty()) {
-//            String trailer = fileStorageService.saveFile(request.trailer());
-//            film.setTrailer(trailer);
-//        }
+        if (request.poster() != null && !request.poster().isEmpty()) {
+            String poster = fileStorageService.saveFile(request.poster());
+            film.setPoster(poster);
+        }
+
+        if (request.trailer() != null && !request.trailer().isEmpty()) {
+            String trailer = fileStorageService.saveFile(request.trailer());
+            film.setTrailer(trailer);
+        }
+
+        filmRepository.save(film);
+
+        List<UUID> categoriesId = objectMapper.readValue(
+                request.categoriesIdJSON(),
+                new TypeReference<>() {}
+        );
+
+        for (UUID categoryId : categoriesId) {
+            Category category = categoryRepository.findById(categoryId).orElse(null);
+
+            FilmCategory filmCategory = new FilmCategory();
+            filmCategory.setCategory(category);
+            filmCategory.setFilm(film);
+
+            filmCategoryRepository.save(filmCategory);
+        }
+
+        System.out.println("categories ID: " + categoriesId);
 
         return new ApiResponse("success", "Thêm phim mới thành công");
     }
@@ -62,69 +139,47 @@ public class FilmManageService {
     }
 
     @Transactional
-    public List<CategoryResponse> getAllCategories() {
-        List<CategoryResponse> categories = categoryRepository.findByIsDeletedIsFalse().stream()
+    public List<CategoryManageResponse> getAllCategories() {
+        List<CategoryManageResponse> categories = categoryRepository.findByIsDeletedIsFalse().stream()
                 .map(this::toCategoryResponse)
                 .collect(Collectors.toList());
         return categories;
     }
 
     @Transactional
-    public List<CategoryResponse> getCategoriesByFilmId(UUID id) {
+    public List<CategoryManageResponse> getCategoriesByFilmId(UUID id) {
         Film film = filmRepository.findFilmByIdAndIsDeletedFalse(id);
 
         if (film == null) {
             System.out.println(("Không tìm thấy phim với ID: " + id));
         }
 
-        List<CategoryResponse> categories = film.getCategories().stream()
-                .map(category -> new CategoryResponse(category.getId(), category.getName()))
+        List<CategoryManageResponse> categories = film.getCategories().stream()
+                .map(category -> new CategoryManageResponse(category.getId(), category.getName()))
                 .collect(Collectors.toList());
 
         return categories;
     }
 
-
-
-    // Cập nhật phim
-    @Transactional
-    public FilmManageResponse updateFilm(UUID id, FilmRequest filmRequest) {
-        Film existingFilm = filmRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Film not found with id " + id));
-
-        // Cập nhật thông tin từ request
-        existingFilm.setName(filmRequest.name());
-        existingFilm.setCountry(filmRequest.country());
-        existingFilm.setDirector(filmRequest.director());
-        existingFilm.setActor(filmRequest.actor());
-        existingFilm.setDescription(filmRequest.description());
-        existingFilm.setDuration(filmRequest.duration());
-        existingFilm.setReleaseDate(filmRequest.releaseDate());
-        existingFilm.setStatus(filmRequest.status());
-        // Cập nhật poster và trailer
-        existingFilm.setPoster(filmRequest.poster());
-        existingFilm.setTrailer(filmRequest.trailer());
-
-        return toFilmManageResponse(filmRepository.save(existingFilm));
-    }
-
     // Xóa mềm phim (chuyển isDeleted thành true)
     // Xóa mềm phim (chuyển isDeleted thành true)
     @Transactional
-    public void deleteFilm(UUID id) {
+    public ApiResponse deleteFilm(UUID id) {
         Film film = filmRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Film not found with id " + id));
 
         film.setDeleted(true); // Xóa mềm
         filmRepository.save(film);
+
+        return new ApiResponse("success", "Xoá phim thành công");
     }
 
-    private CategoryResponse toCategoryResponse(Category category) {
-        return new CategoryResponse(category.getId(), category.getName());
+    private CategoryManageResponse toCategoryResponse(Category category) {
+        return new CategoryManageResponse(category.getId(), category.getName());
     }
 
     private FilmManageResponse toFilmManageResponse(Film film) {
-        Set<CategoryResponse> categories = film.getCategories().stream()
+        Set<CategoryManageResponse> categories = film.getCategories().stream()
                 .map(category -> toCategoryResponse(category)).collect(Collectors.toSet());
         return new FilmManageResponse(
                 film.getId(),
@@ -140,23 +195,5 @@ public class FilmManageService {
                 film.getStatus(),
                 categories
         );
-    }
-
-    // Phương thức chuyển đổi FilmRequest sang Film Entity (cần thiết cho POST/PUT)
-    private Film toFilmEntity(FilmRequest filmRequest) {
-        return Film.builder()
-                .id(filmRequest.id())
-                .name(filmRequest.name())
-                .country(filmRequest.country())
-                .director(filmRequest.director())
-                .actor(filmRequest.actor())
-                .description(filmRequest.description())
-                .duration(filmRequest.duration())
-                .poster(filmRequest.poster())
-                .trailer(filmRequest.trailer())
-                .releaseDate(filmRequest.releaseDate())
-                .status(filmRequest.status())
-                .isDeleted(filmRequest.isDeleted())
-                .build();
     }
 }

@@ -2,11 +2,19 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+<<<<<<< HEAD
+=======
+      <profile default="true" name="Default" enabled="true" />
+>>>>>>> db16f580cbf0a9647ea0537201ae2ba451949676
       <profile name="Annotation profile for Backend" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+<<<<<<< HEAD
         <processorPath useClasspath="false">
+=======
+        <processorPath>
+>>>>>>> db16f580cbf0a9647ea0537201ae2ba451949676
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.40/lombok-1.18.40.jar" />
         </processorPath>
         <module name="Backend" />

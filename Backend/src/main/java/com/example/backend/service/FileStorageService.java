@@ -19,7 +19,6 @@ public class FileStorageService {
     private final String VIDEO_FILE_PATTERN = ".*\\.(mp4|mov|avi|mkv)$";
 
     public String saveFile(MultipartFile file) throws IOException {
-        String fileName;
         String originalFilename = file.getOriginalFilename();
         System.out.println("Saving file: " + originalFilename + ", size=" + file.getSize());
 
@@ -27,6 +26,7 @@ public class FileStorageService {
             throw new IOException("File không hợp lệ");
         }
 
+        // Xác định thư mục lưu
         String folder;
         if (originalFilename.toLowerCase().matches(IMAGE_FILE_PATTERN)) {
             folder = IMAGE_DIR;
@@ -36,18 +36,21 @@ public class FileStorageService {
             throw new IOException("Định dạng file không được hỗ trợ: " + originalFilename);
         }
 
+        // Tạo thư mục nếu chưa có
         File dir = new File(folder);
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IOException("Không thể tạo thư mục lưu trữ: " + folder);
         }
 
-        String filePath = folder + System.currentTimeMillis() + "_" + originalFilename;
+        // 👉 Sử dụng cùng 1 timestamp cho tên file và lưu file
+        long timestamp = System.currentTimeMillis();
+        String fileName = timestamp + "_" + originalFilename;
+        String filePath = folder + fileName;
+
         File destination = new File(filePath);
         file.transferTo(destination);
 
-        fileName = System.currentTimeMillis() + "_" + originalFilename;
-
-        return fileName;
+        return fileName; // trả về đúng tên file đã lưu
     }
 
     public boolean deleteFile(String fileName) {
