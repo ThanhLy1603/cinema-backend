@@ -7,6 +7,7 @@ import com.example.backend.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +50,7 @@ public class CategoryManageService {
 
     // ✅ Soft delete
     @Transactional
+
     public ApiResponse delete(UUID id) {
         Category category = categoryRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục!"));

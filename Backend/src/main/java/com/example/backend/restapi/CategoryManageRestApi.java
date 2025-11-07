@@ -7,10 +7,7 @@ import com.example.backend.entity.Category;
 import com.example.backend.service.CategoryManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +33,8 @@ public class CategoryManageRestApi implements CategoryController {
     }
 
     @Override
-    public ResponseEntity<ApiResponse> delete(UUID id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> delete(@PathVariable UUID id) {
         return ResponseEntity.ok(categoryService.delete(id));
     }
 }
