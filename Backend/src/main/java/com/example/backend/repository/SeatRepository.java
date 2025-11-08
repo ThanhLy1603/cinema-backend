@@ -11,4 +11,5 @@ import java.util.UUID;
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
     List<Seat> findAllByIsDeletedFalse();
+    List<Seat> findAllByIsDeletedFalseAndRoomId(UUID roomId);
 }

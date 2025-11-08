@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +27,14 @@ public class SeatManageService {
                 .map(this::toSeatManageResponse)
                 .collect(Collectors.toList());
 
+        return seats;
+    }
+
+    @Transactional
+    public List<SeatManageResponse> getSeatsByRoomId(UUID roomId) {
+        List<SeatManageResponse> seats = seatRepository.findAllByIsDeletedFalseAndRoomId(roomId).stream()
+                .map(this::toSeatManageResponse)
+                .collect(Collectors.toList());
         return seats;
     }
 
