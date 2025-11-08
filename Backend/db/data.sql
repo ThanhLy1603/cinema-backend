@@ -371,51 +371,51 @@ DELETE FROM seats
 
 -- Nhập liệu cho bảng schedules
 
--- Lấy tất cả IDs của Phim và Suất Chiếu để sử dụng
-DECLARE @FilmIDs TABLE (RowNum INT, film_id UNIQUEIDENTIFIER);
-INSERT INTO @FilmIDs (RowNum, film_id)
-SELECT ROW_NUMBER() OVER (ORDER BY name), id FROM films WHERE is_deleted = 0;
+-- -- Lấy tất cả IDs của Phim và Suất Chiếu để sử dụng
+-- DECLARE @FilmIDs TABLE (RowNum INT, film_id UNIQUEIDENTIFIER);
+-- INSERT INTO @FilmIDs (RowNum, film_id)
+-- SELECT ROW_NUMBER() OVER (ORDER BY name), id FROM films WHERE is_deleted = 0;
 
-DECLARE @TimeIDs TABLE (RowNum INT, show_time_id UNIQUEIDENTIFIER);
-INSERT INTO @TimeIDs (RowNum, show_time_id)
-SELECT ROW_NUMBER() OVER (ORDER BY start_time), id FROM show_times WHERE is_deleted = 0;
+-- DECLARE @TimeIDs TABLE (RowNum INT, show_time_id UNIQUEIDENTIFIER);
+-- INSERT INTO @TimeIDs (RowNum, show_time_id)
+-- SELECT ROW_NUMBER() OVER (ORDER BY start_time), id FROM show_times WHERE is_deleted = 0;
 
--- Lấy IDs của các Phòng
-DECLARE @Room1ID UNIQUEIDENTIFIER, @Room2ID UNIQUEIDENTIFIER, @Room3ID UNIQUEIDENTIFIER, @RoomVIP1ID UNIQUEIDENTIFIER;
-SELECT @Room1ID = id FROM rooms WHERE name = N'Phòng 1';
-SELECT @Room2ID = id FROM rooms WHERE name = N'Phòng 2';
-SELECT @Room3ID = id FROM rooms WHERE name = N'Phòng 3';
-SELECT @RoomVIP1ID = id FROM rooms WHERE name = N'Phòng VIP 1';
+-- -- Lấy IDs của các Phòng
+-- DECLARE @Room1ID UNIQUEIDENTIFIER, @Room2ID UNIQUEIDENTIFIER, @Room3ID UNIQUEIDENTIFIER, @RoomVIP1ID UNIQUEIDENTIFIER;
+-- SELECT @Room1ID = id FROM rooms WHERE name = N'Phòng 1';
+-- SELECT @Room2ID = id FROM rooms WHERE name = N'Phòng 2';
+-- SELECT @Room3ID = id FROM rooms WHERE name = N'Phòng 3';
+-- SELECT @RoomVIP1ID = id FROM rooms WHERE name = N'Phòng VIP 1';
 
--- Ngày chiếu bắt đầu (chọn một ngày mới để tránh xung đột với dữ liệu cũ)
-DECLARE @StartDate DATE = '2025-11-05';
+-- -- Ngày chiếu bắt đầu (chọn một ngày mới để tránh xung đột với dữ liệu cũ)
+-- DECLARE @StartDate DATE = '2025-11-05';
 
-DECLARE @BaseSchedules TABLE (
-    film_id UNIQUEIDENTIFIER NOT NULL,
-    show_time_id UNIQUEIDENTIFIER NOT NULL,
-    schedule_date DATE NOT NULL
-);
+-- DECLARE @BaseSchedules TABLE (
+--     film_id UNIQUEIDENTIFIER NOT NULL,
+--     show_time_id UNIQUEIDENTIFIER NOT NULL,
+--     schedule_date DATE NOT NULL
+-- );
 
--- Tạo 20 bản ghi (lặp lại lịch chiếu 18 lần và thêm 2 bản ghi đầu tiên vào cuối)
-INSERT INTO @BaseSchedules (film_id, show_time_id, schedule_date)
-SELECT
-    F.film_id,
-    T.show_time_id,
-    @StartDate
-FROM
-    @FilmIDs F
-JOIN
-    @TimeIDs T ON T.RowNum = (F.RowNum % 18) + 1; -- Ánh xạ 20 phim vào 18 suất chiếu, 2 phim cuối dùng lại suất đầu
+-- -- Tạo 20 bản ghi (lặp lại lịch chiếu 18 lần và thêm 2 bản ghi đầu tiên vào cuối)
+-- INSERT INTO @BaseSchedules (film_id, show_time_id, schedule_date)
+-- SELECT
+--     F.film_id,
+--     T.show_time_id,
+--     @StartDate
+-- FROM
+--     @FilmIDs F
+-- JOIN
+--     @TimeIDs T ON T.RowNum = (F.RowNum % 18) + 1; -- Ánh xạ 20 phim vào 18 suất chiếu, 2 phim cuối dùng lại suất đầu
 
-INSERT INTO schedules (film_id, room_id, show_time_id, schedule_date)
-SELECT BS.film_id, @Room1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
-UNION ALL
-SELECT BS.film_id, @Room2ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
-UNION ALL
-SELECT BS.film_id, @Room3ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
-UNION ALL
-SELECT BS.film_id, @RoomVIP1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS;
-GO
+-- INSERT INTO schedules (film_id, room_id, show_time_id, schedule_date)
+-- SELECT BS.film_id, @Room1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
+-- UNION ALL
+-- SELECT BS.film_id, @Room2ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
+-- UNION ALL
+-- SELECT BS.film_id, @Room3ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS
+-- UNION ALL
+-- SELECT BS.film_id, @RoomVIP1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS;
+-- GO
 
 SELECT 'Đã nhập liệu thành công 80 bản ghi mới cho bảng schedules.' AS Result;
 
@@ -431,7 +431,7 @@ VALUES
 
 SELECT * FROM user_roles
 SELECT * FROM users
-SELECT * FROM rolesW
+SELECT * FROM roles
 SELECT * FROM user_profiles
 SELECT * FROM categories
 SELECT * FROM films

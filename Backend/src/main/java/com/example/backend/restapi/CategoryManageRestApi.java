@@ -1,6 +1,6 @@
 package com.example.backend.restapi;
 
-import com.example.backend.controller.CategoryController;
+import com.example.backend.controller.CategoryManageController;
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.CategoryManageResponse;
 import com.example.backend.entity.Category;
@@ -15,15 +15,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/categories")
 @RequiredArgsConstructor
-public class CategoryManageRestApi implements CategoryController {
+public class CategoryManageRestApi implements CategoryManageController {
     private final CategoryManageService categoryService;
-
-
 
     @Override
     @GetMapping("")
-    public ResponseEntity<List<CategoryManageResponse>> getAllActive() {
-        return ResponseEntity.ok(categoryService.getAllActive());
+    public ResponseEntity<List<CategoryManageResponse>> getAlls() {
+        return ResponseEntity.ok(categoryService.getAlls());
     }
 
     @Override

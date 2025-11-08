@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.UUID;
 
-public interface CategoryController {
-    public ResponseEntity<List<CategoryManageResponse>> getAllActive();
+public interface CategoryManageController {
+    public ResponseEntity<List<CategoryManageResponse>> getAlls();
     public  ResponseEntity<ApiResponse> delete (UUID id);
     public ResponseEntity<ApiResponse> create(@RequestBody Category category) ;
 
