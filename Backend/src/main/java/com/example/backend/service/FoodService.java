@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ProductResponse;
+import com.example.backend.dto.FoodResponse;
 import com.example.backend.entity.Food;
 import com.example.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,26 +14,26 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ProductService {
+public class FoodService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public List<ProductResponse> getAllProducts() {
-        List<ProductResponse> foods = productRepository.findByIsDeletedFalse().stream()
-                .map(this::toProductResponse)
+    public List<FoodResponse> getAllFoods() {
+        List<FoodResponse> foods = productRepository.findByIsDeletedFalse().stream()
+                .map(this::toFoodResponse)
                 .collect(Collectors.toList());
 
         return foods;
     }
 
-    private ProductResponse toProductResponse(Food food) {
-        return new ProductResponse(food.getId(),food.getName(), food.getDescription(), food.getPoster());
+    private FoodResponse toFoodResponse(Food food) {
+        return new FoodResponse(food.getId(),food.getName(), food.getDescription(), food.getPoster());
     }
 
     @Transactional
-    public ProductResponse getProductById(@PathVariable UUID id) {
+    public FoodResponse getFoodById(@PathVariable UUID id) {
         Food food = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        return toProductResponse(food);
+        return toFoodResponse(food);
     }
 }

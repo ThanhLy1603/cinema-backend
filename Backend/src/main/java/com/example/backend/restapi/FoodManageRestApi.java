@@ -1,6 +1,7 @@
 package com.example.backend.restapi;
 
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.FoodManageRequest;
 import com.example.backend.dto.FoodManageResponse;
 import com.example.backend.entity.Food;
 import com.example.backend.service.FoodManageService;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,14 +26,14 @@ public class FoodManageRestApi {
     }
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse> create(@RequestBody Food food) {
-        return ResponseEntity.ok(foodService.create(food));
+    public ResponseEntity<ApiResponse> create(@ModelAttribute FoodManageRequest request) throws IOException {
+        return ResponseEntity.ok(foodService.create(request));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> update(@PathVariable UUID id, @RequestBody Food food) {
-        return ResponseEntity.ok(foodService.update(id, food));
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<ApiResponse> update(@PathVariable UUID id, @RequestBody Food food) {
+//        return ResponseEntity.ok(foodService.update(id, food));
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> delete(@PathVariable UUID id) {

@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.FoodManageRequest;
 import com.example.backend.dto.FoodManageResponse;
 import com.example.backend.entity.Food;
 import com.example.backend.repository.FoodRepository;
@@ -8,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 public class FoodManageService {
 
     private final FoodRepository foodRepo;
+    private final FileStorageService fileStorageService;
 
     // ✅ Lấy danh sách món ăn chưa bị xóa (isDeleted = false)
     @Transactional
@@ -28,20 +31,30 @@ public class FoodManageService {
 
     // ✅ Thêm mới món ăn
     @Transactional
-    public ApiResponse create(Food food) {
-        if (food.getName() == null || food.getName().trim().isEmpty()) {
+    public ApiResponse create(FoodManageRequest request) throws IOException {
+        if (request.name() == null || request.name().trim().isEmpty()) {
             throw new RuntimeException("Tên sản phẩm không được để trống!");
         }
 
         boolean exists = foodRepo.findByIsDeletedFalse()
                 .stream()
-                .anyMatch(f -> f.getName().equalsIgnoreCase(food.getName().trim()));
+                .anyMatch(f -> f.getName().equalsIgnoreCase(request.name().trim()));
 
         if (exists) {
-            throw new RuntimeException("Sản phẩm '" + food.getName() + "' đã tồn tại!");
+            throw new RuntimeException("Sản phẩm '" + request.name() + "' đã tồn tại!");
         }
 
+        Food food = new Food();
+        food.setName(request.name());
+        food.setDescription(request.description());
         food.setIsDeleted(false);
+
+        if (request.poster() != null && !request.poster().isEmpty()) {
+            String poster = fileStorageService.saveFile(request.poster());
+            food.setPoster(poster);
+        }
+
+        System.out.println("request: " + request);
         foodRepo.save(food);
 
         return new ApiResponse("success", "Thêm sản phẩm thành công!");
