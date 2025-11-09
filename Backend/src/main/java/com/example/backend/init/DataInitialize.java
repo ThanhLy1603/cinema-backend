@@ -664,6 +664,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
                 seat.setRoom(room);
                 seat.setSeatType(seatType);
                 seat.setPosition(position);
+                seat.setActive(true);
                 seat.setDeleted(false);
 
                 seatRepository.save(seat);
@@ -690,23 +691,35 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             }
 
             List<Schedule> schedules = new ArrayList<>();
+            int filmCount = films.size();
+            int showTimeCount = showTimes.size();
+            int roomCount = rooms.size();
 
-            for (Film film : films) {
-                for (ShowTime showTime : showTimes) {
-                    for (Room room : rooms) {
+            // Sinh dữ liệu cho 7 ngày tới
+            for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+                LocalDate date = startDate.plusDays(dayOffset);
 
-                        // kiểm tra trùng (unique constraint tránh lỗi)
-                        boolean exists = scheduleRepository
-                                .existsByRoomAndFilmAndShowTimeAndScheduleDate(
-                                        room, film, showTime, startDate
-                                );
+                for (int r = 0; r < roomCount; r++) {
+                    Room room = rooms.get(r);
+
+                    for (int t = 0; t < showTimeCount; t++) {
+                        ShowTime showTime = showTimes.get(t);
+
+                        // Chọn phim khác nhau cho mỗi phòng/suất/ngày theo công thức xoay vòng
+                        int filmIndex = (r + t + dayOffset) % filmCount;
+                        Film film = films.get(filmIndex);
+
+                        // Kiểm tra xem lịch đã tồn tại chưa
+                        boolean exists = scheduleRepository.existsByRoomAndShowTimeAndScheduleDate(
+                                room, showTime, date
+                        );
 
                         if (!exists) {
                             Schedule schedule = Schedule.builder()
                                     .film(film)
                                     .room(room)
                                     .showTime(showTime)
-                                    .scheduleDate(startDate)
+                                    .scheduleDate(date)
                                     .isDeleted(false)
                                     .build();
 
@@ -719,7 +732,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             scheduleRepository.saveAll(schedules);
 
             System.out.println("✅ Đã khởi tạo bảng SCHEDULES thành công! Tổng: "
-                    + schedules.size() + " lịch chiếu.");
+                    + schedules.size() + " lịch chiếu hợp lệ (7 ngày, không trùng).");
 
         } else {
             System.out.println("ℹ️ Bảng SCHEDULES đã có dữ liệu, bỏ qua.");

@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
     List<Seat> findAllByIsDeletedFalse();
     List<Seat> findAllByIsDeletedFalseAndRoomId(UUID roomId);
+    List<Seat> findAllByIsDeletedFalseAndSeatTypeId(UUID seatTypeId);
+    List<Seat> findAllByIsDeletedFalseAndRoomIdAndSeatTypeId(UUID roomId, UUID seatTypeId);
 }

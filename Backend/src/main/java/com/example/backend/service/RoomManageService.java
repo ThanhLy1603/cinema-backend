@@ -19,12 +19,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RoomManageService {
     private final RoomRepository roomRepository;
+    private final SeatManageService seatManageService;
 
     @Transactional(readOnly = true)
     public List<RoomManageResponse> getAllRooms() {
         return roomRepository.findByIsDeletedFalseOrderByNameAsc()
                 .stream()
-                .map(this::toResponse)
+                .map(this::toRoomResponse)
                 .collect(Collectors.toList());
     }
 
@@ -39,7 +40,9 @@ public class RoomManageService {
             room.setStatus(Room.RoomStatus.active);
         }
         room.setDeleted(false);
-        roomRepository.save(room);
+
+        Room roomSaved = roomRepository.save(room);
+        seatManageService.createSeat(roomSaved);
         return new ApiResponse("sucess", "Thêm phòng chiếu thành công");
     }
 
@@ -62,7 +65,7 @@ public class RoomManageService {
         return new ApiResponse("success", "Xóa phòng thành công");
     }
 
-    private RoomManageResponse toResponse(Room room) {
+    private RoomManageResponse toRoomResponse(Room room) {
         return new RoomManageResponse(room.getId(), room.getName(), room.getStatus().name());
     }
 }

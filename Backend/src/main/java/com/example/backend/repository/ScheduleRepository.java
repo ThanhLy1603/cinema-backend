@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ScheduleRepository  extends JpaRepository<Schedule, UUID> {
+public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     List<Schedule> findByIsDeletedFalse();
-    boolean existsByRoomAndFilmAndShowTimeAndScheduleDate(
-            Room room, Film film, ShowTime showTime, LocalDate date
+    List<Schedule> findByIsDeletedFalseOrderByScheduleDateDescShowTimeStartTimeAsc();
+    boolean existsByRoomAndShowTimeAndScheduleDate(
+            Room room, ShowTime showTime, LocalDate date
     );
-
 }

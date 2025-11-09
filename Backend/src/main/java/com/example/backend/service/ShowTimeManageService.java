@@ -7,11 +7,8 @@ import com.example.backend.entity.ShowTime;
 import com.example.backend.repository.ShowTimeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -20,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ShowTimeService {
+public class ShowTimeManageService {
 
     private final ShowTimeRepository repository;
 
