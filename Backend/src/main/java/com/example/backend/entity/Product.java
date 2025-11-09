@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Food {
+public class Product {
     @Id
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     @GeneratedValue(strategy = GenerationType.UUID)

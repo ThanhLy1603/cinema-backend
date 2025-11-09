@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.FoodResponse;
-import com.example.backend.entity.Food;
+import com.example.backend.dto.ProductResponse;
+import com.example.backend.entity.Product;
 import com.example.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,26 +14,26 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class FoodService {
+public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public List<FoodResponse> getAllFoods() {
-        List<FoodResponse> foods = productRepository.findByIsDeletedFalse().stream()
-                .map(this::toFoodResponse)
+    public List<ProductResponse> getAllProducts() {
+        List<ProductResponse> foods = productRepository.findByIsDeletedFalse().stream()
+                .map(this::toProductResponse)
                 .collect(Collectors.toList());
 
         return foods;
     }
 
-    private FoodResponse toFoodResponse(Food food) {
-        return new FoodResponse(food.getId(),food.getName(), food.getDescription(), food.getPoster());
+    private ProductResponse toProductResponse(Product product) {
+        return new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPoster());
     }
 
     @Transactional
-    public FoodResponse getFoodById(@PathVariable UUID id) {
-        Food food = productRepository.findById(id)
+    public ProductResponse getProductById(@PathVariable UUID id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        return toFoodResponse(food);
+        return toProductResponse(product);
     }
 }

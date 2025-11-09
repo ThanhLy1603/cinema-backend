@@ -731,30 +731,30 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     public void initializeFoods() {
         if (productRepository.count() == 0) {
 
-            List<Food> foods = Arrays.asList(
-                    new Food(null, "Aquafina",
+            List<Product> products = Arrays.asList(
+                    new Product(null, "Aquafina",
                             "01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim",
                             "Aquafina_poster.png", false),
 
-                    new Food(null, "Pepsi 220z",
+                    new Product(null, "Pepsi 220z",
                             "01 nước Pepsi 220z. Nhận trong ngày xem phim",
                             "Pepsi_220z_poster.png", false),
 
-                    new Food(null, "Bắp rang vị ngọt 440z",
+                    new Product(null, "Bắp rang vị ngọt 440z",
                             "01 bắp 440z vị ngọt. Nhận trong ngày xem phim",
                             "Bap_ngot_poster.png", false),
 
-                    new Food(null, "Bắp rang vị phô mai 440z",
+                    new Product(null, "Bắp rang vị phô mai 440z",
                             "01 bắp 440z vị phô mai. Nhận trong ngày xem phim",
                             "Bap_pho_mai_poster.png", false),
 
-                    new Food(null,
+                    new Product(null,
                             "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z",
                             "01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim",
                             "Combo_bapngot_pepsi_xucxich_poster.png", false)
             );
 
-            productRepository.saveAll(foods);
+            productRepository.saveAll(products);
             System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
         } else {
             System.out.println("ℹ️ Bảng PRODUCTS đã có dữ liệu, bỏ qua.");

@@ -419,7 +419,7 @@ DELETE FROM seats
 
 SELECT 'Đã nhập liệu thành công 80 bản ghi mới cho bảng schedules.' AS Result;
 
--- Nhập liệu cho bảng foods
+-- Nhập liệu cho bảng products
 INSERT INTO products (name, description, poster, is_deleted)
 VALUES
 (N'Aquafina', N'01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim', N'Aquafina_poster.png', 0),
