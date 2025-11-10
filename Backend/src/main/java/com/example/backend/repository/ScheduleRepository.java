@@ -18,4 +18,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     boolean existsByRoomAndShowTimeAndScheduleDate(
             Room room, ShowTime showTime, LocalDate date
     );
+    List<Schedule> findByRoomAndScheduleDateAndIsDeletedFalse(Room room, LocalDate date);
 }

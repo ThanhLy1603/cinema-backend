@@ -7,13 +7,13 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "schedules",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "UQ_Schedule",
-                        columnNames = {"room_id", "show_time_id", "schedule_date"}
-                )
-        }
+        name = "schedules"
+//        , uniqueConstraints = {
+//                @UniqueConstraint(
+//                        name = "UQ_Schedule",
+//                        columnNames = {"room_id", "show_time_id", "schedule_date"}
+//                )
+//        }
 )
 @Getter
 @Setter
