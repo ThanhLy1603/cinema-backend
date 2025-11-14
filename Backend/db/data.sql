@@ -773,8 +773,6 @@ ASC
 
 SELECT username, email, password FROM users WHERE email = 'lycustomer@gmail.com';
 
-
-
 -- Truy vấn để lấy toàn bộ thông tin của chương trình khuyến mại
 SELECT 
     p.id AS promotion_id,

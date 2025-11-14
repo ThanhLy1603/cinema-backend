@@ -307,6 +307,7 @@ DROP TABLE IF EXISTS product_prices;
 DROP TABLE IF EXISTS promotions;
 DROP TABLE IF EXISTS promotion_items;
 DROP TABLE IF EXISTS promotion_rules;
+DROP TABLE IF EXISTS price_tickets;
 
 -- Truy vấn các bảng
 SELECT * FROM user_roles
@@ -326,11 +327,8 @@ SELECT * FROM product_prices
 SELECT * FROM promotions
 SELECT * FROM promotion_items
 SELECT * FROM promotion_rules
+SELECT * FROM price_tickets
 GO
-
-
-
-
 
 
 SELECT * FROM user_roles
