@@ -371,6 +371,474 @@ DELETE FROM seats
 
 -- Nhập liệu cho bảng schedules
 
+-- Chèn dữ liệu mới
+DECLARE @FilmIDs TABLE (RowNum INT, id UNIQUEIDENTIFIER);
+INSERT INTO @FilmIDs (RowNum, id)
+SELECT ROW_NUMBER() OVER (ORDER BY name), id FROM films WHERE is_deleted = 0;
+
+DECLARE @RoomIDs TABLE (RowNum INT, id UNIQUEIDENTIFIER);
+INSERT INTO @RoomIDs (RowNum, id)
+SELECT ROW_NUMBER() OVER (ORDER BY name), id FROM rooms WHERE is_deleted = 0;
+
+DECLARE @TimeIDs TABLE (RowNum INT, id UNIQUEIDENTIFIER);
+INSERT INTO @TimeIDs (RowNum, id)
+SELECT ROW_NUMBER() OVER (ORDER BY start_time), id FROM show_times WHERE is_deleted = 0;
+
+DECLARE @FilmCount INT = (SELECT COUNT(*) FROM @FilmIDs);
+DECLARE @RoomCount INT = (SELECT COUNT(*) FROM @RoomIDs);
+DECLARE @TimeCount INT = (SELECT COUNT(*) FROM @TimeIDs);
+
+DECLARE @d INT = 0;
+WHILE @d < 7  -- 7 ngày tới
+BEGIN
+    DECLARE @date DATE = DATEADD(DAY, @d, CAST(GETDATE() AS DATE));
+    DECLARE @r INT = 1;
+
+    WHILE @r <= @RoomCount
+    BEGIN
+        DECLARE @RoomId UNIQUEIDENTIFIER = (SELECT id FROM @RoomIDs WHERE RowNum = @r);
+        DECLARE @t INT = 1;
+
+        WHILE @t <= @TimeCount
+        BEGIN
+            DECLARE @FilmRow INT = ((@r + @t + @d) % @FilmCount) + 1;
+            DECLARE @FilmId UNIQUEIDENTIFIER = (SELECT id FROM @FilmIDs WHERE RowNum = @FilmRow);
+            DECLARE @TimeId UNIQUEIDENTIFIER = (SELECT id FROM @TimeIDs WHERE RowNum = @t);
+
+            -- Chèn dữ liệu
+            INSERT INTO schedules (film_id, room_id, show_time_id, schedule_date, is_deleted)
+            VALUES (@FilmId, @RoomId, @TimeId, @date, 0);
+
+            SET @t += 1;
+        END
+
+        SET @r += 1;
+    END
+
+    SET @d += 1;
+END;
+
+SELECT COUNT(*) AS TotalInserted FROM schedules;
+
+-- Kiểm tra
+SELECT COUNT(*) AS TotalInserted,
+       '✅ Lịch chiếu đã nhập thành công, không trùng khóa.' AS Result
+FROM schedules
+WHERE schedule_date = @StartDate;
+GO
+
+SELECT 'Đã nhập liệu thành công 80 bản ghi mới cho bảng schedules.' AS Result;
+
+-- Nhập liệu cho bảng foods
+INSERT INTO products (name, description, poster, is_deleted)
+VALUES
+(N'Aquafina', N'01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim', N'Aquafina_poster.png', 0),
+(N'Pepsi 2020z', N'01 nước Pepsi 200z. Nhận trong ngày xem phim', N'Pepsi_220z_poster.png', 0),
+(N'Bắp rang vị ngọt 440z', N'01 bắp 440z vị ngọt. Nhận trong ngày xem phim', N'Bap_ngot_poster.png', 0),
+(N'Bắp rang vị phô mai 440z', N'01 bắp 440z vị phô mai. Nhận trong ngày xem phim', N'Bap_pho_mai_poster.png', 0),
+(N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z', N'01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim', N'Combo_bapngot_pepsi_xucxich_poster.png', 0);
+
+
+-- Nhập liệu cho bảng product_prices
+-- Ngày bắt đầu áp dụng giá
+DECLARE @Today DATE = '2025-11-14'; 
+
+INSERT INTO product_prices (product_id, price, start_date, end_date, is_deleted)
+SELECT 
+    P.id,
+    CASE P.name
+        WHEN N'Aquafina' THEN 20000.00
+        WHEN N'Pepsi 220z' THEN 25000.00               -- *** Đã sửa từ '2020z' thành '220z' ***
+        WHEN N'Bắp rang vị ngọt 440z' THEN 60000.00
+        WHEN N'Bắp rang vị phô mai 440z' THEN 65000.00
+        WHEN N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z' THEN 110000.00
+        ELSE NULL -- Trường hợp không khớp tên, giá sẽ là NULL và bị loại bỏ ở WHERE
+    END AS price,
+    @Today AS start_date,
+    NULL AS end_date,
+    0 AS is_deleted
+FROM products P
+WHERE P.name IN (
+    N'Aquafina', 
+    N'Pepsi 220z',                                     -- *** Đã sửa từ '2020z' thành '220z' ***
+    N'Bắp rang vị ngọt 440z', 
+    N'Bắp rang vị phô mai 440z', 
+    N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z'
+)
+-- Điều kiện này đảm bảo chỉ những sản phẩm có giá được định nghĩa trong CASE (Tức là không NULL) mới được chèn.
+AND (CASE P.name
+        WHEN N'Aquafina' THEN 1 
+        WHEN N'Pepsi 220z' THEN 1
+        WHEN N'Bắp rang vị ngọt 440z' THEN 1
+        WHEN N'Bắp rang vị phô mai 440z' THEN 1
+        WHEN N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z' THEN 1
+        ELSE 0 
+    END) = 1;
+GO
+
+-- Nhập liệu cho bảng promotions, promotion_rules, promotion_items
+
+-- Nhập liệu 10 chương trình khuyến mãi
+
+-- 1. Giảm 10% tất cả vé phim
+INSERT INTO promotions (name, description, discount_percent, start_date, end_date, active, is_deleted)
+VALUES (N'Giảm 10% vé phim', N'Giảm 10% tất cả vé phim', 10, '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, note)
+VALUES ((SELECT id FROM promotions WHERE name=N'Giảm 10% vé phim'), N'Áp dụng cho tất cả phim');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Giảm 10% vé phim'), 'PERCENT', '{"percent":10}');
+
+-- 2. Mua 3 món 79k (combo ăn uống)
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Mua 3 món 79k', N'Combo ăn uống: Popcorn + Soda + Nuggets chỉ 79.000đ', '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, product_id, note)
+VALUES 
+((SELECT id FROM promotions WHERE name=N'Mua 3 món 79k'), (SELECT id FROM products WHERE name=N'Bắp rang vị ngọt 440z'), N'Combo 3 món'),
+((SELECT id FROM promotions WHERE name=N'Mua 3 món 79k'), (SELECT id FROM products WHERE name=N'Pepsi 2020z'), N'Combo 3 món'),
+((SELECT id FROM promotions WHERE name=N'Mua 3 món 79k'), (SELECT id FROM products WHERE name=N'Aquafina'), N'Combo 3 món');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Mua 3 món 79k'), 'FIXED_COMBO', N'{"items":["Bắp rang vị ngọt 440z","Pepsi 2020z","Aquafina"],"price":79000}');
+
+-- 3. Mua 2 tặng 1 nước ngọt
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Mua 2 tặng 1 nước ngọt', N'Mua 2 nước ngọt tặng 1', '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, product_id, note)
+VALUES 
+((SELECT id FROM promotions WHERE name=N'Mua 2 tặng 1 nước ngọt'), (SELECT id FROM products WHERE name=N'Pepsi 2020z'), N'Mua 2 tặng 1'),
+((SELECT id FROM promotions WHERE name=N'Mua 2 tặng 1 nước ngọt'), (SELECT id FROM products WHERE name=N'Aquafina'), N'Mua 2 tặng 1');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Mua 2 tặng 1 nước ngọt'), 'BUY_X_GET_Y', N'{"buy":2,"get":1}');
+
+-- 4. Combo Fast & Furious 7 + Popcorn lớn
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Combo Fast & Furious + Popcorn', N'Vé phim Fast & Furious 7 + Popcorn lớn chỉ 150.000đ', '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, product_id, note)
+VALUES 
+((SELECT id FROM promotions WHERE name=N'Combo Fast & Furious + Popcorn'), (SELECT id FROM films WHERE name=N'Fast and Furious 7'), (SELECT id FROM products WHERE name=N'Bắp rang vị ngọt 440z'), N'Combo phim + bắp');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Combo Fast & Furious + Popcorn'), 'FIXED_COMBO', N'{"items":["Fast and Furious 7","Bắp rang vị ngọt 440z"],"price":150000}');
+
+-- 5. Vé Avatar 3 giảm 15%
+INSERT INTO promotions (name, description, discount_percent, start_date, end_date, active, is_deleted)
+VALUES (N'Giảm 15% vé Avatar 3', N'Giảm 15% vé phim Avatar 3', 15, '2025-12-19', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, note)
+VALUES ((SELECT id FROM promotions WHERE name=N'Giảm 15% vé Avatar 3'), (SELECT id FROM films WHERE name=N'Avatar 3'), N'Giảm riêng vé Avatar 3');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Giảm 15% vé Avatar 3'), N'PERCENT', N'{"percent":15}');
+
+-- 6. Combo Alice in Borderland 3 + Pepsi
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Combo Alice + Pepsi', N'Vé Alice in Borderland 3 + Pepsi 2020z chỉ 120.000đ', '2025-10-01', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, product_id, note)
+VALUES 
+((SELECT id FROM promotions WHERE name=N'Combo Alice + Pepsi'), (SELECT id FROM films WHERE name=N'Alice in Borderland 3'), (SELECT id FROM products WHERE name=N'Pepsi 2020z'), N'Combo phim + nước');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Combo Alice + Pepsi'), 'FIXED_COMBO', N'{"items":["Alice in Borderland 3","Pepsi 2020z"],"price":120000}');
+
+-- 7. Giảm 20% vé Mắt Biếc
+INSERT INTO promotions (name, description, discount_percent, start_date, end_date, active, is_deleted)
+VALUES (N'Giảm 20% vé Mắt Biếc', N'Giảm 20% vé phim Mắt Biếc', 20, '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, note)
+VALUES ((SELECT id FROM promotions WHERE name=N'Giảm 20% vé Mắt Biếc'), (SELECT id FROM films WHERE name=N'Mắt Biếc'), N'Giảm riêng vé Mắt Biếc');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Giảm 20% vé Mắt Biếc'), N'PERCENT', N'{"percent":20}');
+
+-- 8. Mua 1 vé Conan Movie 20 + 1 Aquafina giảm 50% Aquafina
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Combo Conan + Nước', N'Mua 1 vé Conan Movie 20 + 1 Aquafina giảm 50% Aquafina', '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, product_id, note)
+VALUES 
+((SELECT id FROM promotions WHERE name=N'Combo Conan + Nước'), (SELECT id FROM films WHERE name=N'Conan Movie 20: The Darkest Nightmare'), (SELECT id FROM products WHERE name=N'Aquafina'), N'Combo phim + nước');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Combo Conan + Nước'), 'PERCENT', N'{"percent":50,"apply_on":"Aquafina"}');
+
+-- 9. Mua 2 Fast & Furious 7 tặng 1 Bắp rang vị phô mai
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Mua 2 Fast & Furious 7 tặng 1 bắp phô mai', N'Mua 2 vé Fast & Furious 7 tặng 1 bắp rang vị phô mai', '2025-11-15', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, product_id, note)
+VALUES ((SELECT id FROM promotions WHERE name=N'Mua 2 Fast & Furious 7 tặng 1 bắp phô mai'), (SELECT id FROM films WHERE name=N'Fast and Furious 7'), (SELECT id FROM products WHERE name=N'Bắp rang vị phô mai 440z'), N'Mua 2 tặng 1');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Mua 2 Fast & Furious 7 tặng 1 bắp phô mai'), 'BUY_X_GET_Y', N'{"buy":2,"get":1,"apply_on":"Bắp rang vị phô mai 440z"}');
+
+-- 10. Combo Tenki no Ko + Pepsi 2020z + Popcorn
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES (N'Combo Tenki no Ko + Pepsi + Popcorn', N'Vé Tenki no Ko + Pepsi + Bắp rang vị ngọt chỉ 150.000đ', '2025-07-19', '2025-12-31', 1, 0);
+
+INSERT INTO promotion_items (promotion_id, film_id, product_id, note)
+VALUES 
+((SELECT id FROM promotions WHERE name=N'Combo Tenki no Ko + Pepsi + Popcorn'), (SELECT id FROM films WHERE name=N'Weathering with You'), (SELECT id FROM products WHERE name=N'Pepsi 2020z'), N'Combo phim + nước + bắp'),
+((SELECT id FROM promotions WHERE name=N'Combo Tenki no Ko + Pepsi + Popcorn'), (SELECT id FROM films WHERE name=N'Weathering with You'), (SELECT id FROM products WHERE name=N'Bắp rang vị ngọt 440z'), N'Combo phim + nước + bắp');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES ((SELECT id FROM promotions WHERE name=N'Combo Tenki no Ko + Pepsi + Popcorn'), 'FIXED_COMBO', N'{"items":["Weathering with You","Pepsi 2020z","Bắp rang vị ngọt 440z"],"price":150000}');
+GO
+
+-- 11. Giảm 10% tổng hoá đơn nếu mua trên 200.000₫
+INSERT INTO promotions (name, description, start_date, end_date, active, is_deleted)
+VALUES ('Giảm 10% tổng hóa đơn', 'Áp dụng cho hóa đơn >= 200k', '2025-11-14', '2025-12-31', 1, 0);
+
+DECLARE @promo_id UNIQUEIDENTIFIER = (SELECT id FROM promotions WHERE name='Giảm 10% tổng hóa đơn');
+
+INSERT INTO promotion_rules (promotion_id, rule_type, rule_value)
+VALUES (@promo_id, 'TOTAL_PERCENT', N'{"percent":10}');
+
+-- Nhập liệu cho bảng price_tickets
+-- Khai báo ngày bắt đầu áp dụng
+DECLARE @StartDate DATE = '2025-11-14';
+DECLARE @BasePrice DECIMAL(12, 2) = 100000.00;
+
+-- Tạo bảng tạm để chứa tất cả các tổ hợp
+-- Bước 1: Lấy tất cả các ID cần thiết
+WITH AllCombinations AS (
+    SELECT
+        F.id AS film_id,
+        ST.id AS seat_type_id,
+        SH.id AS show_time_id,
+        SH.start_time AS show_start_time,
+        DT.day_type
+    FROM films F
+    CROSS JOIN seat_types ST
+    CROSS JOIN show_times SH
+    CROSS JOIN (
+        VALUES 
+            (N'WEEKDAY'), 
+            (N'WEEKEND'), 
+            (N'HOLIDAY'), 
+            (N'SPECIAL')
+    ) AS DT(day_type)
+    -- Chỉ lấy các phim đang 'active' hoặc 'upcoming'
+    WHERE F.status IN ('active', 'upcoming')
+),
+-- Bước 2: Tính toán giá dựa trên các quy tắc đã định
+CalculatedPrices AS (
+    SELECT
+        AC.film_id,
+        AC.seat_type_id,
+        AC.show_time_id,
+        AC.day_type,
+        -- Bắt đầu bằng giá cơ sở
+        @BasePrice 
+        
+        -- 1. Điều chỉnh theo LOẠI GHẾ
+        + CASE 
+            WHEN ST.name = N'Ghế VIP' THEN 20000.00
+            WHEN ST.name = N'Ghế Couple' THEN 50000.00 -- Phụ phí cho 2 người
+            ELSE 0.00
+          END
+          
+        -- 2. Điều chỉnh theo LOẠI NGÀY
+        + CASE AC.day_type
+            WHEN 'WEEKEND' THEN 20000.00
+            WHEN 'HOLIDAY' THEN 40000.00
+            WHEN 'SPECIAL' THEN 60000.00
+            ELSE 0.00
+          END
+          
+        -- 3. Điều chỉnh theo GIỜ CHIẾU (Giờ Vàng 19:00 - 22:00)
+        + CASE 
+            WHEN AC.show_start_time >= '19:00:00' AND AC.show_start_time <= '22:00:00' THEN 10000.00
+            ELSE 0.00
+          END
+          
+        -- 4. Điều chỉnh theo PHIM (Phim Bom Tấn)
+        + CASE 
+            WHEN F.name IN (N'Deadpool 3', N'Avatar 3', N'Fast and Furious 7') THEN 10000.00
+            ELSE 0.00
+          END
+        AS calculated_price
+        
+    FROM AllCombinations AC
+    JOIN films F ON AC.film_id = F.id
+    JOIN seat_types ST ON AC.seat_type_id = ST.id
+    -- Lọc các tổ hợp đã tồn tại để tránh trùng lặp
+    LEFT JOIN price_tickets PT ON 
+        AC.film_id = PT.film_id AND 
+        AC.seat_type_id = PT.seat_type_id AND 
+        AC.show_time_id = PT.show_time_id AND 
+        AC.day_type = PT.day_type AND 
+        PT.start_date = @StartDate
+    WHERE PT.id IS NULL -- Chỉ chèn những quy tắc giá chưa tồn tại với ngày bắt đầu hôm nay
+)
+-- Bước 3: INSERT dữ liệu vào bảng price_tickets
+INSERT INTO price_tickets (film_id, seat_type_id, show_time_id, day_type, price, start_date, end_date, is_deleted)
+SELECT 
+    film_id,
+    seat_type_id,
+    show_time_id,
+    day_type,
+    calculated_price,
+    @StartDate,
+    NULL,
+    0
+FROM CalculatedPrices
+ORDER BY film_id, day_type, show_time_id, seat_type_id;
+
+-- Thông báo kết quả
+SELECT N'Đã hoàn tất nhập liệu hàng loạt cho bảng price_tickets. Số dòng được chèn:' AS Status, @@ROWCOUNT AS RecordsInserted;
+
+
+SELECT * FROM user_roles
+SELECT * FROM users
+SELECT * FROM roles
+SELECT * FROM user_profiles
+SELECT * FROM categories
+SELECT * FROM films
+SELECT * FROM film_categories
+SELECT * FROM seat_types
+SELECT * FROM rooms
+SELECT * FROM show_times
+SELECT * FROM seats
+SELECT * FROM schedules
+
+SELECT * FROM products
+SELECT * FROM product_prices
+
+
+SELECT 
+    R.name AS TenPhong,
+    F.name AS TenPhim,
+    ST.start_time AS ThoiGianBatDau,
+    S.schedule_date AS NgayChieu
+FROM 
+    schedules S
+JOIN 
+    rooms R ON S.room_id = R.id
+JOIN 
+    films F ON S.film_id = F.id           -- JOIN với bảng films
+JOIN 
+    show_times ST ON S.show_time_id = ST.id -- JOIN với bảng show_times
+WHERE 
+    S.schedule_date = '2025-11-13' 
+ORDER BY 
+    R.name, 
+    ST.start_time;
+
+SELECT 
+    R.name AS RoomName,
+    COUNT(S.id) AS TotalSchedules
+FROM 
+    schedules S
+JOIN 
+    rooms R ON S.room_id = R.id
+WHERE 
+    S.schedule_date = '2025-11-05' -- Ngày mới được nhập
+GROUP BY 
+    R.name
+ORDER BY 
+    RoomName;
+
+SELECT * FROM seats WHERE room_id = '1d0bd470-b5b7-4437-b201-6155d1be7bd0' and seat_type_id = 'eccf0df2-df4f-4eb7-a10b-29a3836e9b18'
+
+SELECT 
+    ST.name AS 'LoaiGhe',
+    COUNT(S.seat_type_id) AS 'SoLuong'
+FROM 
+    seats S
+JOIN 
+    seat_types ST ON S.seat_type_id = ST.id
+WHERE 
+    S.room_id = '0754e6e5-e061-420b-a4ca-904e4742990b' 
+GROUP BY 
+    ST.name;
+
+
+SELECT 
+    position,
+    CAST(SUBSTRING(position, 2, LEN(position) - 1) AS INT) AS SeatNumber
+FROM 
+    seats
+WHERE 
+    room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' and seat_type_id = 'e0df25aa-3113-4494-a753-b55abf97652d'
+ORDER BY 
+    SeatNumber 
+ASC
+
+SELECT username, email, password FROM users WHERE email = 'lycustomer@gmail.com';
+
+
+
+-- Truy vấn để lấy toàn bộ thông tin của chương trình khuyến mại
+SELECT 
+    p.id AS promotion_id,
+    p.name AS promotion_name,
+    p.description AS promotion_description,
+    p.poster AS promotion_poster,
+    p.discount_percent,
+    p.discount_amount,
+    p.start_date,
+    p.end_date,
+    p.active,
+    p.is_deleted,
+    pi.id AS promotion_item_id,
+    pi.product_id,
+    prod.name AS product_name,
+    pi.film_id,
+    f.name AS film_name,
+    pi.seat_type_id,
+    st.name AS seat_type_name,
+    pi.note AS item_note,
+    pr.id AS promotion_rule_id,
+    pr.rule_type,
+    pr.rule_value
+FROM promotions p
+LEFT JOIN promotion_items pi ON pi.promotion_id = p.id
+LEFT JOIN products prod ON prod.id = pi.product_id
+LEFT JOIN films f ON f.id = pi.film_id
+LEFT JOIN seat_types st ON st.id = pi.seat_type_id
+LEFT JOIN promotion_rules pr ON pr.promotion_id = p.id
+WHERE p.is_deleted = 0
+ORDER BY p.start_date DESC, p.name;
+
+
+-- Truy vấn để lấy toàn bộ thông tin của giá vé
+SELECT
+    F.name AS TenPhim,
+    ST.name AS LoaiGheApDung,
+    SHT.start_time AS GioBatDauChieu,
+    PT.day_type AS LoaiNgay,
+    
+    -- Sửa lỗi: Thay thế FORMAT tiền tệ bằng CONVERT(MONEY) để tránh lỗi CLR
+    REPLACE(CONVERT(VARCHAR, CAST(PT.price AS MONEY), 1), '.00', '') + N' VNĐ' AS MucGiaApDung,
+    
+    -- Sửa lỗi: Thay thế FORMAT ngày tháng bằng CONVERT(VARCHAR, date, 103)
+    CONVERT(VARCHAR, PT.start_date, 103) AS NgayBatDauApDung,
+    ISNULL(CONVERT(VARCHAR, PT.end_date, 103), N'Vô thời hạn') AS NgayKetThucApDung,
+    
+    PT.id AS PriceRuleID,
+    PT.film_id,
+    PT.seat_type_id,
+    PT.show_time_id
+
+FROM price_tickets PT
+JOIN films F ON PT.film_id = F.id
+JOIN seat_types ST ON PT.seat_type_id = ST.id
+JOIN show_times SHT ON PT.show_time_id = SHT.id
+WHERE 
+    PT.is_deleted = 0
+ORDER BY 
+    F.name, 
+    PT.day_type, 
+    SHT.start_time, 
+    ST.name;
+
 -- -- Lấy tất cả IDs của Phim và Suất Chiếu để sử dụng
 -- DECLARE @FilmIDs TABLE (RowNum INT, film_id UNIQUEIDENTIFIER);
 -- INSERT INTO @FilmIDs (RowNum, film_id)
@@ -416,92 +884,3 @@ DELETE FROM seats
 -- UNION ALL
 -- SELECT BS.film_id, @RoomVIP1ID, BS.show_time_id, BS.schedule_date FROM @BaseSchedules BS;
 -- GO
-
-SELECT 'Đã nhập liệu thành công 80 bản ghi mới cho bảng schedules.' AS Result;
-
--- Nhập liệu cho bảng products
-INSERT INTO products (name, description, poster, is_deleted)
-VALUES
-(N'Aquafina', N'01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim', N'Aquafina_poster.png', 0),
-(N'Pepsi 2020z', N'01 nước Pepsi 200z. Nhận trong ngày xem phim', N'Pepsi_220z_poster.png', 0),
-(N'Bắp rang vị ngọt 440z', N'01 bắp 440z vị ngọt. Nhận trong ngày xem phim', N'Bap_ngot_poster.png', 0),
-(N'Bắp rang vị phô mai 440z', N'01 bắp 440z vị phô mai. Nhận trong ngày xem phim', N'Bap_pho_mai_poster.png', 0),
-(N'Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z', N'01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim', N'Combo_bapngot_pepsi_xucxich_poster.png', 0);
-
-
-SELECT * FROM user_roles
-SELECT * FROM users
-SELECT * FROM roles
-SELECT * FROM user_profiles
-SELECT * FROM categories
-SELECT * FROM films
-SELECT * FROM film_categories
-SELECT * FROM seat_types
-SELECT * FROM rooms
-SELECT * FROM show_times
-SELECT * FROM seats
-SELECT * FROM schedules
-
-SELECT * FROM products
-
-
-SELECT 
-    R.name AS TenPhong,
-    F.name AS TenPhim,
-    ST.start_time AS ThoiGianBatDau,
-    S.schedule_date AS NgayChieu
-FROM 
-    schedules S
-JOIN 
-    rooms R ON S.room_id = R.id
-JOIN 
-    films F ON S.film_id = F.id           -- JOIN với bảng films
-JOIN 
-    show_times ST ON S.show_time_id = ST.id -- JOIN với bảng show_times
-WHERE 
-    S.schedule_date = '2025-11-05' 
-ORDER BY 
-    R.name, 
-    ST.start_time;
-
-SELECT 
-    R.name AS RoomName,
-    COUNT(S.id) AS TotalSchedules
-FROM 
-    schedules S
-JOIN 
-    rooms R ON S.room_id = R.id
-WHERE 
-    S.schedule_date = '2025-11-05' -- Ngày mới được nhập
-GROUP BY 
-    R.name
-ORDER BY 
-    RoomName;
-
-SELECT * FROM seats WHERE room_id = '1d0bd470-b5b7-4437-b201-6155d1be7bd0' and seat_type_id = 'eccf0df2-df4f-4eb7-a10b-29a3836e9b18'
-
-SELECT 
-    ST.name AS 'LoaiGhe',
-    COUNT(S.seat_type_id) AS 'SoLuong'
-FROM 
-    seats S
-JOIN 
-    seat_types ST ON S.seat_type_id = ST.id
-WHERE 
-    S.room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' 
-GROUP BY 
-    ST.name;
-
-
-SELECT 
-    position,
-    CAST(SUBSTRING(position, 2, LEN(position) - 1) AS INT) AS SeatNumber
-FROM 
-    seats
-WHERE 
-    room_id = '2268d1fd-2448-45ae-80e5-8575de373c88' and seat_type_id = 'e0df25aa-3113-4494-a753-b55abf97652d'
-ORDER BY 
-    SeatNumber 
-ASC
-
-SELECT username, email, password FROM users WHERE email = 'lycustomer@gmail.com';

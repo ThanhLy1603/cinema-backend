@@ -9,9 +9,7 @@ import com.example.backend.repository.SeatTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -133,7 +131,7 @@ public class SeatManageService {
         newSeat.setPosition(existSeat.getPosition());
         newSeat.setRoom(existSeat.getRoom());
         newSeat.setSeatType(seatType);
-        newSeat.setActive(existSeat.isActive());
+        newSeat.setActive(request.active());
         newSeat.setDeleted(false);
         seatRepository.save(newSeat);
 

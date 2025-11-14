@@ -1,17 +1,18 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.net.ProtocolFamily;
 import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Product {
     @Id
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
@@ -29,4 +30,9 @@ public class Product {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<ProductPrice> productPrices;
 }

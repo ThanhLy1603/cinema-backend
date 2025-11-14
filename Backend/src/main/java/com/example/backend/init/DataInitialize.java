@@ -8,10 +8,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +31,11 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private final SeatTypeRepository seatTypeRepository;
     private final ScheduleRepository scheduleRepository;
     private final ProductRepository productRepository;
+    private final ProductPriceRepository productPriceRepository;
+    private final PromotionItemRepository promotionItemRepository;
+    private final PromotionRuleRepository promotionRuleRepository;
+    private final PromotionRepository promotionRepository;
+    private final PriceTicketRepository priceTicketRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -742,37 +750,357 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     @Override
     @Transactional
     public void initializeFoods() {
-        if (productRepository.count() == 0) {
-
-            List<Product> products = Arrays.asList(
-                    new Product(null, "Aquafina",
-                            "01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim",
-                            "Aquafina_poster.png", false),
-
-                    new Product(null, "Pepsi 220z",
-                            "01 nước Pepsi 220z. Nhận trong ngày xem phim",
-                            "Pepsi_220z_poster.png", false),
-
-                    new Product(null, "Bắp rang vị ngọt 440z",
-                            "01 bắp 440z vị ngọt. Nhận trong ngày xem phim",
-                            "Bap_ngot_poster.png", false),
-
-                    new Product(null, "Bắp rang vị phô mai 440z",
-                            "01 bắp 440z vị phô mai. Nhận trong ngày xem phim",
-                            "Bap_pho_mai_poster.png", false),
-
-                    new Product(null,
-                            "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z",
-                            "01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim",
-                            "Combo_bapngot_pepsi_xucxich_poster.png", false)
-            );
-
-            productRepository.saveAll(products);
-            System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
-        } else {
+        // Kiểm tra nếu bảng products đã có dữ liệu thì bỏ qua
+        if (productRepository.count() > 0) {
             System.out.println("ℹ️ Bảng PRODUCTS đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        // Khởi tạo danh sách sản phẩm
+        List<Product> products = Arrays.asList(
+                Product.builder()
+                        .name("Aquafina")
+                        .description("01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim")
+                        .poster("Aquafina_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Pepsi 220z")
+                        .description("01 nước Pepsi 220z. Nhận trong ngày xem phim")
+                        .poster("Pepsi_220z_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Bắp rang vị ngọt 440z")
+                        .description("01 bắp 440z vị ngọt. Nhận trong ngày xem phim")
+                        .poster("Bap_ngot_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Bắp rang vị phô mai 440z")
+                        .description("01 bắp 440z vị phô mai. Nhận trong ngày xem phim")
+                        .poster("Bap_pho_mai_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z")
+                        .description("01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim")
+                        .poster("Combo_bapngot_pepsi_xucxich_poster.png")
+                        .isDeleted(false)
+                        .build()
+        );
+
+        // Lưu tất cả sản phẩm vào database
+        productRepository.saveAll(products);
+        System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
+    }
+
+
+    @Override
+    @Transactional
+    public void initializeProductPrices() {
+        // Kiểm tra nếu đã có dữ liệu thì bỏ qua
+        if (productPriceRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng PRODUCT_PRICES đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        // Lấy danh sách tất cả sản phẩm đã lưu
+        List<Product> products = productRepository.findAll();
+
+        // Ngày bắt đầu áp dụng giá
+        LocalDate today = LocalDate.of(2025, 11, 14);
+
+        List<ProductPrice> prices = new ArrayList<>();
+
+        for (Product product : products) {
+            BigDecimal priceValue = switch (product.getName()) {
+                case "Aquafina" -> BigDecimal.valueOf(20000.00);
+                case "Pepsi 220z" -> BigDecimal.valueOf(25000.00);
+                case "Bắp rang vị ngọt 440z" -> BigDecimal.valueOf(60000.00);
+                case "Bắp rang vị phô mai 440z" -> BigDecimal.valueOf(65000.00);
+                case "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z" -> BigDecimal.valueOf(110000.00);
+                default -> null;
+            };
+
+            if (priceValue != null) {
+                ProductPrice price = ProductPrice.builder()
+                        .product(product)
+                        .price(priceValue)
+                        .startDate(today)
+                        .endDate(null)
+                        .isDeleted(false)
+                        .build();
+
+                prices.add(price);
+            }
+        }
+
+        if (!prices.isEmpty()) {
+            productPriceRepository.saveAll(prices);
+            System.out.println("✅ Đã khởi tạo bảng PRODUCT_PRICES thành công!");
+        } else {
+            System.out.println("ℹ️ Không có sản phẩm nào phù hợp để khởi tạo giá.");
         }
     }
+
+    @Override
+    @Transactional
+    public void initializePromotions() {
+        // Kiểm tra nếu đã có dữ liệu thì bỏ qua
+        if (promotionRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng PROMOTIONS đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        LocalDate today = LocalDate.of(2025, 11, 14);
+
+        // Lấy danh sách films và products
+        List<Film> films = filmRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        // Map theo tên để dễ tìm, tránh duplicate key
+        Map<String, Film> filmMap = films.stream()
+                .collect(Collectors.toMap(
+                        Film::getName,
+                        Function.identity(),
+                        (f1, f2) -> f1.getReleaseDate().isAfter(f2.getReleaseDate()) ? f1 : f2
+                ));
+
+        Map<String, Product> productMap = products.stream()
+                .collect(Collectors.toMap(
+                        Product::getName,
+                        Function.identity(),
+                        (p1, p2) -> p1 // giữ bản đầu tiên
+                ));
+
+        List<Promotion> promotions = new ArrayList<>();
+
+        // 1. Giảm 10% tất cả vé phim
+        Promotion p1 = Promotion.builder()
+                .name("Giảm 10% vé phim")
+                .description("Giảm 10% tất cả vé phim")
+                .discountPercent(BigDecimal.valueOf(10))
+                .poster("Giam_gia_10%_poster.jpg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        PromotionItem p1Item = PromotionItem.builder()
+                .note("Áp dụng cho tất cả phim")
+                .promotion(p1) // set liên kết 2 chiều
+                .build();
+
+        PromotionRule p1Rule = PromotionRule.builder()
+                .ruleType("PERCENT")
+                .ruleValue("{\"percent\":10}")
+                .promotion(p1) // set liên kết 2 chiều
+                .build();
+
+        p1.getItems().add(p1Item);
+        p1.getRules().add(p1Rule);
+
+        // 2. Mua 3 món 79k
+        Promotion p2 = Promotion.builder()
+                .name("Mua 3 món 79k")
+                .description("Combo ăn uống: Popcorn + Soda + Nuggets chỉ 79.000đ")
+                .poster("Mua_3_mon_79k_poster.jpeg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        List<String> comboProducts = List.of("Bắp rang vị ngọt 440z", "Pepsi 2020z", "Aquafina");
+
+        comboProducts.forEach(name -> {
+            Product prod = productMap.get(name);
+            if (prod != null) {
+                PromotionItem item = PromotionItem.builder()
+                        .product(prod)
+                        .note("Combo 3 món")
+                        .promotion(p2) // set liên kết 2 chiều
+                        .build();
+                p2.getItems().add(item);
+            }
+        });
+
+        PromotionRule p2Rule = PromotionRule.builder()
+                .ruleType("FIXED_COMBO")
+                .ruleValue("{\"items\":[\"Bắp rang vị ngọt 440z\",\"Pepsi 2020z\",\"Aquafina\"],\"price\":79000}")
+                .promotion(p2) // set liên kết 2 chiều
+                .build();
+        p2.getRules().add(p2Rule);
+
+        // 3. Mua 2 tặng 1 nước ngọt
+        Promotion p3 = Promotion.builder()
+                .name("Mua 2 tặng 1 nước ngọt")
+                .description("Mua 2 nước ngọt tặng 1")
+                .poster("Mua_2_tang_1_poster.jpeg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        List<String> drinkProducts = List.of("Pepsi 2020z", "Aquafina");
+        drinkProducts.forEach(name -> {
+            Product prod = productMap.get(name);
+            if (prod != null) {
+                PromotionItem item = PromotionItem.builder()
+                        .product(prod)
+                        .note("Mua 2 tặng 1")
+                        .promotion(p3) // set liên kết 2 chiều
+                        .build();
+                p3.getItems().add(item);
+            }
+        });
+
+        PromotionRule p3Rule = PromotionRule.builder()
+                .ruleType("BUY_X_GET_Y")
+                .ruleValue("{\"buy\":2,\"get\":1}")
+                .promotion(p3) // set liên kết 2 chiều
+                .build();
+        p3.getRules().add(p3Rule);
+
+        // 11. Giảm 10% tổng hóa đơn nếu >= 200k
+        Promotion pTotal = Promotion.builder()
+                .name("Giảm 10% tổng hóa đơn")
+                .description("Áp dụng cho hóa đơn >= 200k")
+                .poster("Giam_10%_tong_hoa_don_poster.jpeg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        PromotionRule totalRule = PromotionRule.builder()
+                .ruleType("TOTAL_PERCENT")
+                .ruleValue("{\"percent\":10}")
+                .promotion(pTotal) // set liên kết 2 chiều
+                .build();
+
+        pTotal.getRules().add(totalRule);
+
+        // Thêm tất cả promotions vào danh sách
+        promotions.addAll(List.of(p1, p2, p3, pTotal));
+
+        // Lưu xuống database, cascade sẽ tự lưu items & rules
+        promotionRepository.saveAll(promotions);
+
+        System.out.println("✅ Đã khởi tạo dữ liệu PROMOTIONS thành công!");
+    }
+
+    @Override
+    @Transactional
+    public void initializePriceTickets() {
+        LocalDate startDate = LocalDate.of(2025, 11, 14);
+        BigDecimal basePrice = new BigDecimal("100000.00");
+
+        // Nếu đã có dữ liệu cho ngày này thì bỏ qua
+        long count = priceTicketRepository.countByStartDate(startDate);
+        if (count > 0) {
+            System.out.println("ℹ️ Bảng PRICE_TICKETS đã có dữ liệu cho ngày " + startDate + ", bỏ qua.");
+            return;
+        }
+
+        // Lấy dữ liệu cần thiết
+//        List<Film> films = filmRepository.findByStatusIn(List.of("active", "upcoming"));
+        List<Film> films = filmRepository.findAll();
+        List<SeatType> seatTypes = seatTypeRepository.findAll();
+        List<ShowTime> showTimes = showTimeRepository.findAll();
+
+        // Duyệt trực tiếp enum DayType để đảm bảo kiểu đúng
+        PriceTicket.DayType[] dayTypes = PriceTicket.DayType.values();
+
+        List<PriceTicket> listToInsert = new ArrayList<>();
+
+        for (Film film : films) {
+            for (SeatType seat : seatTypes) {
+                for (ShowTime showTime : showTimes) {
+                    for (PriceTicket.DayType dayType : dayTypes) {
+
+                        // Kiểm tra tồn tại (lưu ý: repository method phải có signature đúng)
+//                        boolean exists = priceTicketRepository.existsByFilmIdAndSeatTypeIdAndShowTimeIdAndDayTypeAndStartDate(
+//                                film.getId(),
+//                                seat.getId(),
+//                                showTime.getId(),
+//                                dayType.toString(),
+//                                startDate
+//                        );
+
+//                        if (exists) continue;
+
+                        BigDecimal price = basePrice;
+
+                        // 1. PHỤ THU LOẠI GHẾ
+                        if (seat.getName() != null) {
+                            if (seat.getName().equalsIgnoreCase("Ghế VIP")) {
+                                price = price.add(new BigDecimal("20000"));
+                            } else if (seat.getName().equalsIgnoreCase("Ghế Couple")) {
+                                price = price.add(new BigDecimal("50000"));
+                            }
+                        }
+
+                        // 2. PHỤ THU THEO LOẠI NGÀY
+                        switch (dayType) {
+                            case WEEKEND -> price = price.add(new BigDecimal("20000"));
+                            case HOLIDAY -> price = price.add(new BigDecimal("40000"));
+                            case SPECIAL -> price = price.add(new BigDecimal("60000"));
+                            default -> { /* WEEKDAY -> no change */ }
+                        }
+
+                        // 3. GIỜ VÀNG 19:00–22:00 (giả định showTime.getStartTime() trả về LocalTime)
+                        LocalTime t = showTime.getStartTime();
+                        if (t != null && !t.isBefore(LocalTime.of(19, 0)) && !t.isAfter(LocalTime.of(22, 0))) {
+                            price = price.add(new BigDecimal("10000"));
+                        }
+
+                        // 4. PHIM BOM TẤN
+                        List<String> blockbusters = List.of("Deadpool 3", "Avatar 3", "Fast and Furious 7");
+                        if (film.getName() != null && blockbusters.contains(film.getName())) {
+                            price = price.add(new BigDecimal("10000"));
+                        }
+
+                        // Tạo PriceTicket (dayType là enum, phù hợp với builder)
+                        PriceTicket pt = PriceTicket.builder()
+                                .film(film)
+                                .seatType(seat)
+                                .showTime(showTime)
+                                .dayType(dayType)           // <-- now passes enum, no error
+                                .price(price)
+                                .startDate(startDate)
+                                .endDate(null)
+                                .isDeleted(false)
+                                .build();
+
+                        listToInsert.add(pt);
+                    }
+                }
+            }
+        }
+
+        if (!listToInsert.isEmpty()) {
+            priceTicketRepository.saveAll(listToInsert);
+        }
+
+        System.out.println("✅ Đã khởi tạo PRICE_TICKETS (" + listToInsert.size() + " dòng) thành công!");
+    }
+
 
 
 
@@ -797,5 +1125,8 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeSeats();
         initializeSchedules();
         initializeFoods();
+        initializeProductPrices();
+        initializePromotions();
+        initializePriceTickets();
     }
 }
