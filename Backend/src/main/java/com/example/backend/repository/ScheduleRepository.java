@@ -19,4 +19,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
             Room room, ShowTime showTime, LocalDate date
     );
     List<Schedule> findByRoomAndScheduleDateAndIsDeletedFalse(Room room, LocalDate date);
+    List<Schedule> findByFilmAndIsDeletedFalse(
+            Film film
+    );
 }

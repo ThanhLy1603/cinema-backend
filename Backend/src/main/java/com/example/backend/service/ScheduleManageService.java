@@ -38,6 +38,20 @@ public class ScheduleManageService {
     }
 
     @Transactional
+    public List<ScheduleManageResponse> getSchedulesByFilmId(UUID filmId) {
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return List.of();
+
+        List<ScheduleManageResponse> schedules = scheduleRepository
+                .findByFilmAndIsDeletedFalse(film)
+                .stream()
+                .map(this::toScheduleManageResponse)
+                .collect(Collectors.toList());
+
+        return schedules;
+    }
+
+    @Transactional
     public ApiResponse createSchedule(ScheduleManageRequest request) {
         // 1. Lấy các thực thể
         Film film = filmRepository.findById(request.filmId()).orElse(null);
