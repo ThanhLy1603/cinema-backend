@@ -1,15 +1,12 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.FilmRequest;
 import com.example.backend.dto.FilmResponse;
-import com.example.backend.dto.CategoryResponse;
+import com.example.backend.dto.CategoryManageResponse;
 import com.example.backend.entity.Film;
 import com.example.backend.repository.FilmRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,15 +36,15 @@ public class FilmService {
     }
 
     @Transactional
-    public List<CategoryResponse> getCategoriesByFilmId(UUID id) {
+    public List<CategoryManageResponse> getCategoriesByFilmId(UUID id) {
         Film film = filmRepository.findFilmByIdAndIsDeletedFalse(id);
 
         if (film == null) {
             System.out.println(("Không tìm thấy phim với ID: " + id));
         }
 
-        List<CategoryResponse> categories = film.getCategories().stream()
-                .map(category -> new CategoryResponse(category.getId(), category.getName()))
+        List<CategoryManageResponse> categories = film.getCategories().stream()
+                .map(category -> new CategoryManageResponse(category.getId(), category.getName()))
                 .collect(Collectors.toList());
 
         return categories;

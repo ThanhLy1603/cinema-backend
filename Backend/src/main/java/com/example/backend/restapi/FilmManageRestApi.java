@@ -1,18 +1,13 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmManageController;
-import com.example.backend.dto.CategoryResponse;
-import com.example.backend.dto.FilmManageResponse;
-import com.example.backend.dto.FilmRequest;
-import com.example.backend.dto.FilmResponse;
+import com.example.backend.dto.*;
 import com.example.backend.service.FilmManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,22 +25,25 @@ public class FilmManageRestApi implements FilmManageController {
 
     @Override
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+    public ResponseEntity<List<CategoryManageResponse>> getAllCategories() {
         return ResponseEntity.ok(filmManageService.getAllCategories());
     }
 
     @Override
-    public ResponseEntity<FilmResponse> createFilm(FilmRequest filmRequest) {
-        return null;
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> createFilm(@ModelAttribute FilmManageRequest request) throws IOException {
+        return ResponseEntity.ok(filmManageService.createFilm(request));
     }
 
     @Override
-    public ResponseEntity<FilmResponse> updateFilm(UUID id, FilmRequest filmRequest) {
-        return null;
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse> updateFilm(@PathVariable UUID id, @ModelAttribute FilmManageRequest request) throws IOException {
+        return ResponseEntity.ok(filmManageService.updateFilm(id, request));
     }
 
     @Override
-    public ResponseEntity<Void> deleteFilm(UUID id) {
-        return null;
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ApiResponse> deleteFilm(@PathVariable UUID id) {
+        return  ResponseEntity.ok(filmManageService.deleteFilm(id));
     }
 }

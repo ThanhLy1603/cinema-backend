@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity
-@Table(name = "seats", uniqueConstraints = {
-        @UniqueConstraint(name = "UQ_SeatPositionInRoom", columnNames = {"room_id", "position"})
-})
+@Table(name = "seats"
+//        , uniqueConstraints = {
+//        @UniqueConstraint(name = "UQ_SeatPositionInRoom", columnNames = {"room_id", "position"})
+//}
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,6 +32,9 @@ public class Seat {
 
     @Column(name = "position", length = 10, nullable = false, columnDefinition = "NVARCHAR(10)")
     private String position;
+
+    @Column(name = "active", nullable = false, columnDefinition = "BIT default 1")
+    private boolean active = true;
 
     @Column(name = "is_deleted", nullable = false, columnDefinition = "BIT default 0")
     private boolean isDeleted = false;

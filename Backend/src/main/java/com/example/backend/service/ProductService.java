@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.ProductResponse;
-import com.example.backend.entity.Food;
+import com.example.backend.entity.Product;
 import com.example.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,14 +26,14 @@ public class ProductService {
         return foods;
     }
 
-    private ProductResponse toProductResponse(Food food) {
-        return new ProductResponse(food.getId(),food.getName(), food.getDescription(), food.getPoster());
+    private ProductResponse toProductResponse(Product product) {
+        return new ProductResponse(product.getId(), product.getName(), product.getDescription(), product.getPoster());
     }
 
     @Transactional
     public ProductResponse getProductById(@PathVariable UUID id) {
-        Food food = productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        return toProductResponse(food);
+        return toProductResponse(product);
     }
 }
