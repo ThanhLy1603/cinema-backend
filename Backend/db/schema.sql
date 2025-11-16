@@ -231,20 +231,36 @@ CREATE TABLE price_tickets (
 );
 GO
 
-
 CREATE TABLE invoices (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    created_by VARCHAR(50) NULL, -- nhân viên
-    username VARCHAR(50) NULL,   -- khách hàng
+
+    -- Người tạo hóa đơn (staff/admin)
+    created_by VARCHAR(50) NULL,
+    
+    -- Khách hàng đăng nhập (trực tuyến)
+    username VARCHAR(50) NULL,
+
+    -- Khách vãng lai
+    customer_name NVARCHAR(100) NULL,
+    customer_phone VARCHAR(20) NULL,
+    customer_address VARCHAR(100) NULL,
+
+    -- Tổng tiền
     total_amount DECIMAL(12,2) NOT NULL,
     discount_amount DECIMAL(12,2) DEFAULT 0,
     final_amount DECIMAL(12,2) NOT NULL,
+
+    status NVARCHAR(20) NOT NULL DEFAULT 'PENDING',  
+        -- PENDING / PAID / CANCELLED
+
     created_at DATETIME DEFAULT GETDATE(),
     is_deleted BIT DEFAULT 0,
-    CONSTRAINT FK_Invoices_User FOREIGN KEY (username) REFERENCES users(username),
-    CONSTRAINT FK_Invoices_Staff FOREIGN KEY (created_by) REFERENCES users(username)
+
+    FOREIGN KEY (username) REFERENCES users(username),
+    FOREIGN KEY (created_by) REFERENCES users(username)
 );
 GO
+
 
 CREATE TABLE invoice_tickets (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -254,13 +270,21 @@ CREATE TABLE invoice_tickets (
     ticket_price_id UNIQUEIDENTIFIER NOT NULL,
     price DECIMAL(12,2) NOT NULL,
     promotion_id UNIQUEIDENTIFIER NULL,
+    
+    is_used BIT DEFAULT 0,
+    used_at DATETIME NULL,
+
     FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
     FOREIGN KEY (schedule_id) REFERENCES schedules(id),
     FOREIGN KEY (seat_id) REFERENCES seats(id),
-    FOREIGN KEY (ticket_price_id) REFERENCES ticket_prices(id),
-    FOREIGN KEY (promotion_id) REFERENCES promotions(id)
+    FOREIGN KEY (ticket_price_id) REFERENCES price_tickets(id),
+    FOREIGN KEY (promotion_id) REFERENCES promotions(id),
+
+    -- Một vé của 1 schedule + 1 seat chỉ được bán 1 lần
+    -- CONSTRAINT UQ_ScheduleSeat UNIQUE (schedule_id, seat_id)
 );
 GO
+
 
 CREATE TABLE invoice_products (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -269,6 +293,7 @@ CREATE TABLE invoice_products (
     quantity INT NOT NULL,
     price DECIMAL(12,2) NOT NULL,
     promotion_id UNIQUEIDENTIFIER NULL,
+
     FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id),
     FOREIGN KEY (promotion_id) REFERENCES promotions(id)
@@ -278,10 +303,15 @@ GO
 CREATE TABLE invoice_qrcodes (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     invoice_id UNIQUEIDENTIFIER NOT NULL,
-    qr_type NVARCHAR(20) NOT NULL, -- 'TICKET', 'PRODUCT', 'COMBINED'
     qr_code NVARCHAR(MAX) NOT NULL,
+    qr_type NVARCHAR(20) NOT NULL DEFAULT 'COMBINED',  
+        -- TICKET / PRODUCT / COMBINED
+
+    is_used BIT DEFAULT 0,
+    used_at DATETIME NULL,
     created_at DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (invoice_id) REFERENCES invoices(id)
+
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
 );
 GO
 
@@ -309,6 +339,11 @@ DROP TABLE IF EXISTS promotion_items;
 DROP TABLE IF EXISTS promotion_rules;
 DROP TABLE IF EXISTS price_tickets;
 
+DROP TABLE IF EXISTS invoices;
+DROP TABLE IF EXISTS invoice_products;
+DROP TABLE IF EXISTS invoice_tickets;
+DROP TABLE IF EXISTS invoice_qrcodes;
+
 -- Truy vấn các bảng
 SELECT * FROM user_roles
 SELECT * FROM users
@@ -328,6 +363,8 @@ SELECT * FROM promotions
 SELECT * FROM promotion_items
 SELECT * FROM promotion_rules
 SELECT * FROM price_tickets
+SELECT * FROM invoices
+SELECT * FROM invoice_products
 GO
 
 
@@ -419,5 +456,20 @@ UPDATE films SET is_deleted = 0 WHERE id ='46913442-cdc2-4136-9a81-33c08e5e1fb7'
 --     is_deleted BIT NOT NULL DEFAULT 0,
 --     CONSTRAINT FK_PO_Product FOREIGN KEY (product_id) REFERENCES products(id),
 --     CONSTRAINT FK_PO_Invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id)
+-- );
+-- GO
+
+
+-- CREATE TABLE invoices (
+--     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+--     created_by VARCHAR(50) NULL, -- nhân viên
+--     username VARCHAR(50) NULL,   -- khách hàng
+--     total_amount DECIMAL(12,2) NOT NULL,
+--     discount_amount DECIMAL(12,2) DEFAULT 0,
+--     final_amount DECIMAL(12,2) NOT NULL,
+--     created_at DATETIME DEFAULT GETDATE(),
+--     is_deleted BIT DEFAULT 0,
+--     CONSTRAINT FK_Invoices_User FOREIGN KEY (username) REFERENCES users(username),
+--     CONSTRAINT FK_Invoices_Staff FOREIGN KEY (created_by) REFERENCES users(username)
 -- );
 -- GO

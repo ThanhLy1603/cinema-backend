@@ -695,6 +695,9 @@ ORDER BY film_id, day_type, show_time_id, seat_type_id;
 SELECT N'Đã hoàn tất nhập liệu hàng loạt cho bảng price_tickets. Số dòng được chèn:' AS Status, @@ROWCOUNT AS RecordsInserted;
 
 
+-- Nhập liệu cho các bảng hoá đơn
+
+
 SELECT * FROM user_roles
 SELECT * FROM users
 SELECT * FROM roles

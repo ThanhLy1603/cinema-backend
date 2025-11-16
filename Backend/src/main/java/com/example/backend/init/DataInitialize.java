@@ -4,13 +4,19 @@ import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
@@ -36,6 +42,10 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private final PromotionRuleRepository promotionRuleRepository;
     private final PromotionRepository promotionRepository;
     private final PriceTicketRepository priceTicketRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final InvoiceProductRepository invoiceProductRepository;
+    private final InvoiceQRCodeRepository invoiceQRCodeRepository;
+    private final InvoiceTicketRepository invoiceTicketRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -1101,7 +1111,188 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         System.out.println("✅ Đã khởi tạo PRICE_TICKETS (" + listToInsert.size() + " dòng) thành công!");
     }
 
+    @Override
+    @Transactional
+    public void initializeInvoices() {
+        if (invoiceRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng INVOICES đã có dữ liệu, bỏ qua.");
+            return;
+        }
 
+        Optional<Users> customerOpt = userRepository.findById("LyCustomer");
+        Optional<Users> staffOpt = userRepository.findById("LyStaff");
+
+        if (customerOpt.isEmpty() || staffOpt.isEmpty()) {
+            System.out.println("⚠️ Không tìm thấy user 'LyCustomer' hoặc 'LyStaff'.");
+            return;
+        }
+
+        Users customer = customerOpt.get();
+        Users staff = staffOpt.get();
+
+        Schedule schedule = scheduleRepository.findTopAvailableSchedule(PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if (schedule == null) {
+            System.out.println("⚠️ Không tìm thấy lịch chiếu nào có ghế trống!");
+            return;
+        }
+
+        List<Seat> seats = seatRepository.findTop3AvailableSeats(
+                schedule.getRoom().getId(),
+                schedule.getId(),
+                PageRequest.of(0, 3)  // Spring Data Pageable
+        );
+
+        if (seats.isEmpty()) {
+            System.out.println("⚠️ Không đủ ghế trống trong phòng!");
+            return;
+        }
+
+        Seat seat1 = seats.get(0);
+        Seat seat2 = seats.size() > 1 ? seats.get(1) : null;
+        Seat seat3 = seats.size() > 2 ? seats.get(2) : null;
+
+        LocalDate scheduleDate = schedule.getScheduleDate();
+        PriceTicket.DayType dayType = (scheduleDate.getDayOfWeek() == DayOfWeek.SATURDAY ||
+                scheduleDate.getDayOfWeek() == DayOfWeek.SUNDAY)
+                ? PriceTicket.DayType.WEEKEND
+                : PriceTicket.DayType.WEEKDAY;
+
+        PriceTicket ticketPrice = priceTicketRepository.findTicketPrice(
+                schedule.getFilm().getId(),
+                seat1.getSeatType().getId(),
+                schedule.getShowTime().getId(),
+                dayType,
+                scheduleDate
+        ).orElseGet(() -> priceTicketRepository.findTopByFilmIdAndSeatTypeId(schedule.getFilm().getId(), seat1.getSeatType().getId()).orElse(null));
+
+        Product pepsi = productRepository.findByName("Pepsi 220z").orElseGet(() -> productRepository.findTopByIsDeletedFalse().orElse(null));
+        Product bap = productRepository.findByNameStartingWith("Bắp rang vị ngọt 440z").orElse(pepsi);
+
+        Promotion promotion = promotionRepository.findTopByActiveTrueAndIsDeletedFalse().orElse(null);
+
+        // ================= HÓA ĐƠN 1: KHÁCH ONLINE (1 vé + 1 nước) =================
+        Invoice inv1 = Invoice.builder()
+                .username(customer)
+                .totalAmount(BigDecimal.valueOf(125_000))
+                .discountAmount(BigDecimal.valueOf(12_500))
+                .finalAmount(BigDecimal.valueOf(112_500))
+                .status("PAID")
+                .createdAt(LocalDateTime.now())
+                .build();
+        invoiceRepository.save(inv1);
+
+        invoiceTicketRepository.save(InvoiceTicket.builder()
+                .invoice(inv1)
+                .schedule(schedule)
+                .seat(seat1)
+                .ticketPrice(ticketPrice)
+                .price(BigDecimal.valueOf(100_000))
+                .promotion(promotion)
+                .build());
+
+        invoiceProductRepository.save(InvoiceProduct.builder()
+                .invoice(inv1)
+                .product(pepsi)
+                .quantity(1)
+                .price(BigDecimal.valueOf(25_000))
+                .build());
+
+        invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                .invoice(inv1)
+                .qrCode("QR_ONLINE_001")
+                .qrType("COMBINED")
+                .build());
+
+        System.out.println("Hóa đơn 1: Thành công");
+
+        // ================= HÓA ĐƠN 2: NHÂN VIÊN BÁN (2 vé) =================
+        Invoice inv2 = Invoice.builder()
+                .createdBy(staff)
+                .customerName("Nguyễn Văn A")
+                .customerPhone("0901234567")
+                .customerAddress("123 Lê Lợi, Quận 1")
+                .totalAmount(BigDecimal.valueOf(200_000))
+                .discountAmount(BigDecimal.ZERO)
+                .finalAmount(BigDecimal.valueOf(200_000))
+                .status("PAID")
+                .createdAt(LocalDateTime.now())
+                .build();
+        invoiceRepository.save(inv2);
+
+        if (seat2 != null) {
+            invoiceTicketRepository.save(InvoiceTicket.builder()
+                    .invoice(inv2)
+                    .schedule(schedule)
+                    .seat(seat2)
+                    .ticketPrice(ticketPrice)
+                    .price(BigDecimal.valueOf(100_000))
+                    .build());
+
+            invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                    .invoice(inv2)
+                    .qrCode("QR_TICKET_" + UUID.randomUUID().toString().substring(0, 8))
+                    .qrType("TICKET")
+                    .build());
+        }
+
+        if (seat3 != null) {
+            invoiceTicketRepository.save(InvoiceTicket.builder()
+                    .invoice(inv2)
+                    .schedule(schedule)
+                    .seat(seat3)
+                    .ticketPrice(ticketPrice)
+                    .price(BigDecimal.valueOf(100_000))
+                    .build());
+
+            invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                    .invoice(inv2)
+                    .qrCode("QR_TICKET_" + UUID.randomUUID().toString().substring(0, 8))
+                    .qrType("TICKET")
+                    .build());
+        }
+
+        System.out.println("Hóa đơn 2: Thành công");
+
+        // ================= HÓA ĐƠN 3: COMBO VIP (1 vé VIP + Bắp + Pepsi) =================
+        Seat vipSeat = seatRepository.findTopVipSeatAvailable(schedule.getRoom().getId(), schedule.getId()).orElse(seat1);
+        PriceTicket vipPrice = priceTicketRepository.findTopByFilmIdAndSeatTypeId(schedule.getFilm().getId(), vipSeat.getSeatType().getId()).orElse(ticketPrice);
+
+        Invoice inv3 = Invoice.builder()
+                .username(customer)
+                .totalAmount(BigDecimal.valueOf(235_000))
+                .discountAmount(BigDecimal.valueOf(35_000))
+                .finalAmount(BigDecimal.valueOf(200_000))
+                .status("PENDING")
+                .createdAt(LocalDateTime.now())
+                .build();
+        invoiceRepository.save(inv3);
+
+        invoiceTicketRepository.save(InvoiceTicket.builder()
+                .invoice(inv3)
+                .schedule(schedule)
+                .seat(vipSeat)
+                .ticketPrice(vipPrice)
+                .price(BigDecimal.valueOf(150_000))
+                .build());
+
+        invoiceProductRepository.saveAll(List.of(
+                InvoiceProduct.builder().invoice(inv3).product(bap).quantity(1).price(BigDecimal.valueOf(60_000)).build(),
+                InvoiceProduct.builder().invoice(inv3).product(pepsi).quantity(1).price(BigDecimal.valueOf(25_000)).build()
+        ));
+
+        invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                .invoice(inv3)
+                .qrCode("QR_COMBO_VIP_001")
+                .qrType("COMBINED")
+                .build());
+
+        System.out.println("Hóa đơn 3: Thành công");
+        System.out.println("✅ Khởi tạo 3 hóa đơn demo hoàn tất!");
+    }
 
 
     private int getLastDigit(String username) {
@@ -1128,5 +1319,6 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeProductPrices();
         initializePromotions();
         initializePriceTickets();
+        initializeInvoices();
     }
 }
