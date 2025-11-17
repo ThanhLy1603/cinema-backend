@@ -7,6 +7,7 @@ import com.example.backend.entity.ShowTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -32,4 +33,14 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
             "   )" +
             ") ORDER BY s.scheduleDate DESC, s.id DESC")
     List<Schedule> findTopAvailableSchedule(Pageable pageable);
+
+    @Query("SELECT COUNT(s) > 0 FROM Schedule s " +
+            "WHERE s.room = :room " +
+            "AND s.scheduleDate = :date " +
+            "AND s.showTime = :showTime " +
+            "AND s.isDeleted = false")
+    boolean existsByRoomAndScheduleDateAndShowTime(
+            @Param("room") Room room,
+            @Param("date") LocalDate date,
+            @Param("showTime") ShowTime showTime);
 }

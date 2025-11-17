@@ -243,7 +243,7 @@ CREATE TABLE invoices (
     -- Khách vãng lai
     customer_name NVARCHAR(100) NULL,
     customer_phone VARCHAR(20) NULL,
-    customer_address VARCHAR(100) NULL,
+    customer_address NVARCHAR(100) NULL,
 
     -- Tổng tiền
     total_amount DECIMAL(12,2) NOT NULL,
@@ -363,8 +363,11 @@ SELECT * FROM promotions
 SELECT * FROM promotion_items
 SELECT * FROM promotion_rules
 SELECT * FROM price_tickets
+
 SELECT * FROM invoices
 SELECT * FROM invoice_products
+SELECT * FROM invoice_tickets
+SELECT * FROM invoice_qrcodes
 GO
 
 

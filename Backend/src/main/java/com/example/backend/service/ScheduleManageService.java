@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +36,37 @@ public class ScheduleManageService {
                 .collect(Collectors.toList());
 
         return schedules;
+    }
+
+    @Transactional
+    public ApiResponse bulkSchedules(List<ScheduleManageRequest> requests) {
+        System.out.println("requests: " + requests);
+        List<Schedule> schedules = new ArrayList<>();
+
+        for (ScheduleManageRequest request : requests) {
+            Film film = filmRepository.findById(request.filmId()).orElse(null);
+            Room room = roomRepository.findById(request.roomId()).orElse(null);
+            ShowTime showTime = showTimeRepository.findById(request.showTimeId()).orElse(null);
+
+            if (film == null) return new ApiResponse("error", "Phim không tồn tại");
+            if (room == null) return new ApiResponse("error", "Phòng không tồn tại");
+            if (showTime == null) return new ApiResponse("error", "Khung giờ không tồn tại");
+
+            LocalDate scheduleDate = request.scheduleDate();
+
+            Schedule schedule = Schedule.builder()
+                    .film(film)
+                    .room(room)
+                    .showTime(showTime)
+                    .scheduleDate(scheduleDate)
+                    .isDeleted(false)
+                    .build();
+
+            System.out.println("schedule: " + schedule);
+            schedules.add(schedule);
+        }
+        scheduleRepository.saveAll(schedules);
+        return new ApiResponse("success", "Thêm lịch chiếu thành công");
     }
 
     @Transactional

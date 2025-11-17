@@ -27,6 +27,11 @@ public class ScheduleManageRestApi {
         return ResponseEntity.ok(scheduleManageService.createSchedule(request));
     }
 
+    @PostMapping("/bulk")
+    public ResponseEntity<ApiResponse> bulkSchedules(@RequestBody List<ScheduleManageRequest> requests) {
+        return ResponseEntity.ok(scheduleManageService.bulkSchedules(requests));
+    }
+
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> updateSchedule(@PathVariable UUID id, @RequestBody ScheduleManageRequest request) {
         return ResponseEntity.ok(scheduleManageService.updateSchedule(id, request));
