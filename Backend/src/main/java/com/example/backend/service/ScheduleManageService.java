@@ -39,6 +39,20 @@ public class ScheduleManageService {
     }
 
     @Transactional
+    public List<ScheduleManageResponse> getSchedulesByFilmId(UUID filmId) {
+        Film film = filmRepository.findById(filmId).orElse(null);
+        if (film == null) return List.of();
+
+        List<ScheduleManageResponse> schedules = scheduleRepository
+                .findByFilmAndIsDeletedFalse(film)
+                .stream()
+                .map(this::toScheduleManageResponse)
+                .collect(Collectors.toList());
+
+        return schedules;
+    }
+
+    @Transactional
     public ApiResponse bulkSchedules(List<ScheduleManageRequest> requests) {
         System.out.println("requests: " + requests);
         List<Schedule> schedules = new ArrayList<>();
