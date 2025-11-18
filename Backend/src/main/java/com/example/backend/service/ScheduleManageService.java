@@ -53,6 +53,7 @@ public class ScheduleManageService {
     }
 
     @Transactional
+<<<<<<< HEAD
     public ApiResponse bulkSchedules(List<ScheduleManageRequest> requests) {
         System.out.println("requests: " + requests);
         List<Schedule> schedules = new ArrayList<>();
@@ -84,6 +85,8 @@ public class ScheduleManageService {
     }
 
     @Transactional
+=======
+>>>>>>> origin/Quan
     public ApiResponse createSchedule(ScheduleManageRequest request) {
         // 1. Lấy các thực thể
         Film film = filmRepository.findById(request.filmId()).orElse(null);
