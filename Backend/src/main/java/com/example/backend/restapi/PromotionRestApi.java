@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -19,7 +18,8 @@ public class PromotionRestApi implements PromotionController {
 
     private final PromotionService promotionService;
 
-    @GetMapping("")
+    // ================== GET ==================
+    @GetMapping
     @Override
     public ResponseEntity<List<PromotionResponse>> getAllPromotions() {
         return ResponseEntity.ok(promotionService.getAllPromotions());
@@ -31,57 +31,67 @@ public class PromotionRestApi implements PromotionController {
         return ResponseEntity.ok(promotionService.getPromotion(id));
     }
 
-
-
-    @PostMapping("")
+    // ================== CREATE / UPDATE ==================
+    @PostMapping
     @Override
     public ResponseEntity<PromotionResponse> createPromotion(@ModelAttribute PromotionRequest request) {
-        return ResponseEntity.ok(promotionService.createPromotion(request));
+        PromotionResponse response = promotionService.createPromotion(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @PutMapping("/{id}")
+    @Override
     public ResponseEntity<PromotionResponse> updatePromotion(
             @PathVariable UUID id,
-            @ModelAttribute PromotionRequest request) {
-        return ResponseEntity.ok(promotionService.updatePromotion(id, request));
+            @ModelAttribute PromotionRequest request
+    ) {
+        PromotionResponse response = promotionService.updatePromotion(id, request);
+        return ResponseEntity.ok(response);
     }
 
+    // ================== ITEMS ==================
     @PostMapping("/{id}/items")
     @Override
-    public ResponseEntity<PromotionResponse> addItems(@PathVariable UUID id,
-                                                      @RequestBody List<PromotionItemRequest> items) {
-        return ResponseEntity.ok(promotionService.addItems(id, items));
+    public ResponseEntity<PromotionResponse> addItems(
+            @PathVariable UUID id,
+            @RequestBody List<PromotionItemRequest> items
+    ) {
+        PromotionResponse response = promotionService.addItems(id, items);
+        return ResponseEntity.ok(response);
     }
 
+    // ================== RULES ==================
     @PostMapping("/{id}/rules")
     public ResponseEntity<PromotionResponse> addRules(
             @PathVariable UUID id,
-            @RequestBody List<PromotionRuleRequest> rules) {
-        PromotionResponse response = new PromotionResponse();
+            @RequestBody List<PromotionRuleRequest> rules
+    ) {
         try {
-            // Thêm rule vào promotion
-            response = promotionService.addRules(id, rules);
+            PromotionResponse response = promotionService.addRules(id, rules);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            // Lỗi do logic nghiệp vụ
-            response.setErrorMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            PromotionResponse errorResponse = new PromotionResponse();
+            errorResponse.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
-            // Lỗi server
-            response.setErrorMessage("Server error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            PromotionResponse errorResponse = new PromotionResponse();
+            errorResponse.setErrorMessage("Server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
+    @DeleteMapping("/rules/{ruleId}")
+    @Override
+    public ResponseEntity<PromotionResponse> deleteRule(@PathVariable UUID ruleId) {
+        PromotionResponse updatedPromotion = promotionService.deleteRule(ruleId);
+        return ResponseEntity.ok(updatedPromotion);
+    }
+
+    // ================== DELETE ==================
     @DeleteMapping("/{id}")
     @Override
     public ResponseEntity<Void> deletePromotion(@PathVariable UUID id) {
         promotionService.deletePromotion(id);
         return ResponseEntity.noContent().build();
-    }
-    @DeleteMapping("/rules/{ruleId}")
-    @Override
-    public ResponseEntity<PromotionResponse> deleteRule(@PathVariable UUID ruleId) {
-        PromotionResponse updatedPromotion = promotionService.deleteRule(ruleId); // Service trả về promotion sau khi xóa rule
-        return ResponseEntity.ok(updatedPromotion);
     }
 }
