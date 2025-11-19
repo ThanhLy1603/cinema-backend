@@ -7,7 +7,8 @@ import java.util.UUID;
 public record SeatManageResponse(
         UUID id,
         String position,
-        RoomManageResponse rooms,
+        boolean active,
+        RoomManageResponse room,
         SeatTypeManageResponse seatType
         ) {
 }

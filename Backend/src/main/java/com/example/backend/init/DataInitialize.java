@@ -4,14 +4,23 @@ import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +37,15 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private final SeatTypeRepository seatTypeRepository;
     private final ScheduleRepository scheduleRepository;
     private final ProductRepository productRepository;
+    private final ProductPriceRepository productPriceRepository;
+    private final PromotionItemRepository promotionItemRepository;
+    private final PromotionRuleRepository promotionRuleRepository;
+    private final PromotionRepository promotionRepository;
+    private final PriceTicketRepository priceTicketRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final InvoiceProductRepository invoiceProductRepository;
+    private final InvoiceQRCodeRepository invoiceQRCodeRepository;
+    private final InvoiceTicketRepository invoiceTicketRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -664,6 +682,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
                 seat.setRoom(room);
                 seat.setSeatType(seatType);
                 seat.setPosition(position);
+                seat.setActive(true);
                 seat.setDeleted(false);
 
                 seatRepository.save(seat);
@@ -690,23 +709,35 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             }
 
             List<Schedule> schedules = new ArrayList<>();
+            int filmCount = films.size();
+            int showTimeCount = showTimes.size();
+            int roomCount = rooms.size();
 
-            for (Film film : films) {
-                for (ShowTime showTime : showTimes) {
-                    for (Room room : rooms) {
+            // Sinh dữ liệu cho 7 ngày tới
+            for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+                LocalDate date = startDate.plusDays(dayOffset);
 
-                        // kiểm tra trùng (unique constraint tránh lỗi)
-                        boolean exists = scheduleRepository
-                                .existsByRoomAndFilmAndShowTimeAndScheduleDate(
-                                        room, film, showTime, startDate
-                                );
+                for (int r = 0; r < roomCount; r++) {
+                    Room room = rooms.get(r);
+
+                    for (int t = 0; t < showTimeCount; t++) {
+                        ShowTime showTime = showTimes.get(t);
+
+                        // Chọn phim khác nhau cho mỗi phòng/suất/ngày theo công thức xoay vòng
+                        int filmIndex = (r + t + dayOffset) % filmCount;
+                        Film film = films.get(filmIndex);
+
+                        // Kiểm tra xem lịch đã tồn tại chưa
+                        boolean exists = scheduleRepository.existsByRoomAndShowTimeAndScheduleDate(
+                                room, showTime, date
+                        );
 
                         if (!exists) {
                             Schedule schedule = Schedule.builder()
                                     .film(film)
                                     .room(room)
                                     .showTime(showTime)
-                                    .scheduleDate(startDate)
+                                    .scheduleDate(date)
                                     .isDeleted(false)
                                     .build();
 
@@ -719,7 +750,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             scheduleRepository.saveAll(schedules);
 
             System.out.println("✅ Đã khởi tạo bảng SCHEDULES thành công! Tổng: "
-                    + schedules.size() + " lịch chiếu.");
+                    + schedules.size() + " lịch chiếu hợp lệ (7 ngày, không trùng).");
 
         } else {
             System.out.println("ℹ️ Bảng SCHEDULES đã có dữ liệu, bỏ qua.");
@@ -729,38 +760,539 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     @Override
     @Transactional
     public void initializeFoods() {
-        if (productRepository.count() == 0) {
-
-            List<Food> foods = Arrays.asList(
-                    new Food(null, "Aquafina",
-                            "01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim",
-                            "Aquafina_poster.png", false),
-
-                    new Food(null, "Pepsi 220z",
-                            "01 nước Pepsi 220z. Nhận trong ngày xem phim",
-                            "Pepsi_220z_poster.png", false),
-
-                    new Food(null, "Bắp rang vị ngọt 440z",
-                            "01 bắp 440z vị ngọt. Nhận trong ngày xem phim",
-                            "Bap_ngot_poster.png", false),
-
-                    new Food(null, "Bắp rang vị phô mai 440z",
-                            "01 bắp 440z vị phô mai. Nhận trong ngày xem phim",
-                            "Bap_pho_mai_poster.png", false),
-
-                    new Food(null,
-                            "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z",
-                            "01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim",
-                            "Combo_bapngot_pepsi_xucxich_poster.png", false)
-            );
-
-            productRepository.saveAll(foods);
-            System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
-        } else {
+        // Kiểm tra nếu bảng products đã có dữ liệu thì bỏ qua
+        if (productRepository.count() > 0) {
             System.out.println("ℹ️ Bảng PRODUCTS đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        // Khởi tạo danh sách sản phẩm
+        List<Product> products = Arrays.asList(
+                Product.builder()
+                        .name("Aquafina")
+                        .description("01 chai nước suối Aquafina 500ml. Nhận trong ngày xem phim")
+                        .poster("Aquafina_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Pepsi 220z")
+                        .description("01 nước Pepsi 220z. Nhận trong ngày xem phim")
+                        .poster("Pepsi_220z_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Bắp rang vị ngọt 440z")
+                        .description("01 bắp 440z vị ngọt. Nhận trong ngày xem phim")
+                        .poster("Bap_ngot_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Bắp rang vị phô mai 440z")
+                        .description("01 bắp 440z vị phô mai. Nhận trong ngày xem phim")
+                        .poster("Bap_pho_mai_poster.png")
+                        .isDeleted(false)
+                        .build(),
+
+                Product.builder()
+                        .name("Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z")
+                        .description("01 bắp lớn vị ngọt + 01 pepsi 220z + 01 xúc xích phô mai. Nhận trong ngày xem phim")
+                        .poster("Combo_bapngot_pepsi_xucxich_poster.png")
+                        .isDeleted(false)
+                        .build()
+        );
+
+        // Lưu tất cả sản phẩm vào database
+        productRepository.saveAll(products);
+        System.out.println("✅ Đã khởi tạo bảng PRODUCTS thành công!");
+    }
+
+
+    @Override
+    @Transactional
+    public void initializeProductPrices() {
+        // Kiểm tra nếu đã có dữ liệu thì bỏ qua
+        if (productPriceRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng PRODUCT_PRICES đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        // Lấy danh sách tất cả sản phẩm đã lưu
+        List<Product> products = productRepository.findAll();
+
+        // Ngày bắt đầu áp dụng giá
+        LocalDate today = LocalDate.of(2025, 11, 14);
+
+        List<ProductPrice> prices = new ArrayList<>();
+
+        for (Product product : products) {
+            BigDecimal priceValue = switch (product.getName()) {
+                case "Aquafina" -> BigDecimal.valueOf(20000.00);
+                case "Pepsi 220z" -> BigDecimal.valueOf(25000.00);
+                case "Bắp rang vị ngọt 440z" -> BigDecimal.valueOf(60000.00);
+                case "Bắp rang vị phô mai 440z" -> BigDecimal.valueOf(65000.00);
+                case "Combo 2 xúc xích - 1 bắp ngọt 440z - 1 Pepsi 220z" -> BigDecimal.valueOf(110000.00);
+                default -> null;
+            };
+
+            if (priceValue != null) {
+                ProductPrice price = ProductPrice.builder()
+                        .product(product)
+                        .price(priceValue)
+                        .startDate(today)
+                        .endDate(null)
+                        .isDeleted(false)
+                        .build();
+
+                prices.add(price);
+            }
+        }
+
+        if (!prices.isEmpty()) {
+            productPriceRepository.saveAll(prices);
+            System.out.println("✅ Đã khởi tạo bảng PRODUCT_PRICES thành công!");
+        } else {
+            System.out.println("ℹ️ Không có sản phẩm nào phù hợp để khởi tạo giá.");
         }
     }
 
+    @Override
+    @Transactional
+    public void initializePromotions() {
+        // Kiểm tra nếu đã có dữ liệu thì bỏ qua
+        if (promotionRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng PROMOTIONS đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        LocalDate today = LocalDate.of(2025, 11, 14);
+
+        // Lấy danh sách films và products
+        List<Film> films = filmRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        // Map theo tên để dễ tìm, tránh duplicate key
+        Map<String, Film> filmMap = films.stream()
+                .collect(Collectors.toMap(
+                        Film::getName,
+                        Function.identity(),
+                        (f1, f2) -> f1.getReleaseDate().isAfter(f2.getReleaseDate()) ? f1 : f2
+                ));
+
+        Map<String, Product> productMap = products.stream()
+                .collect(Collectors.toMap(
+                        Product::getName,
+                        Function.identity(),
+                        (p1, p2) -> p1 // giữ bản đầu tiên
+                ));
+
+        List<Promotion> promotions = new ArrayList<>();
+
+        // 1. Giảm 10% tất cả vé phim
+        Promotion p1 = Promotion.builder()
+                .name("Giảm 10% vé phim")
+                .description("Giảm 10% tất cả vé phim")
+                .discountPercent(BigDecimal.valueOf(10))
+                .poster("Giam_gia_10%_poster.jpg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        PromotionItem p1Item = PromotionItem.builder()
+                .note("Áp dụng cho tất cả phim")
+                .promotion(p1) // set liên kết 2 chiều
+                .build();
+
+        PromotionRule p1Rule = PromotionRule.builder()
+                .ruleType("PERCENT")
+                .ruleValue("{\"percent\":10}")
+                .promotion(p1) // set liên kết 2 chiều
+                .build();
+
+        p1.getItems().add(p1Item);
+        p1.getRules().add(p1Rule);
+
+        // 2. Mua 3 món 79k
+        Promotion p2 = Promotion.builder()
+                .name("Mua 3 món 79k")
+                .description("Combo ăn uống: Popcorn + Soda + Nuggets chỉ 79.000đ")
+                .poster("Mua_3_mon_79k_poster.jpeg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        List<String> comboProducts = List.of("Bắp rang vị ngọt 440z", "Pepsi 2020z", "Aquafina");
+
+        comboProducts.forEach(name -> {
+            Product prod = productMap.get(name);
+            if (prod != null) {
+                PromotionItem item = PromotionItem.builder()
+                        .product(prod)
+                        .note("Combo 3 món")
+                        .promotion(p2) // set liên kết 2 chiều
+                        .build();
+                p2.getItems().add(item);
+            }
+        });
+
+        PromotionRule p2Rule = PromotionRule.builder()
+                .ruleType("FIXED_COMBO")
+                .ruleValue("{\"items\":[\"Bắp rang vị ngọt 440z\",\"Pepsi 2020z\",\"Aquafina\"],\"price\":79000}")
+                .promotion(p2) // set liên kết 2 chiều
+                .build();
+        p2.getRules().add(p2Rule);
+
+        // 3. Mua 2 tặng 1 nước ngọt
+        Promotion p3 = Promotion.builder()
+                .name("Mua 2 tặng 1 nước ngọt")
+                .description("Mua 2 nước ngọt tặng 1")
+                .poster("Mua_2_tang_1_poster.jpeg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        List<String> drinkProducts = List.of("Pepsi 2020z", "Aquafina");
+        drinkProducts.forEach(name -> {
+            Product prod = productMap.get(name);
+            if (prod != null) {
+                PromotionItem item = PromotionItem.builder()
+                        .product(prod)
+                        .note("Mua 2 tặng 1")
+                        .promotion(p3) // set liên kết 2 chiều
+                        .build();
+                p3.getItems().add(item);
+            }
+        });
+
+        PromotionRule p3Rule = PromotionRule.builder()
+                .ruleType("BUY_X_GET_Y")
+                .ruleValue("{\"buy\":2,\"get\":1}")
+                .promotion(p3) // set liên kết 2 chiều
+                .build();
+        p3.getRules().add(p3Rule);
+
+        // 11. Giảm 10% tổng hóa đơn nếu >= 200k
+        Promotion pTotal = Promotion.builder()
+                .name("Giảm 10% tổng hóa đơn")
+                .description("Áp dụng cho hóa đơn >= 200k")
+                .poster("Giam_10%_tong_hoa_don_poster.jpeg")
+                .startDate(today)
+                .endDate(LocalDate.of(2025, 12, 31))
+                .active(true)
+                .isDeleted(false)
+                .items(new ArrayList<>())
+                .rules(new ArrayList<>())
+                .build();
+
+        PromotionRule totalRule = PromotionRule.builder()
+                .ruleType("TOTAL_PERCENT")
+                .ruleValue("{\"percent\":10}")
+                .promotion(pTotal) // set liên kết 2 chiều
+                .build();
+
+        pTotal.getRules().add(totalRule);
+
+        // Thêm tất cả promotions vào danh sách
+        promotions.addAll(List.of(p1, p2, p3, pTotal));
+
+        // Lưu xuống database, cascade sẽ tự lưu items & rules
+        promotionRepository.saveAll(promotions);
+
+        System.out.println("✅ Đã khởi tạo dữ liệu PROMOTIONS thành công!");
+    }
+
+    @Override
+    @Transactional
+    public void initializePriceTickets() {
+        LocalDate startDate = LocalDate.of(2025, 11, 14);
+        BigDecimal basePrice = new BigDecimal("100000.00");
+
+        // Nếu đã có dữ liệu cho ngày này thì bỏ qua
+        long count = priceTicketRepository.countByStartDate(startDate);
+        if (count > 0) {
+            System.out.println("ℹ️ Bảng PRICE_TICKETS đã có dữ liệu cho ngày " + startDate + ", bỏ qua.");
+            return;
+        }
+
+        // Lấy dữ liệu cần thiết
+//        List<Film> films = filmRepository.findByStatusIn(List.of("active", "upcoming"));
+        List<Film> films = filmRepository.findAll();
+        List<SeatType> seatTypes = seatTypeRepository.findAll();
+        List<ShowTime> showTimes = showTimeRepository.findAll();
+
+        // Duyệt trực tiếp enum DayType để đảm bảo kiểu đúng
+        PriceTicket.DayType[] dayTypes = PriceTicket.DayType.values();
+
+        List<PriceTicket> listToInsert = new ArrayList<>();
+
+        for (Film film : films) {
+            for (SeatType seat : seatTypes) {
+                for (ShowTime showTime : showTimes) {
+                    for (PriceTicket.DayType dayType : dayTypes) {
+
+                        // Kiểm tra tồn tại (lưu ý: repository method phải có signature đúng)
+//                        boolean exists = priceTicketRepository.existsByFilmIdAndSeatTypeIdAndShowTimeIdAndDayTypeAndStartDate(
+//                                film.getId(),
+//                                seat.getId(),
+//                                showTime.getId(),
+//                                dayType.toString(),
+//                                startDate
+//                        );
+
+//                        if (exists) continue;
+
+                        BigDecimal price = basePrice;
+
+                        // 1. PHỤ THU LOẠI GHẾ
+                        if (seat.getName() != null) {
+                            if (seat.getName().equalsIgnoreCase("Ghế VIP")) {
+                                price = price.add(new BigDecimal("20000"));
+                            } else if (seat.getName().equalsIgnoreCase("Ghế Couple")) {
+                                price = price.add(new BigDecimal("50000"));
+                            }
+                        }
+
+                        // 2. PHỤ THU THEO LOẠI NGÀY
+                        switch (dayType) {
+                            case WEEKEND -> price = price.add(new BigDecimal("20000"));
+                            case HOLIDAY -> price = price.add(new BigDecimal("40000"));
+                            case SPECIAL -> price = price.add(new BigDecimal("60000"));
+                            default -> { /* WEEKDAY -> no change */ }
+                        }
+
+                        // 3. GIỜ VÀNG 19:00–22:00 (giả định showTime.getStartTime() trả về LocalTime)
+                        LocalTime t = showTime.getStartTime();
+                        if (t != null && !t.isBefore(LocalTime.of(19, 0)) && !t.isAfter(LocalTime.of(22, 0))) {
+                            price = price.add(new BigDecimal("10000"));
+                        }
+
+                        // 4. PHIM BOM TẤN
+                        List<String> blockbusters = List.of("Deadpool 3", "Avatar 3", "Fast and Furious 7");
+                        if (film.getName() != null && blockbusters.contains(film.getName())) {
+                            price = price.add(new BigDecimal("10000"));
+                        }
+
+                        // Tạo PriceTicket (dayType là enum, phù hợp với builder)
+                        PriceTicket pt = PriceTicket.builder()
+                                .film(film)
+                                .seatType(seat)
+                                .showTime(showTime)
+                                .dayType(dayType)           // <-- now passes enum, no error
+                                .price(price)
+                                .startDate(startDate)
+                                .endDate(null)
+                                .isDeleted(false)
+                                .build();
+
+                        listToInsert.add(pt);
+                    }
+                }
+            }
+        }
+
+        if (!listToInsert.isEmpty()) {
+            priceTicketRepository.saveAll(listToInsert);
+        }
+
+        System.out.println("✅ Đã khởi tạo PRICE_TICKETS (" + listToInsert.size() + " dòng) thành công!");
+    }
+
+    @Override
+    @Transactional
+    public void initializeInvoices() {
+        if (invoiceRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng INVOICES đã có dữ liệu, bỏ qua.");
+            return;
+        }
+
+        Optional<Users> customerOpt = userRepository.findById("LyCustomer");
+        Optional<Users> staffOpt = userRepository.findById("LyStaff");
+
+        if (customerOpt.isEmpty() || staffOpt.isEmpty()) {
+            System.out.println("⚠️ Không tìm thấy user 'LyCustomer' hoặc 'LyStaff'.");
+            return;
+        }
+
+        Users customer = customerOpt.get();
+        Users staff = staffOpt.get();
+
+        Schedule schedule = scheduleRepository.findTopAvailableSchedule(PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if (schedule == null) {
+            System.out.println("⚠️ Không tìm thấy lịch chiếu nào có ghế trống!");
+            return;
+        }
+
+        List<Seat> seats = seatRepository.findTop3AvailableSeats(
+                schedule.getRoom().getId(),
+                schedule.getId(),
+                PageRequest.of(0, 3)  // Spring Data Pageable
+        );
+
+        if (seats.isEmpty()) {
+            System.out.println("⚠️ Không đủ ghế trống trong phòng!");
+            return;
+        }
+
+        Seat seat1 = seats.get(0);
+        Seat seat2 = seats.size() > 1 ? seats.get(1) : null;
+        Seat seat3 = seats.size() > 2 ? seats.get(2) : null;
+
+        LocalDate scheduleDate = schedule.getScheduleDate();
+        PriceTicket.DayType dayType = (scheduleDate.getDayOfWeek() == DayOfWeek.SATURDAY ||
+                scheduleDate.getDayOfWeek() == DayOfWeek.SUNDAY)
+                ? PriceTicket.DayType.WEEKEND
+                : PriceTicket.DayType.WEEKDAY;
+
+        PriceTicket ticketPrice = priceTicketRepository.findTicketPrice(
+                schedule.getFilm().getId(),
+                seat1.getSeatType().getId(),
+                schedule.getShowTime().getId(),
+                dayType,
+                scheduleDate
+        ).orElseGet(() -> priceTicketRepository.findTopByFilmIdAndSeatTypeId(schedule.getFilm().getId(), seat1.getSeatType().getId()).orElse(null));
+
+        Product pepsi = productRepository.findByName("Pepsi 220z").orElseGet(() -> productRepository.findTopByIsDeletedFalse().orElse(null));
+        Product bap = productRepository.findByNameStartingWith("Bắp rang vị ngọt 440z").orElse(pepsi);
+
+        Promotion promotion = promotionRepository.findTopByActiveTrueAndIsDeletedFalse().orElse(null);
+
+        // ================= HÓA ĐƠN 1: KHÁCH ONLINE (1 vé + 1 nước) =================
+        Invoice inv1 = Invoice.builder()
+                .username(customer)
+                .totalAmount(BigDecimal.valueOf(125_000))
+                .discountAmount(BigDecimal.valueOf(12_500))
+                .finalAmount(BigDecimal.valueOf(112_500))
+                .status("PAID")
+                .createdAt(LocalDateTime.now())
+                .build();
+        invoiceRepository.save(inv1);
+
+        invoiceTicketRepository.save(InvoiceTicket.builder()
+                .invoice(inv1)
+                .schedule(schedule)
+                .seat(seat1)
+                .ticketPrice(ticketPrice)
+                .price(BigDecimal.valueOf(100_000))
+                .promotion(promotion)
+                .build());
+
+        invoiceProductRepository.save(InvoiceProduct.builder()
+                .invoice(inv1)
+                .product(pepsi)
+                .quantity(1)
+                .price(BigDecimal.valueOf(25_000))
+                .build());
+
+        invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                .invoice(inv1)
+                .qrCode("QR_ONLINE_001")
+                .qrType("COMBINED")
+                .build());
+
+        System.out.println("Hóa đơn 1: Thành công");
+
+        // ================= HÓA ĐƠN 2: NHÂN VIÊN BÁN (2 vé) =================
+        Invoice inv2 = Invoice.builder()
+                .createdBy(staff)
+                .customerName("Nguyễn Văn A")
+                .customerPhone("0901234567")
+                .customerAddress("123 Lê Lợi, Quận 1")
+                .totalAmount(BigDecimal.valueOf(200_000))
+                .discountAmount(BigDecimal.ZERO)
+                .finalAmount(BigDecimal.valueOf(200_000))
+                .status("PAID")
+                .createdAt(LocalDateTime.now())
+                .build();
+        invoiceRepository.save(inv2);
+
+        if (seat2 != null) {
+            invoiceTicketRepository.save(InvoiceTicket.builder()
+                    .invoice(inv2)
+                    .schedule(schedule)
+                    .seat(seat2)
+                    .ticketPrice(ticketPrice)
+                    .price(BigDecimal.valueOf(100_000))
+                    .build());
+
+            invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                    .invoice(inv2)
+                    .qrCode("QR_TICKET_" + UUID.randomUUID().toString().substring(0, 8))
+                    .qrType("TICKET")
+                    .build());
+        }
+
+        if (seat3 != null) {
+            invoiceTicketRepository.save(InvoiceTicket.builder()
+                    .invoice(inv2)
+                    .schedule(schedule)
+                    .seat(seat3)
+                    .ticketPrice(ticketPrice)
+                    .price(BigDecimal.valueOf(100_000))
+                    .build());
+
+            invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                    .invoice(inv2)
+                    .qrCode("QR_TICKET_" + UUID.randomUUID().toString().substring(0, 8))
+                    .qrType("TICKET")
+                    .build());
+        }
+
+        System.out.println("Hóa đơn 2: Thành công");
+
+        // ================= HÓA ĐƠN 3: COMBO VIP (1 vé VIP + Bắp + Pepsi) =================
+        Seat vipSeat = seatRepository.findTopVipSeatAvailable(schedule.getRoom().getId(), schedule.getId()).orElse(seat1);
+        PriceTicket vipPrice = priceTicketRepository.findTopByFilmIdAndSeatTypeId(schedule.getFilm().getId(), vipSeat.getSeatType().getId()).orElse(ticketPrice);
+
+        Invoice inv3 = Invoice.builder()
+                .username(customer)
+                .totalAmount(BigDecimal.valueOf(235_000))
+                .discountAmount(BigDecimal.valueOf(35_000))
+                .finalAmount(BigDecimal.valueOf(200_000))
+                .status("PENDING")
+                .createdAt(LocalDateTime.now())
+                .build();
+        invoiceRepository.save(inv3);
+
+        invoiceTicketRepository.save(InvoiceTicket.builder()
+                .invoice(inv3)
+                .schedule(schedule)
+                .seat(vipSeat)
+                .ticketPrice(vipPrice)
+                .price(BigDecimal.valueOf(150_000))
+                .build());
+
+        invoiceProductRepository.saveAll(List.of(
+                InvoiceProduct.builder().invoice(inv3).product(bap).quantity(1).price(BigDecimal.valueOf(60_000)).build(),
+                InvoiceProduct.builder().invoice(inv3).product(pepsi).quantity(1).price(BigDecimal.valueOf(25_000)).build()
+        ));
+
+        invoiceQRCodeRepository.save(InvoiceQRCode.builder()
+                .invoice(inv3)
+                .qrCode("QR_COMBO_VIP_001")
+                .qrType("COMBINED")
+                .build());
+
+        System.out.println("Hóa đơn 3: Thành công");
+        System.out.println("✅ Khởi tạo 3 hóa đơn demo hoàn tất!");
+    }
 
 
     private int getLastDigit(String username) {
@@ -784,5 +1316,9 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeSeats();
         initializeSchedules();
         initializeFoods();
+        initializeProductPrices();
+        initializePromotions();
+        initializePriceTickets();
+        initializeInvoices();
     }
 }

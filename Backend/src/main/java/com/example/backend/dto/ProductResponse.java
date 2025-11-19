@@ -2,5 +2,5 @@ package com.example.backend.dto;
 
 import java.util.UUID;
 
-public record ProductResponse(UUID id,String name, String description, String poster) {
+public record ProductResponse(UUID id, String name, String description, String poster) {
 }

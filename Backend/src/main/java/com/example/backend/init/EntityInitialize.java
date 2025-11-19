@@ -12,4 +12,8 @@ public interface EntityInitialize {
     public void initializeSeats();
     public void initializeSchedules();
     public void initializeFoods();
+    public void initializeProductPrices();
+    public void initializePromotions();
+    public void initializePriceTickets();
+    public void initializeInvoices();
 }

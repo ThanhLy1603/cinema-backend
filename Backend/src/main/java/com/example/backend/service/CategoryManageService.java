@@ -21,7 +21,7 @@ public class CategoryManageService {
 
     // ✅ Lấy tất cả category chưa bị xóa (isDeleted = false)
     @Transactional
-    public List<CategoryManageResponse> getAllActive() {
+    public List<CategoryManageResponse> getAlls() {
         return categoryRepo.findByIsDeletedFalse().stream()
                 .map(this::toCategoryManageResponse)
                 .collect(Collectors.toList());
