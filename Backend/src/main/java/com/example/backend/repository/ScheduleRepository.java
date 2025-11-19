@@ -17,15 +17,18 @@ import java.util.UUID;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     List<Schedule> findByIsDeletedFalse();
+
     List<Schedule> findByIsDeletedFalseOrderByScheduleDateDescShowTimeStartTimeAsc();
+
     boolean existsByRoomAndShowTimeAndScheduleDate(
             Room room, ShowTime showTime, LocalDate date
     );
+
     List<Schedule> findByRoomAndScheduleDateAndIsDeletedFalse(Room room, LocalDate date);
+
     List<Schedule> findByFilmAndIsDeletedFalse(
             Film film
     );
-<<<<<<< HEAD
 
     @Query("SELECT s FROM Schedule s " +
             "WHERE s.isDeleted = false AND EXISTS (" +
@@ -47,6 +50,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
             @Param("room") Room room,
             @Param("date") LocalDate date,
             @Param("showTime") ShowTime showTime);
-=======
->>>>>>> origin/Quan
 }
