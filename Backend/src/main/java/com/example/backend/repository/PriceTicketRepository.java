@@ -6,11 +6,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface PriceTicketRepository extends JpaRepository<PriceTicket, UUID> {
+
+    List<PriceTicket> findAllByIsDeletedFalse();
+
+    boolean existsByFilmIdAndSeatTypeIdAndShowTimeIdAndDayTypeAndStartDateAndIsDeletedFalse(
+            UUID filmId, UUID seatTypeId, UUID showTimeId, PriceTicket.DayType dayType, LocalDate startDate);
+
+    boolean existsByFilmIdAndSeatTypeIdAndShowTimeIdAndDayTypeAndStartDateAndIdNotAndIsDeletedFalse(
+            UUID filmId, UUID seatTypeId, UUID showTimeId, PriceTicket.DayType dayType, UUID id, LocalDate startDate);
+
     boolean existsByFilmIdAndSeatTypeIdAndShowTimeIdAndDayTypeAndStartDate(
             UUID filmId, UUID seatTypeId, UUID showTimeId, String dayType, LocalDate startDate
     );

@@ -8,3 +8,4 @@ public record ShowTimeManageResponse(
         UUID id,
         @JsonFormat(pattern = "HH:mm") LocalTime startTime
 ) {}
+
