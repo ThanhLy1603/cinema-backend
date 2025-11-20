@@ -25,4 +25,6 @@ public interface SeatRepository extends JpaRepository<Seat, UUID> {
     @Query("SELECT st FROM Seat st JOIN st.seatType stt WHERE st.room.id = :roomId AND stt.name = 'Ghế VIP' AND st.isDeleted = false " +
             "AND NOT EXISTS (SELECT it FROM InvoiceTicket it WHERE it.seat.id = st.id AND it.schedule.id = :scheduleId)")
     Optional<Seat> findTopVipSeatAvailable(@Param("roomId") UUID roomId, @Param("scheduleId") UUID scheduleId);
+
+    List<Seat> findByRoomIdAndIsDeletedFalseOrderByPositionAsc(UUID roomId);
 }
