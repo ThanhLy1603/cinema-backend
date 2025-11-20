@@ -36,6 +36,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     private final ShowTimeRepository showTimeRepository;
     private final SeatTypeRepository seatTypeRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ScheduleSeatRepository scheduleSeatRepository;
     private final ProductRepository productRepository;
     private final ProductPriceRepository productPriceRepository;
     private final PromotionItemRepository promotionItemRepository;
@@ -759,6 +760,52 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
 
     @Override
     @Transactional
+    public void initializeScheduleSeats() {
+
+        if (scheduleSeatRepository.count() > 0) {
+            System.out.println("ℹ️ Bảng SCHEDULE_SEATS đã có dữ liệu, bỏ qua khởi tạo.");
+            return;
+        }
+
+        List<Schedule> schedules = scheduleRepository.findByIsDeletedFalse();
+        if (schedules.isEmpty()) {
+            System.out.println("⚠️ Không tìm thấy schedule. Hãy khởi tạo schedule trước!");
+            return;
+        }
+
+        List<ScheduleSeat> buffer = new ArrayList<>();
+
+        for (Schedule schedule : schedules) {
+
+            // Lấy room từ schedule
+            UUID roomId = schedule.getRoom().getId();
+
+            // Lấy toàn bộ ghế của phòng đó
+            List<Seat> seats = seatRepository.findByRoomIdAndIsDeletedFalseOrderByPositionAsc(roomId);
+
+            for (Seat seat : seats) {
+
+                ScheduleSeat ss = ScheduleSeat.builder()
+                        .schedule(schedule)
+                        .seat(seat)
+                        .status("available")     // mặc định
+                        .holderId(null)
+                        .holdExpiresAt(null)
+                        .isDeleted(false)
+                        .build();
+
+                buffer.add(ss);
+            }
+        }
+
+        scheduleSeatRepository.saveAll(buffer);
+
+        System.out.println("✅ Đã khởi tạo bảng SCHEDULE_SEATS thành công! Tổng: "
+                + buffer.size() + " seat states được tạo.");
+    }
+
+    @Override
+    @Transactional
     public void initializeFoods() {
         // Kiểm tra nếu bảng products đã có dữ liệu thì bỏ qua
         if (productRepository.count() > 0) {
@@ -1315,6 +1362,7 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
         initializeShowTimes();
         initializeSeats();
         initializeSchedules();
+        initializeScheduleSeats();
         initializeFoods();
         initializeProductPrices();
         initializePromotions();

@@ -357,6 +357,7 @@ SELECT * FROM rooms
 SELECT * FROM show_times
 SELECT * FROM seats
 SELECT * FROM schedules
+SELECT * FROM schedule_seats
 SELECT * FROM products
 SELECT * FROM product_prices
 SELECT * FROM promotions
