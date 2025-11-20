@@ -26,7 +26,7 @@ public class CategoryManageRestApi implements CategoryManageController {
 
     @Override
     @PostMapping("")
-    public ResponseEntity<ApiResponse> create(Category category) {
+    public ResponseEntity<ApiResponse> create(@RequestBody Category category) {
         return ResponseEntity.ok(categoryService.create(category));
     }
 

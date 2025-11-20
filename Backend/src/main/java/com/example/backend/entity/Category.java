@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
