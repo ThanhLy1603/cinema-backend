@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7c6ebf6c-4c13-446f-8ce3-8312c234c6f1" name="Changes" comment="" />
+    <list default="true" id="7c6ebf6c-4c13-446f-8ce3-8312c234c6f1" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,6 +21,12 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -102,7 +110,7 @@
       <workItem from="1763621588158" duration="2205000" />
       <workItem from="1763644971601" duration="657000" />
       <workItem from="1763645658718" duration="207000" />
-      <workItem from="1763646197757" duration="1662000" />
+      <workItem from="1763646197757" duration="2593000" />
     </task>
     <servers />
   </component>
