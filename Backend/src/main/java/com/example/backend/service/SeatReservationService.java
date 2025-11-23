@@ -10,6 +10,7 @@ import com.example.backend.entity.Seat;
 import com.example.backend.repository.ScheduleRepository;
 import com.example.backend.repository.ScheduleSeatRepository;
 import com.example.backend.repository.SeatRepository;
+import com.example.backend.repository.SeatTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class SeatReservationService {
     private final ScheduleSeatRepository scheduleSeatRepository;
     private final SeatRepository seatRepository;
     private final ScheduleRepository scheduleRepository;
+    private final SeatTypeRepository seatTypeRepository;
 
     private static final int DEFAULT_HOLDER_MINUTES = 10;
 
@@ -129,13 +131,14 @@ public class SeatReservationService {
     }
 
 
-    private SeatReservationResponse toSeatReservationResponse(ScheduleSeat ss) {
-        SeatReservationResponse dto = new SeatReservationResponse();
-        dto.setSeatId(ss.getSeat().getId());
-        dto.setPosition(ss.getSeat().getPosition());
-        dto.setStatus(ss.getStatus());
-        dto.setHolderId(ss.getHolderId());
-        dto.setHoldExpiresAt(ss.getHoldExpiresAt());
-        return dto;
+    private SeatReservationResponse toSeatReservationResponse(ScheduleSeat scheduleSeat) {
+        SeatReservationResponse response = new SeatReservationResponse();
+        response.setSeatId(scheduleSeat.getSeat().getId());
+        response.setPosition(scheduleSeat.getSeat().getPosition());
+        response.setSeatType(scheduleSeat.getSeat().getSeatType().getName());
+        response.setStatus(scheduleSeat.getStatus());
+        response.setHolderId(scheduleSeat.getHolderId());
+        response.setHoldExpiresAt(scheduleSeat.getHoldExpiresAt());
+        return response;
     }
 }

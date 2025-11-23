@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class HoldRequest {
     private String holderId;
-    private Integer holdMinutes; // optional
+    private Integer holdMinutes;
 }

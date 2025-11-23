@@ -24,14 +24,14 @@ public class SeatReservationRestApi {
         return ResponseEntity.ok(seatReservationService.getSeats(scheduleId));
     }
 
-    @PostMapping("/{scheduleId}/seats/{seatId}/hold")
+    @PutMapping("/{scheduleId}/seats/{seatId}/hold")
     public ResponseEntity<ApiResponse> holdSeat(@PathVariable UUID scheduleId,
                                                 @PathVariable UUID seatId,
                                                 @RequestBody HoldRequest request) {
         return ResponseEntity.ok(seatReservationService.holdSeat(scheduleId, seatId, request));
     }
 
-    @PostMapping("/{scheduleId}/seats/{seatId}/release")
+    @PutMapping("/{scheduleId}/seats/{seatId}/release")
     public ResponseEntity<?> releaseSeat(
             @PathVariable UUID scheduleId,
             @PathVariable UUID seatId,
