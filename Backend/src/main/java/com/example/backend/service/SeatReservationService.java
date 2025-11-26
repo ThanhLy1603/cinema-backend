@@ -72,18 +72,13 @@ public class SeatReservationService {
             return new ApiResponse("fail","Ghế đã được đặt");
         }
 
-        List<ScheduleSeat> allSeats = scheduleSeatRepository.findByScheduleIdOrderBySeatPosition(scheduleId);
-        if (createsGapWhenHolding(allSeats, scheduleSeat,  holderId)) {
-            System.out.println("Không được để 1 ghế trống giữa hai ghế đã giữ/đặt");
-            return new ApiResponse("fail", "Không được để 1 ghế trống giữa hai ghế đã giữ/đặt");
-        }
+        if (isAntiGap(scheduleId, seat)) System.out.println("Không được bỏ trống ghế ở giữa cùng hàng");
 
         scheduleSeat.setStatus("holding");
         scheduleSeat.setHolderId(holderId);
         scheduleSeat.setHoldExpiresAt(LocalDateTime.now().plusMinutes(ttlMinutes));
+        simpMessagingTemplate.convertAndSend("/topic/seats/" + scheduleId, toSeatReservationResponse(scheduleSeat));
         scheduleSeatRepository.save(scheduleSeat);
-
-        simpMessagingTemplate.convertAndSend("/topic/seats/" +scheduleId, toSeatReservationResponse(scheduleSeat));
 
         return new ApiResponse("success", "Giữ ghế thành công");
     }
@@ -94,6 +89,8 @@ public class SeatReservationService {
                 .findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
 
+        Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new RuntimeException("Seat not found"));
+
         if (!"holding".equals(scheduleSeat.getStatus())) {
             return;
         }
@@ -101,6 +98,8 @@ public class SeatReservationService {
         if (!Objects.equals(scheduleSeat.getHolderId(), holderId)) {
             throw new RuntimeException("You are not holder of this seat");
         }
+
+        if (isAntiGap(scheduleId, seat)) System.out.println("Không được bỏ trống ghế ở giữa cùng hàng");
 
         scheduleSeat.setStatus("available");
         scheduleSeat.setHolderId(null);
@@ -149,6 +148,46 @@ public class SeatReservationService {
         response.setHolderId(scheduleSeat.getHolderId());
         response.setHoldExpiresAt(scheduleSeat.getHoldExpiresAt());
         return response;
+    }
+
+    public boolean isAntiGap(UUID scheduleId, Seat seatSelected) {
+        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findByScheduleIdOrderBySeatPosition(scheduleId);
+
+        if (scheduleSeats.isEmpty()) return false;
+
+        String rowLabel = seatSelected.getPosition().substring(0, 1);
+
+        List<ScheduleSeat> rowSeats = scheduleSeats.stream()
+                .filter(scheduleSeat -> scheduleSeat.getSeat().getPosition().startsWith(rowLabel))
+                .sorted(Comparator.comparingInt(scheduleSeat ->
+                        Integer.parseInt(scheduleSeat.getSeat().getPosition().replaceAll("\\D", ""))))
+                .toList();
+
+        List<Integer> holdingIndexes = new ArrayList<>();
+        for (int i = 0; i <= rowSeats.size() - 1; i++) {
+            if ("holding".equals(rowSeats.get(i).getStatus())) {
+                holdingIndexes.add(i);
+            }
+        }
+
+        if (holdingIndexes.size() < 2) return false;
+
+        for (int i = 0; i < holdingIndexes.size() - 1; i++) {
+            int left = holdingIndexes.get(i);
+            int right = holdingIndexes.get(i + 1);
+
+            List<ScheduleSeat> middleSeats = rowSeats.subList(left, right);
+
+            boolean hasGap = middleSeats.stream().anyMatch(scheduleSeat ->
+                    "available".equals(scheduleSeat.getStatus())
+            );
+
+            System.out.println("hasGap: " + hasGap);
+
+            if (hasGap) return true;
+        }
+
+        return false;
     }
 
     private boolean createsGapWhenHolding(List<ScheduleSeat> scheduleSeats, ScheduleSeat targetSeat, String currentHolderId) {
