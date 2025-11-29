@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ScheduleCustomerService {
+public class ScheduleService {
     private final FilmRepository filmRepository;
     private final ScheduleRepository scheduleRepository;
 

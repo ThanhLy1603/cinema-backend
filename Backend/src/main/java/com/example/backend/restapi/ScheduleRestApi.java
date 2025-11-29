@@ -2,7 +2,7 @@ package com.example.backend.restapi;
 
 
 import com.example.backend.dto.ScheduleManageResponse;
-import com.example.backend.service.ScheduleCustomerService;
+import com.example.backend.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/customer/schedules")
+@RequestMapping("/api/schedules")
 @RequiredArgsConstructor
-public class ScheduleCustomerApi {
-    private final ScheduleCustomerService scheduleCustomerService;
+public class ScheduleRestApi {
+    private final ScheduleService scheduleService;
 
-    @GetMapping("/{filmId}")
+    @GetMapping("/film/{filmId}")
     public ResponseEntity<List<ScheduleManageResponse>> getAllSchedulesByFilmId(@PathVariable UUID filmId) {
-        return ResponseEntity.ok(scheduleCustomerService.getSchedulesByFilmId(filmId));
+        return ResponseEntity.ok(scheduleService.getSchedulesByFilmId(filmId));
     }
 }

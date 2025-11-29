@@ -58,5 +58,5 @@ public class Invoice {
     private List<InvoiceProduct> products;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InvoiceQRCode> qrcodes;
+    private List<InvoiceQRCode> qrCodes;
 }
