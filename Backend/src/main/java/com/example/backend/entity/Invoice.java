@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,11 +53,14 @@ public class Invoice {
     private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InvoiceTicket> tickets;
+    @Builder.Default
+    private List<InvoiceTicket> tickets = new ArrayList<>();
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InvoiceProduct> products;
+    @Builder.Default
+    private List<InvoiceProduct> products= new ArrayList<>();
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InvoiceQRCode> qrcodes;
+    @Builder.Default
+    private List<InvoiceQRCode> qrcodes= new ArrayList<>();
 }
