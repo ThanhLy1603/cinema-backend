@@ -23,4 +23,9 @@ public class ScheduleRestApi {
     public ResponseEntity<List<ScheduleManageResponse>> getAllSchedulesByFilmId(@PathVariable UUID filmId) {
         return ResponseEntity.ok(scheduleService.getSchedulesByFilmId(filmId));
     }
+
+    @GetMapping("/{scheduleId}")
+    public ResponseEntity<ScheduleManageResponse> getScheduleById(@PathVariable UUID scheduleId) {
+        return ResponseEntity.ok(scheduleService.getScheduleById(scheduleId));
+    }
 }

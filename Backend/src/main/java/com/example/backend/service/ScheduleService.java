@@ -25,6 +25,13 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
 
     @Transactional
+    public ScheduleManageResponse getScheduleById(UUID scheduleId) {
+        Schedule schedule = scheduleRepository.findByIdAndIsDeletedFalse(scheduleId);
+        if (schedule == null) return null;
+        return toScheduleManageResponse(schedule);
+    }
+
+    @Transactional
     public List<ScheduleManageResponse> getSchedulesByFilmId(UUID filmId) {
         Film film = filmRepository.findById(filmId).orElse(null);
         if (film == null) return List.of();
