@@ -1,9 +1,9 @@
 package com.example.backend.restapi;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CheckoutRequest;
-import com.example.backend.dto.HoldRequest;
-import com.example.backend.dto.SeatReservationResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.CheckoutRequest;
+import com.example.backend.dto.request.HoldRequest;
+import com.example.backend.dto.response.SeatReservationResponse;
 import com.example.backend.service.SeatReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

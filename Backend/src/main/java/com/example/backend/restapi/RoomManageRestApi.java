@@ -1,13 +1,12 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.RoomManageController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.RoomMangeRequest;
-import com.example.backend.dto.RoomManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.RoomMangeRequest;
+import com.example.backend.dto.response.RoomManageResponse;
 import com.example.backend.service.RoomManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

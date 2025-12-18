@@ -1,13 +1,12 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CategoryManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.UUID;

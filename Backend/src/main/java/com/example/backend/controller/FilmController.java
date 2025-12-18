@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.FilmResponse;
-import com.example.backend.dto.CategoryManageResponse;
+import com.example.backend.dto.response.FilmResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 

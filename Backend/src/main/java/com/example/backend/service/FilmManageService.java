@@ -1,8 +1,11 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.request.FilmManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
+import com.example.backend.dto.response.FilmManageResponse;
 import com.example.backend.entity.FilmCategory;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.example.backend.dto.*;
 import com.example.backend.entity.Category;
 import com.example.backend.entity.Film;
 import com.example.backend.repository.CategoryRepository;
@@ -15,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;

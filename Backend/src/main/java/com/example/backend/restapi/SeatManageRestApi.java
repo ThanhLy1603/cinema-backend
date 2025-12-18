@@ -1,13 +1,16 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.SeatManageController;
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.SeatManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.RoomManageResponse;
+import com.example.backend.dto.response.SeatManageResponse;
+import com.example.backend.dto.response.SeatTypeManageResponse;
 import com.example.backend.service.RoomManageService;
 import com.example.backend.service.SeatManageService;
 import com.example.backend.service.SeatTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

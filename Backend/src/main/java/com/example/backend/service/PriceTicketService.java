@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.PriceTicketResponse;
+import com.example.backend.dto.response.PriceTicketResponse;
 import com.example.backend.entity.PriceTicket;
 import com.example.backend.repository.PriceTicketRepository;
 import lombok.RequiredArgsConstructor;

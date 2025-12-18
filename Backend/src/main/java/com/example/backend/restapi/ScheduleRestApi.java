@@ -1,7 +1,7 @@
 package com.example.backend.restapi;
 
 
-import com.example.backend.dto.ScheduleManageResponse;
+import com.example.backend.dto.response.ScheduleManageResponse;
 import com.example.backend.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +22,10 @@ public class ScheduleRestApi {
     @GetMapping("/film/{filmId}")
     public ResponseEntity<List<ScheduleManageResponse>> getAllSchedulesByFilmId(@PathVariable UUID filmId) {
         return ResponseEntity.ok(scheduleService.getSchedulesByFilmId(filmId));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ScheduleManageResponse> getScheduleById(@PathVariable UUID id) {
+        return ResponseEntity.ok(scheduleService.getScheduleById(id));
     }
 }

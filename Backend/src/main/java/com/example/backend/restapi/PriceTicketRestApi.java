@@ -1,8 +1,6 @@
 package com.example.backend.restapi;
 
-import com.example.backend.dto.PriceTicketResponse;
-import com.example.backend.entity.PriceTicket;
-import com.example.backend.repository.PriceTicketRepository;
+import com.example.backend.dto.response.PriceTicketResponse;
 import com.example.backend.service.PriceTicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

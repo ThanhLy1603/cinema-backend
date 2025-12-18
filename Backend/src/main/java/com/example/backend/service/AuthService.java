@@ -1,6 +1,10 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.LoginRequest;
+import com.example.backend.dto.request.ResetPasswordRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.LoginResponse;
+import com.example.backend.dto.response.RegisterRequest;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.UserProfile;
 import com.example.backend.entity.UserRole;
@@ -8,7 +12,6 @@ import com.example.backend.entity.Users;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -17,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

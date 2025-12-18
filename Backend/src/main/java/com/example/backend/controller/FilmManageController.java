@@ -1,6 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.FilmManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
+import com.example.backend.dto.response.FilmManageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;

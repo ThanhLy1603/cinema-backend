@@ -1,9 +1,9 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CheckoutRequest;
-import com.example.backend.dto.HoldRequest;
-import com.example.backend.dto.SeatReservationResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.CheckoutRequest;
+import com.example.backend.dto.request.HoldRequest;
+import com.example.backend.dto.response.SeatReservationResponse;
 import com.example.backend.entity.Schedule;
 import com.example.backend.entity.ScheduleSeat;
 import com.example.backend.entity.Seat;
@@ -14,7 +14,6 @@ import com.example.backend.repository.SeatTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -143,6 +142,7 @@ public class SeatReservationService {
             scheduleSeat.setStatus("booked");
             scheduleSeat.setHoldExpiresAt(null);
 
+            simpMessagingTemplate.convertAndSend("/topic/seats/" + scheduleId, toSeatReservationResponse(scheduleSeat));
             scheduleSeatRepository.save(scheduleSeat);
 
             results.add(toSeatReservationResponse(scheduleSeat));
@@ -201,88 +201,4 @@ public class SeatReservationService {
         response.setHoldExpiresAt(scheduleSeat.getHoldExpiresAt());
         return response;
     }
-
-//    private boolean createsGapWhenHolding(List<ScheduleSeat> scheduleSeats, ScheduleSeat targetSeat, String currentHolderId) {
-//        Map<String, List<RowSeat>> rows = buildRows(scheduleSeats);
-//
-//        String targetPosition = targetSeat.getSeat().getPosition();
-//        String rowKey = targetPosition.substring(0, 1);
-//
-//        List<RowSeat> rowSeats = rows.get(rowKey);
-//        if (rowSeats == null) return false;
-//
-//        for (RowSeat rowSeat : rowSeats) {
-//            if (rowSeat.position.equals(targetPosition)) {
-//                rowSeat.simulatedStatus = "holding";
-//                rowSeat.simulatedHolderId = currentHolderId;
-//            }
-//        }
-//
-//        for (int i = 0; i < rowSeats.size(); i++) {
-//            RowSeat left = rowSeats.get(i);
-//            RowSeat middle = rowSeats.get(i + 1);
-//            RowSeat right = rowSeats.get(i + 2);
-//
-//            boolean leftTaken = isTaken(left);
-//            boolean rightTaken = isTaken(right);
-//            boolean middleTaken = isTaken(middle);
-//
-//            if (leftTaken && rightTaken && middleTaken) return true;
-//        }
-//
-//        return false;
-//    }
-//
-//    private boolean isTaken(RowSeat seat) {
-//        if ("booked".equalsIgnoreCase(seat.status)) return true;
-//        if ("holding".equalsIgnoreCase(seat.status) && seat.holdExpiresAt != null && seat.holdExpiresAt.isAfter(LocalDateTime.now())) return true;
-//        if ("holding".equalsIgnoreCase(seat.simulatedStatus) && seat.simulatedHolderId != null) return true;
-//        if ("booked".equalsIgnoreCase(seat.simulatedStatus)) return true;
-//        return false;
-//    }
-//
-//    private boolean isFree(RowSeat seat) {
-//        if (seat.status == null) return true;
-//        if ("available".equalsIgnoreCase(seat.status)) {
-//            return !"holding".equalsIgnoreCase(seat.simulatedStatus) && !"booked".equalsIgnoreCase(seat.simulatedStatus);
-//        }
-//        if ("holding".equalsIgnoreCase(seat.status) && (seat.holdExpiresAt == null || seat.holdExpiresAt.isBefore(LocalDateTime.now()))) return true;
-//        return false;
-//    }
-//
-//    private Map<String, List<RowSeat>> buildRows(List<ScheduleSeat> scheduleSeats) {
-//        Map<String, List<RowSeat>> rows = new HashMap<>();
-//        for (ScheduleSeat scheduleSeat : scheduleSeats) {
-//            String position = scheduleSeat.getSeat().getPosition();
-//            String rowKey = position.substring(0, 1);
-//            int index;
-//
-//            try {
-//                index = Integer.parseInt(position.substring(1));
-//            } catch (Exception ex) {
-//                index = 0;
-//            }
-//
-//            RowSeat rowSeat = new RowSeat();
-//            rowSeat.position = position;
-//            rowSeat.status = scheduleSeat.getStatus();
-//            rowSeat.holderId = scheduleSeat.getHolderId();
-//            rowSeat.positionIndex = index;
-//            rowSeat.holdExpiresAt = scheduleSeat.getHoldExpiresAt();
-//        }
-//
-//        rows.values().forEach(list -> list.sort(Comparator.comparingInt(row -> row.positionIndex)));
-//
-//        return rows;
-//    }
-//
-//    private static class RowSeat {
-//        String position;
-//        String status;
-//        String holderId;
-//        LocalDateTime holdExpiresAt;
-//        int positionIndex;
-//        String simulatedStatus;
-//        String simulatedHolderId;
-//    }
 }

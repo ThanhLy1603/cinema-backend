@@ -1,6 +1,10 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.SeatManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.RoomManageResponse;
+import com.example.backend.dto.response.SeatManageResponse;
+import com.example.backend.dto.response.SeatTypeManageResponse;
 import com.example.backend.entity.Room;
 import com.example.backend.entity.Seat;
 import com.example.backend.entity.SeatType;

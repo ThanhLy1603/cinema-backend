@@ -1,9 +1,9 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.FilmResponse;
-import com.example.backend.dto.RoomManageResponse;
-import com.example.backend.dto.ScheduleManageResponse;
-import com.example.backend.dto.ShowTimeManageResponse;
+import com.example.backend.dto.response.FilmResponse;
+import com.example.backend.dto.response.RoomManageResponse;
+import com.example.backend.dto.response.ScheduleManageResponse;
+import com.example.backend.dto.response.ShowTimeManageResponse;
 import com.example.backend.entity.Film;
 import com.example.backend.entity.Room;
 import com.example.backend.entity.Schedule;
@@ -38,6 +38,15 @@ public class ScheduleService {
         return schedules;
     }
 
+    @Transactional
+    public ScheduleManageResponse getScheduleById(UUID id) {
+        if (id == null) return null;
+
+        Schedule schedule = scheduleRepository.findById(id).orElse(null);
+        ScheduleManageResponse response = toScheduleManageResponse(schedule);
+
+        return response;
+    }
 
     private ScheduleManageResponse toScheduleManageResponse(Schedule schedule) {
         return new ScheduleManageResponse(

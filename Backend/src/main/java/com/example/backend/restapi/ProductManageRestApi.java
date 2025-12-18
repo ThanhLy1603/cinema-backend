@@ -1,9 +1,9 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.ProductManageController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ProductManageRequest;
-import com.example.backend.dto.ProductManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ProductManageRequest;
+import com.example.backend.dto.response.ProductManageResponse;
 import com.example.backend.service.ProductManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

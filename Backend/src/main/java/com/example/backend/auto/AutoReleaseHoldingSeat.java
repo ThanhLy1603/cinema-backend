@@ -1,12 +1,13 @@
 package com.example.backend.auto;
 
-import com.example.backend.dto.SeatReservationResponse;
+import com.example.backend.dto.response.SeatReservationResponse;
 import com.example.backend.entity.ScheduleSeat;
 import com.example.backend.repository.ScheduleSeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,7 @@ public class AutoReleaseHoldingSeat {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Scheduled(fixedRate = 30000)
+    @Transactional
     public void releaseExpiredHoldingSeat() {
         LocalDateTime now = LocalDateTime.now();
         List<ScheduleSeat> expiredSeats = scheduleSeatRepository.findAllExpired(now);
@@ -45,5 +47,18 @@ public class AutoReleaseHoldingSeat {
                     response
             );
         }
+
+        System.out.println("Đã reset toàn bộ ghế thành công");
+    }
+
+    private SeatReservationResponse toSeatReservationResponse(ScheduleSeat scheduleSeat) {
+        SeatReservationResponse response = new SeatReservationResponse();
+        response.setSeatId(scheduleSeat.getSeat().getId());
+        response.setPosition(scheduleSeat.getSeat().getPosition());
+        response.setSeatType(scheduleSeat.getSeat().getSeatType().getName());
+        response.setStatus(scheduleSeat.getStatus());
+        response.setHolderId(scheduleSeat.getHolderId());
+        response.setHoldExpiresAt(scheduleSeat.getHoldExpiresAt());
+        return response;
     }
 }

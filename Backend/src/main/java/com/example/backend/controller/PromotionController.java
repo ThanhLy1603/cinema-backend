@@ -1,9 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.PromotionItemRequest;
-import com.example.backend.dto.PromotionRequest;
-import com.example.backend.dto.PromotionResponse;
-import com.example.backend.dto.PromotionRuleRequest;
+import com.example.backend.dto.request.PromotionItemRequest;
+import com.example.backend.dto.request.PromotionRequest;
+import com.example.backend.dto.response.PromotionResponse;
+import com.example.backend.dto.request.PromotionRuleRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;

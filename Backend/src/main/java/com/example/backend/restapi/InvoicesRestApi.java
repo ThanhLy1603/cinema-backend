@@ -1,11 +1,8 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.InvoiceController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CreateInvoicesRequest;
-import com.example.backend.dto.InvoicesRequest;
-import com.example.backend.entity.InvoiceProduct;
-import com.example.backend.entity.InvoiceTicket;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.CreateInvoicesRequest;
 import com.example.backend.service.InvoicesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-
-
 
 @RestController
 @RequestMapping("/api/invoices")

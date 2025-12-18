@@ -1,7 +1,10 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmManageController;
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.FilmManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
+import com.example.backend.dto.response.FilmManageResponse;
 import com.example.backend.service.FilmManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

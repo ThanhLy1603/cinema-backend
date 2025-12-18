@@ -1,8 +1,8 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ShowTimeManageRequest;
-import com.example.backend.dto.ShowTimeManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ShowTimeManageRequest;
+import com.example.backend.dto.response.ShowTimeManageResponse;
 import com.example.backend.entity.ShowTime;
 import com.example.backend.repository.ShowTimeRepository;
 import jakarta.transaction.Transactional;

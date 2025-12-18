@@ -1,8 +1,8 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.ProductPriceManageController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ProductPriceResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.ProductPriceResponse;
 import com.example.backend.entity.ProductPrice;
 import com.example.backend.service.ProductPriceManageService;
 import lombok.RequiredArgsConstructor;

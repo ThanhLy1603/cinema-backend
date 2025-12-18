@@ -1,9 +1,9 @@
 package com.example.backend.service;
 
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.RoomMangeRequest;
-import com.example.backend.dto.RoomManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.RoomMangeRequest;
+import com.example.backend.dto.response.RoomManageResponse;
 import com.example.backend.entity.Room;
 import com.example.backend.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;

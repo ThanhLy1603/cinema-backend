@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CreateInvoicesRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.CreateInvoicesRequest;
 import com.example.backend.entity.Invoice;
 import com.example.backend.entity.InvoiceProduct;
 import com.example.backend.entity.InvoiceTicket;
