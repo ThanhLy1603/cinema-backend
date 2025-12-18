@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -21,14 +22,17 @@ public class PriceTicket {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "film_id", nullable = false)
+    @JsonIgnore
     private Film film;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_type_id", nullable = false)
+    @JsonIgnore
     private SeatType seatType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "show_time_id", nullable = false)
+    @JsonIgnore
     private ShowTime showTime;
 
     @Enumerated(EnumType.STRING)

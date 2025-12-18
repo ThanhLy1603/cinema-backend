@@ -2,16 +2,15 @@ package com.example.backend.service;
 
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.CreateInvoicesRequest;
-import com.example.backend.entity.Invoice;
-import com.example.backend.entity.InvoiceProduct;
-import com.example.backend.entity.InvoiceTicket;
-import com.example.backend.entity.UserProfile;
+import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.awt.desktop.UserSessionEvent;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +24,13 @@ public class InvoicesService {
     private final PriceTicketRepository priceTicketRepository;
     private final PromotionRepository promotionRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     public ApiResponse createInvoice(CreateInvoicesRequest request) {
         UserProfile userProfile = userProfileRepository.findById(request.invoice().userName())
                 .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
+        Optional<Users> user = userRepository.findByUsername(request.invoice().userName());
+        Users users = user.orElseThrow(() -> new RuntimeException("Users not found"));
         Invoice invoice = Invoice.builder()
                 .customerName(userProfile.getUsername())
                 .customerAddress(userProfile.getAddress())
@@ -39,6 +40,7 @@ public class InvoicesService {
                 .finalAmount(request.invoice().finalAmount())
                 .status("PENDING")
                 .createdAt(LocalDateTime.now())
+                .username(users)
                 .build();
         invoiceRepository.save(invoice);
 
