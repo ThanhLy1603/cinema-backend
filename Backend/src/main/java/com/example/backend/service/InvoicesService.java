@@ -1,22 +1,16 @@
 package com.example.backend.service;
 
-<<<<<<< HEAD
 import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.dto.request.CreateInvoicesRequest;
 import com.example.backend.entity.Invoice;
 import com.example.backend.entity.InvoiceProduct;
 import com.example.backend.entity.InvoiceTicket;
 import com.example.backend.entity.UserProfile;
-=======
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CreateInvoicesRequest;
 import com.example.backend.entity.*;
->>>>>>> origin/Quan
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.awt.desktop.UserSessionEvent;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

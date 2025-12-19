@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ProductPriceResponse;
+import com.example.backend.dto.response.ProductPriceResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
