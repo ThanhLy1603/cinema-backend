@@ -99,6 +99,4 @@ public class SellTicketService {
 
         return new ApiResponse("success", "Tạo hoá đơn thành công");
     }
-
-
 }

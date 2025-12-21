@@ -23,9 +23,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InvoiceHistoryService {
     private final InvoiceRepository invoiceRepository;
-    private final InvoiceTicketRepository invoiceTicketRepository;
-    private final InvoiceProductRepository invoiceProductRepository;
-    private final InvoiceQRCodeRepository invoiceQRCodeRepository;
 
     public List<InvoiceSummaryResponse> getAllInvoices() {
 

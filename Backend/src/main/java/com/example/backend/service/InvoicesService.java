@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.request.CheckoutRequest;
+import com.example.backend.dto.request.InvoicesTicketRequest;
 import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.dto.request.CreateInvoicesRequest;
 import com.example.backend.entity.Invoice;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,9 @@ public class InvoicesService {
     private final PromotionRepository promotionRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final QRCodeService qrCodeService;
+    private final InvoiceQRCodeRepository invoiceQRCodeRepository;
+    private final SeatReservationService seatReservationService;
 
     public ApiResponse createInvoice(CreateInvoicesRequest request) {
         UserProfile userProfile = userProfileRepository.findById(request.invoice().userName())
@@ -81,7 +87,30 @@ public class InvoicesService {
         invoice.getProducts().addAll(invoiceProducts);
 
         // Lưu lại lần cuối để cascade quan hệ
-        invoiceRepository.save(invoice);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+
+        // Tạo QR Code
+        String qrString = qrCodeService.generateQRCode(savedInvoice.getId());
+
+        InvoiceQRCode invoiceQRCode = new InvoiceQRCode();
+        invoiceQRCode.setInvoice(savedInvoice);
+        invoiceQRCode.setQrCode(qrString);
+        invoiceQRCode.setQrType("TICKET");
+        invoiceQRCode.setIsUsed(false);
+        invoiceQRCodeRepository.save(invoiceQRCode);
+
+        // Xử lý checkout
+        CheckoutRequest checkoutRequest = new CheckoutRequest();
+
+        checkoutRequest.setHolderId(userProfile.getUsername());
+        checkoutRequest.setSeatIds(
+                request.tickets().stream()
+                        .map(InvoicesTicketRequest::seatId)
+                        .toList()
+        );
+
+        UUID scheduleId = request.tickets().getFirst().scheduleId();
+        seatReservationService.checkout(scheduleId, checkoutRequest);
 
         return new ApiResponse("success", "Invoice created successfully");
     }

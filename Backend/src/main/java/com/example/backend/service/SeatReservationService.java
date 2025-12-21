@@ -50,8 +50,11 @@ public class SeatReservationService {
     public ApiResponse holdSeat(UUID scheduleId, UUID seatId, HoldRequest request) {
         String holderId = request.getHolderId();
         System.out.println("holderId: " + holderId);
+
         int ttlMinutes = request.getHoldMinutes() != null
                 ? request.getHoldMinutes() : DEFAULT_HOLDER_MINUTES;
+
+        System.out.println("ttlMinutes: " + ttlMinutes);
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new RuntimeException("Schedule not found"));
         Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new RuntimeException("Seat not found"));
