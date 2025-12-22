@@ -29,6 +29,9 @@ public class Users implements UserDetails {
     @Column(nullable = false)
     private Boolean enabled = true;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false; // Added for soft delete
+
     // Quan hệ 1-1 với UserProfile
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfile profile;
@@ -55,4 +58,8 @@ public class Users implements UserDetails {
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return enabled; }
+
+    public void setIsDeleted(boolean b) {
+        this.isDeleted = isDeleted;
+    }
 }
