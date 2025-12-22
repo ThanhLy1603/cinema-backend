@@ -1,8 +1,8 @@
 package com.example.backend.service;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ChangePasswordRequest;
-import com.example.backend.dto.UserProfileResponse;
-import com.example.backend.dto.UserProfileUpdateRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ChangePasswordRequest;
+import com.example.backend.dto.response.UserProfileResponse;
+import com.example.backend.dto.request.UserProfileUpdateRequest;
 import com.example.backend.entity.UserProfile;
 import com.example.backend.entity.Users;
 import com.example.backend.repository.UserProfileRepository;
@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;

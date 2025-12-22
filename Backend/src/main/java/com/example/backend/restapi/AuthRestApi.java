@@ -1,16 +1,14 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.AuthController;
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.*;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.RegisterRequest;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

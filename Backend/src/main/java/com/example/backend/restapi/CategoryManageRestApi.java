@@ -1,8 +1,8 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.CategoryManageController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CategoryManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.service.CategoryManageService;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class UserProfile {
 
     @OneToOne
     @MapsId
+    @JsonIgnore
     @JoinColumn(name = "username", referencedColumnName = "username")
     private Users user;
 

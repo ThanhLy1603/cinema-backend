@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ public class Schedule {
             nullable = false,
             foreignKey = @ForeignKey(name = "FK_Schedule_Film")
     )
+
     private Film film;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Users implements UserDetails {
     @Id
     @Column(length = 50, nullable = false)
@@ -31,10 +33,12 @@ public class Users implements UserDetails {
 
     // Quan hệ 1-1 với UserProfile
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private UserProfile profile;
 
     // Quan hệ 1-n với UserRole
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
 
     public Users(String username, String password, String email, Boolean enabled) {

@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ProductResponse;
+import com.example.backend.dto.response.ProductResponse;
 import com.example.backend.entity.Product;
 import com.example.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;

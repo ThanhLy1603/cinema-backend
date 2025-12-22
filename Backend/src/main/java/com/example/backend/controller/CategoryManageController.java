@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CategoryManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
 import com.example.backend.entity.Category;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -1,8 +1,8 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.FilmResponse;
-import com.example.backend.dto.CategoryManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.FilmResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
 import com.example.backend.entity.Film;
 import com.example.backend.repository.FilmRepository;
 import jakarta.transaction.Transactional;

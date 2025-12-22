@@ -1,17 +1,22 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.CreateInvoicesRequest;
+import com.example.backend.dto.request.CheckoutRequest;
+import com.example.backend.dto.request.InvoicesTicketRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.CreateInvoicesRequest;
 import com.example.backend.entity.Invoice;
 import com.example.backend.entity.InvoiceProduct;
 import com.example.backend.entity.InvoiceTicket;
 import com.example.backend.entity.UserProfile;
+import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +30,16 @@ public class InvoicesService {
     private final PriceTicketRepository priceTicketRepository;
     private final PromotionRepository promotionRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final QRCodeService qrCodeService;
+    private final InvoiceQRCodeRepository invoiceQRCodeRepository;
+    private final SeatReservationService seatReservationService;
 
     public ApiResponse createInvoice(CreateInvoicesRequest request) {
         UserProfile userProfile = userProfileRepository.findById(request.invoice().userName())
                 .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
+        Optional<Users> user = userRepository.findByUsername(request.invoice().userName());
+        Users users = user.orElseThrow(() -> new RuntimeException("Users not found"));
         Invoice invoice = Invoice.builder()
                 .customerName(userProfile.getUsername())
                 .customerAddress(userProfile.getAddress())
@@ -39,6 +49,7 @@ public class InvoicesService {
                 .finalAmount(request.invoice().finalAmount())
                 .status("PENDING")
                 .createdAt(LocalDateTime.now())
+                .username(users)
                 .build();
         invoiceRepository.save(invoice);
 
@@ -76,7 +87,30 @@ public class InvoicesService {
         invoice.getProducts().addAll(invoiceProducts);
 
         // Lưu lại lần cuối để cascade quan hệ
-        invoiceRepository.save(invoice);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+
+        // Tạo QR Code
+        String qrString = qrCodeService.generateQRCode(savedInvoice.getId());
+
+        InvoiceQRCode invoiceQRCode = new InvoiceQRCode();
+        invoiceQRCode.setInvoice(savedInvoice);
+        invoiceQRCode.setQrCode(qrString);
+        invoiceQRCode.setQrType("TICKET");
+        invoiceQRCode.setIsUsed(false);
+        invoiceQRCodeRepository.save(invoiceQRCode);
+
+        // Xử lý checkout
+        CheckoutRequest checkoutRequest = new CheckoutRequest();
+
+        checkoutRequest.setHolderId(userProfile.getUsername());
+        checkoutRequest.setSeatIds(
+                request.tickets().stream()
+                        .map(InvoicesTicketRequest::seatId)
+                        .toList()
+        );
+
+        UUID scheduleId = request.tickets().getFirst().scheduleId();
+        seatReservationService.checkout(scheduleId, checkoutRequest);
 
         return new ApiResponse("success", "Invoice created successfully");
     }

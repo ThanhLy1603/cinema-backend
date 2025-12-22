@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,7 @@ public class UserRole {
     // Liên kết đến Users
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", insertable = false, updatable = false)
+    @JsonIgnore
     private Users user;
 
     // Liên kết đến Role

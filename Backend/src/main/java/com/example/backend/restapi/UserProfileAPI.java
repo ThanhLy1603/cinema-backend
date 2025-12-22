@@ -1,20 +1,14 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.UserProfileController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ChangePasswordRequest;
-import com.example.backend.dto.UserProfileResponse;
-import com.example.backend.dto.UserProfileUpdateRequest;
-import com.example.backend.entity.UserProfile;
-import com.example.backend.entity.Users;
-import com.example.backend.repository.UserProfileRepository;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ChangePasswordRequest;
+import com.example.backend.dto.response.UserProfileResponse;
+import com.example.backend.dto.request.UserProfileUpdateRequest;
 import com.example.backend.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor

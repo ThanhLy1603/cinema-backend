@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.ScheduleManageRequest;
+import com.example.backend.dto.response.*;
 import com.example.backend.entity.Film;
 import com.example.backend.entity.Room;
 import com.example.backend.entity.Schedule;

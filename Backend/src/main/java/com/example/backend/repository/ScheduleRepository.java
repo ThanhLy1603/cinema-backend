@@ -25,6 +25,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     List<Schedule> findByFilmAndIsDeletedFalse(
             Film film
     );
+    Schedule findByIdAndIsDeletedFalse(
+            UUID id
+    );
 
     @Query("SELECT s FROM Schedule s " +
             "WHERE s.isDeleted = false AND EXISTS (" +
