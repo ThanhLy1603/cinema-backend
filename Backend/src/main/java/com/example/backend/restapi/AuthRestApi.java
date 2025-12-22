@@ -49,7 +49,7 @@ public class AuthRestApi implements AuthController {
                 ? ResponseEntity.ok(new ApiResponse("success", "OTP hợp lệ!"))
                 : ResponseEntity.badRequest().body(new ApiResponse("error", "OTP sai hoặc hết hạn!"));
     }
-
+    
     @Override
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request) {

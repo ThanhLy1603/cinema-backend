@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SeatReservationService {
+
     private final ScheduleSeatRepository scheduleSeatRepository;
     private final SeatRepository seatRepository;
     private final ScheduleRepository scheduleRepository;
@@ -31,72 +32,89 @@ public class SeatReservationService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final int DEFAULT_HOLDER_MINUTES = 10;
-    private final ListableBeanFactory listableBeanFactory;
 
     @Transactional
     public List<SeatReservationResponse> getSeats(UUID scheduleId) {
-        List<ScheduleSeat> list = scheduleSeatRepository.findByScheduleIdOrderBySeatPosition(scheduleId);
+        List<ScheduleSeat> list =
+                scheduleSeatRepository.findByScheduleIdOrderBySeatPosition(scheduleId);
 
         return list.stream()
                 .map(this::toSeatReservationResponse)
                 .collect(Collectors.toList());
     }
 
+    // =========================
+    // HOLD SEAT
+    // =========================
     @Transactional
     public ApiResponse holdSeat(UUID scheduleId, UUID seatId, HoldRequest request) {
+
         String holderId = request.getHolderId();
-        int ttlMinutes = request.getHoldMinutes() != null
-                ? request.getHoldMinutes() : DEFAULT_HOLDER_MINUTES;
+        int ttlMinutes =
+                request.getHoldMinutes() != null ? request.getHoldMinutes() : DEFAULT_HOLDER_MINUTES;
 
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new RuntimeException("Schedule not found"));
-        Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new RuntimeException("Seat not found"));
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Schedule not found"));
 
-        ScheduleSeat scheduleSeat = scheduleSeatRepository
-                .findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
-                .orElseGet(() -> {
-                    ScheduleSeat newSeat = new ScheduleSeat();
-                    newSeat.setSchedule(schedule);
-                    newSeat.setSeat(seat);
-                    newSeat.setStatus("available");
-                    return scheduleSeatRepository.save(newSeat);
-                });
+        Seat seat = seatRepository.findById(seatId)
+                .orElseThrow(() -> new RuntimeException("Seat not found"));
 
-        if ("holding".equals(scheduleSeat.getStatus())
-                && scheduleSeat.getHoldExpiresAt().isAfter(LocalDateTime.now())
-                && !Objects.equals(scheduleSeat.getHolderId(), holderId)) {
-            return new ApiResponse("fail","Ghế đang được giữ bởi người khác");
+        ScheduleSeat scheduleSeat =
+                scheduleSeatRepository.findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
+                        .orElseGet(() -> {
+                            ScheduleSeat ss = new ScheduleSeat();
+                            ss.setSchedule(schedule);
+                            ss.setSeat(seat);
+                            ss.setStatus("available");
+                            return scheduleSeatRepository.save(ss);
+                        });
+
+        // Nếu đang được giữ bởi người khác
+        if ("holding".equals(scheduleSeat.getStatus()) &&
+                scheduleSeat.getHoldExpiresAt() != null &&
+                scheduleSeat.getHoldExpiresAt().isAfter(LocalDateTime.now()) &&
+                !Objects.equals(scheduleSeat.getHolderId(), holderId)) {
+
+            return new ApiResponse("fail", "Ghế đang được giữ bởi người khác");
         }
 
-        // Nếu booked → cấm giữ
+        // Nếu booked thì không được giữ
         if ("booked".equals(scheduleSeat.getStatus())) {
-            return new ApiResponse("fail","Ghế đã được đặt");
+            return new ApiResponse("fail", "Ghế đã được đặt");
         }
 
-        List<ScheduleSeat> allSeats = scheduleSeatRepository.findByScheduleIdOrderBySeatPosition(scheduleId);
-        if (createsGapWhenHolding(allSeats, scheduleSeat,  holderId)) {
-            System.out.println("Không được để 1 ghế trống giữa hai ghế đã giữ/đặt");
+        List<ScheduleSeat> allSeats =
+                scheduleSeatRepository.findByScheduleIdOrderBySeatPosition(scheduleId);
+
+        if (createsGapWhenHolding(allSeats, scheduleSeat, holderId)) {
             return new ApiResponse("fail", "Không được để 1 ghế trống giữa hai ghế đã giữ/đặt");
         }
 
         scheduleSeat.setStatus("holding");
         scheduleSeat.setHolderId(holderId);
         scheduleSeat.setHoldExpiresAt(LocalDateTime.now().plusMinutes(ttlMinutes));
+
         scheduleSeatRepository.save(scheduleSeat);
 
-        simpMessagingTemplate.convertAndSend("/topic/seats/" +scheduleId, toSeatReservationResponse(scheduleSeat));
+        simpMessagingTemplate.convertAndSend(
+                "/topic/seats/" + scheduleId,
+                toSeatReservationResponse(scheduleSeat)
+        );
 
         return new ApiResponse("success", "Giữ ghế thành công");
     }
 
+    // =========================
+    // RELEASE SEAT
+    // =========================
     @Transactional
     public void releaseSeat(UUID scheduleId, UUID seatId, String holderId) {
-        ScheduleSeat scheduleSeat = scheduleSeatRepository
-                .findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
 
-        if (!"holding".equals(scheduleSeat.getStatus())) {
-            return;
-        }
+        ScheduleSeat scheduleSeat =
+                scheduleSeatRepository.findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
+                        .orElseThrow(() -> new RuntimeException("Seat not found"));
+
+        if (!"holding".equals(scheduleSeat.getStatus())) return;
 
         if (!Objects.equals(scheduleSeat.getHolderId(), holderId)) {
             throw new RuntimeException("You are not holder of this seat");
@@ -105,10 +123,18 @@ public class SeatReservationService {
         scheduleSeat.setStatus("available");
         scheduleSeat.setHolderId(null);
         scheduleSeat.setHoldExpiresAt(null);
-        simpMessagingTemplate.convertAndSend("/topic/seats/" + scheduleId, toSeatReservationResponse(scheduleSeat));
-        scheduleSeatRepository.save(scheduleSeat);
+
+        scheduleSeatRepository.save(scheduleSeat); // SAVE TRƯỚC
+
+        simpMessagingTemplate.convertAndSend(
+                "/topic/seats/" + scheduleId,
+                toSeatReservationResponse(scheduleSeat)
+        ); // GỬI SAU
     }
 
+    // =========================
+    // CHECKOUT
+    // =========================
     @Transactional
     public List<SeatReservationResponse> checkout(UUID scheduleId, CheckoutRequest request) {
         String holderId = request.getHolderId();
@@ -116,9 +142,9 @@ public class SeatReservationService {
         List<SeatReservationResponse> results = new ArrayList<>();
 
         for (UUID seatId : seatIds) {
-            ScheduleSeat scheduleSeat = scheduleSeatRepository
-                    .findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
-                    .orElseThrow(() -> new RuntimeException("Schedule not found"));
+            ScheduleSeat scheduleSeat =
+                    scheduleSeatRepository.findByScheduleIdAndSeatIdForUpdate(scheduleId, seatId)
+                            .orElseThrow(() -> new RuntimeException("Seat not found"));
 
             if (!"holding".equals(scheduleSeat.getStatus()))
                 throw new RuntimeException("Seat not held");
@@ -134,49 +160,65 @@ public class SeatReservationService {
 
             scheduleSeatRepository.save(scheduleSeat);
 
-            results.add(toSeatReservationResponse(scheduleSeat));
+            SeatReservationResponse dto = toSeatReservationResponse(scheduleSeat);
+            results.add(dto);
+
+            // BẮN WEBSOCKET CHO FE REALTIME
+            simpMessagingTemplate.convertAndSend(
+                    "/topic/seats/" + scheduleId,
+                    dto
+            );
         }
 
         return results;
     }
 
+    // =========================
+    // MAPPING
+    // =========================
     private SeatReservationResponse toSeatReservationResponse(ScheduleSeat scheduleSeat) {
-        SeatReservationResponse response = new SeatReservationResponse();
-        response.setSeatId(scheduleSeat.getSeat().getId());
-        response.setPosition(scheduleSeat.getSeat().getPosition());
-        response.setSeatType(scheduleSeat.getSeat().getSeatType().getName());
-        response.setStatus(scheduleSeat.getStatus());
-        response.setHolderId(scheduleSeat.getHolderId());
-        response.setHoldExpiresAt(scheduleSeat.getHoldExpiresAt());
-        return response;
+        SeatReservationResponse dto = new SeatReservationResponse();
+        dto.setSeatId(scheduleSeat.getSeat().getId());
+        dto.setPosition(scheduleSeat.getSeat().getPosition());
+        dto.setSeatType(scheduleSeat.getSeat().getSeatType().getName());
+        dto.setStatus(scheduleSeat.getStatus());
+        dto.setHolderId(scheduleSeat.getHolderId());
+        dto.setHoldExpiresAt(scheduleSeat.getHoldExpiresAt());
+        return dto;
     }
 
-    private boolean createsGapWhenHolding(List<ScheduleSeat> scheduleSeats, ScheduleSeat targetSeat, String currentHolderId) {
+    // =========================
+    // GAP VALIDATION
+    // =========================
+    private boolean createsGapWhenHolding(List<ScheduleSeat> scheduleSeats,
+                                          ScheduleSeat targetSeat,
+                                          String currentHolderId) {
+
         Map<String, List<RowSeat>> rows = buildRows(scheduleSeats);
 
-        String targetPosition = targetSeat.getSeat().getPosition();
-        String rowKey = targetPosition.substring(0, 1);
+        String pos = targetSeat.getSeat().getPosition();
+        String rowKey = pos.substring(0, 1);
 
-        List<RowSeat> rowSeats = rows.get(rowKey);
-        if (rowSeats == null) return false;
+        List<RowSeat> row = rows.get(rowKey);
+        if (row == null) return false;
 
-        for (RowSeat rowSeat : rowSeats) {
-            if (rowSeat.position.equals(targetPosition)) {
-                rowSeat.simulatedStatus = "holding";
-                rowSeat.simulatedHolderId = currentHolderId;
+        for (RowSeat r : row) {
+            if (r.position.equals(pos)) {
+                r.simulatedStatus = "holding";
+                r.simulatedHolderId = currentHolderId;
             }
         }
 
-        for (int i = 0; i < rowSeats.size(); i++) {
-            RowSeat left = rowSeats.get(i);
-            RowSeat middle = rowSeats.get(i + 1);
-            RowSeat right = rowSeats.get(i + 2);
+        for (int i = 0; i + 2 < row.size(); i++) {
+            RowSeat left = row.get(i);
+            RowSeat mid = row.get(i + 1);
+            RowSeat right = row.get(i + 2);
 
             boolean leftTaken = isTaken(left);
             boolean rightTaken = isTaken(right);
-            boolean middleTaken = isTaken(middle);
+            boolean midFree = !isTaken(mid);
 
-            if (leftTaken && rightTaken && middleTaken) return true;
+            if (leftTaken && rightTaken && midFree) return true;
         }
 
         return false;
@@ -184,47 +226,45 @@ public class SeatReservationService {
 
     private boolean isTaken(RowSeat seat) {
         if ("booked".equalsIgnoreCase(seat.status)) return true;
-        if ("holding".equalsIgnoreCase(seat.status) && seat.holdExpiresAt != null && seat.holdExpiresAt.isAfter(LocalDateTime.now())) return true;
-        if ("holding".equalsIgnoreCase(seat.simulatedStatus) && seat.simulatedHolderId != null) return true;
-        if ("booked".equalsIgnoreCase(seat.simulatedStatus)) return true;
-        return false;
-    }
-
-    private boolean isFree(RowSeat seat) {
-        if (seat.status == null) return true;
-        if ("available".equalsIgnoreCase(seat.status)) {
-            return !"holding".equalsIgnoreCase(seat.simulatedStatus) && !"booked".equalsIgnoreCase(seat.simulatedStatus);
-        }
-        if ("holding".equalsIgnoreCase(seat.status) && (seat.holdExpiresAt == null || seat.holdExpiresAt.isBefore(LocalDateTime.now()))) return true;
+        if ("holding".equalsIgnoreCase(seat.status) &&
+                seat.holdExpiresAt != null &&
+                seat.holdExpiresAt.isAfter(LocalDateTime.now())) return true;
+        if ("holding".equalsIgnoreCase(seat.simulatedStatus)) return true;
         return false;
     }
 
     private Map<String, List<RowSeat>> buildRows(List<ScheduleSeat> scheduleSeats) {
-        Map<String, List<RowSeat>> rows = new HashMap<>();
-        for (ScheduleSeat scheduleSeat : scheduleSeats) {
-            String position = scheduleSeat.getSeat().getPosition();
-            String rowKey = position.substring(0, 1);
-            int index;
 
+        Map<String, List<RowSeat>> rows = new HashMap<>();
+
+        for (ScheduleSeat ss : scheduleSeats) {
+            String pos = ss.getSeat().getPosition();
+            String rowKey = pos.substring(0, 1);
+
+            int index;
             try {
-                index = Integer.parseInt(position.substring(1));
+                index = Integer.parseInt(pos.substring(1));
             } catch (Exception ex) {
                 index = 0;
             }
 
-            RowSeat rowSeat = new RowSeat();
-            rowSeat.position = position;
-            rowSeat.status = scheduleSeat.getStatus();
-            rowSeat.holderId = scheduleSeat.getHolderId();
-            rowSeat.positionIndex = index;
-            rowSeat.holdExpiresAt = scheduleSeat.getHoldExpiresAt();
+            RowSeat r = new RowSeat();
+            r.position = pos;
+            r.status = ss.getStatus();
+            r.holderId = ss.getHolderId();
+            r.positionIndex = index;
+            r.holdExpiresAt = ss.getHoldExpiresAt();
+
+            rows.computeIfAbsent(rowKey, k -> new ArrayList<>()).add(r);
         }
 
-        rows.values().forEach(list -> list.sort(Comparator.comparingInt(row -> row.positionIndex)));
+        rows.values()
+                .forEach(list -> list.sort(Comparator.comparingInt(x -> x.positionIndex)));
 
         return rows;
     }
 
+    // DTO nội bộ để validate
     private static class RowSeat {
         String position;
         String status;
