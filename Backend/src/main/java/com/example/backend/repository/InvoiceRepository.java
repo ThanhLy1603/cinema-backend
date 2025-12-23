@@ -20,6 +20,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     List<Invoice> findByIsDeletedFalseOrderByCreatedAtDesc();
 
+<<<<<<< HEAD
     // ================== TỔNG DOANH THU ==================
     @Query(value = """
         SELECT COALESCE(SUM(finalamount), 0)
@@ -72,5 +73,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
         ORDER BY revenuedate
     """, nativeQuery = true)
     List<Object[]> dailyRevenueNative();
+=======
+    List<Invoice> findAllByUsername_UsernameOrderByCreatedAtDesc(String username);
+>>>>>>> b83be6d0a0e272a01cdec8e9223781ca0c5b6f4f
 }
 

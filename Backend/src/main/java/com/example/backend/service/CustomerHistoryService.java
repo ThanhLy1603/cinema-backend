@@ -1,14 +1,14 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.CustomerHistoryRequest;
-import com.example.backend.dto.CustomerHistoryResponse;
+import com.example.backend.dto.request.CustomerHistoryRequest;
+import com.example.backend.dto.request.CustomerHistoryResponse;
+import com.example.backend.dto.response.*;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -64,5 +64,89 @@ public class CustomerHistoryService {
             return new CustomerHistoryResponse(invoice, products, tickets, film.getName());
 
         }).toList();
+    }
+
+    public List<InvoiceSummaryResponse> getAllInvoices(CustomerHistoryRequest request) {
+
+        return invoiceRepository.findAllByUsername_UsernameOrderByCreatedAtDesc(request.username())
+                .stream()
+                .map(invoice -> new InvoiceSummaryResponse(
+                        invoice.getId(),
+                        invoice.getCreatedAt(),
+                        invoice.getStatus(),
+                        invoice.getFinalAmount(),
+                        invoice.getCreatedBy() != null ? invoice.getCreatedBy().getUsername() : invoice.getUsername().getUsername(),
+                        invoice.getCustomerName(),
+                        invoice.getCustomerPhone()
+                ))
+                .toList();
+    }
+
+    public InvoiceDetailResponse getInvoiceDetail(UUID id) {
+        Invoice invoice = invoiceRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+        return toInvoiceDetailResponse(invoice);
+    }
+
+    private InvoiceDetailResponse toInvoiceDetailResponse(Invoice invoice) {
+        return new InvoiceDetailResponse(
+                invoice.getId(),
+                invoice.getStatus(),
+                invoice.getCreatedAt(),
+                invoice.getTotalAmount(),
+                invoice.getDiscountAmount(),
+                invoice.getFinalAmount(),
+                invoice.getCreatedBy() != null ? invoice.getCreatedBy().getUsername() : invoice.getUsername().getUsername(),
+                invoice.getCustomerName(),
+                invoice.getCustomerPhone(),
+
+                invoice.getTickets()
+                        .stream()
+                        .map(this::toTicketHistoryResponse)
+                        .toList(),
+
+                invoice.getProducts()
+                        .stream()
+                        .map(this::toProductHistoryResponse)
+                        .toList(),
+
+                invoice.getQrcodes()
+                        .stream()
+                        .map(this::toQRCodeHistoryResponse)
+                        .toList()
+        );
+    }
+
+    private QRCodeHistoryResponse toQRCodeHistoryResponse(InvoiceQRCode qrCode) {
+        return new QRCodeHistoryResponse(
+                qrCode.getQrCode(),
+                qrCode.getQrType(),
+                qrCode.getIsUsed(),
+                qrCode.getUsedAt()
+        );
+    }
+
+    private ProductHistoryResponse toProductHistoryResponse(InvoiceProduct invoiceProduct) {
+        return new ProductHistoryResponse(
+                invoiceProduct.getProduct().getName(),
+                invoiceProduct.getQuantity(),
+                invoiceProduct.getPrice(),
+                invoiceProduct.getPromotion() != null ? invoiceProduct.getPromotion().getName() : ""
+        );
+    }
+
+    private TicketHistoryResponse toTicketHistoryResponse(InvoiceTicket ticket) {
+        return new TicketHistoryResponse(
+                ticket.getSchedule().getFilm().getName(),
+                ticket.getSchedule().getShowTime().getStartTime(),
+                ticket.getSchedule().getScheduleDate(),
+                ticket.getSchedule().getRoom().getName(),
+                ticket.getSeat().getPosition(),
+                ticket.getPrice(),
+                ticket.getIsUsed(),
+                ticket.getUsedAt()
+        );
     }
 }

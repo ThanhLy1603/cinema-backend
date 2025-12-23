@@ -1,60 +1,44 @@
 package com.example.backend.service;
 
-import com.beust.ah.A;
-import com.example.backend.dto.request.ScanQrRequest;
 import com.example.backend.dto.response.*;
 import com.example.backend.entity.Invoice;
 import com.example.backend.entity.InvoiceProduct;
 import com.example.backend.entity.InvoiceQRCode;
 import com.example.backend.entity.InvoiceTicket;
-import com.example.backend.repository.InvoiceQRCodeRepository;
 import com.example.backend.repository.InvoiceRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class QrScanService {
-    private final InvoiceQRCodeRepository invoiceQRCodeRepository;
+public class SellHistoryService {
     private final InvoiceRepository invoiceRepository;
 
-    public ScanQrResponse scanQr(ScanQrRequest request) {
-        InvoiceQRCode invoiceQRCode = invoiceQRCodeRepository.findByQrCode(request.qrCode());
+    public List<InvoiceSummaryResponse> getAllInvoices() {
 
-        if (invoiceQRCode == null) throw new RuntimeException("QR code không tồn tại");
-
-        Invoice invoice = invoiceQRCode.getInvoice();
-
-        return new ScanQrResponse(
-              true,
-              "Xác nhận hoá đơn thành công",
-              toInvoiceDetailResponse(invoice)
-        );
+        return invoiceRepository.findByIsDeletedFalseOrderByCreatedAtDesc()
+                .stream()
+                .map(invoice -> new InvoiceSummaryResponse(
+                        invoice.getId(),
+                        invoice.getCreatedAt(),
+                        invoice.getStatus(),
+                        invoice.getFinalAmount(),
+                        invoice.getCreatedBy() != null ? invoice.getCreatedBy().getUsername() : invoice.getUsername().getUsername(),
+                        invoice.getCustomerName(),
+                        invoice.getCustomerPhone()
+                ))
+                .toList();
     }
 
-    @Transactional
-    public ApiResponse confirmQRCode(ScanQrRequest request) {
-        InvoiceQRCode invoiceQRCode = invoiceQRCodeRepository.findByQrCode(request.qrCode());
+    public InvoiceDetailResponse getInvoiceDetail(UUID id) {
+        Invoice invoice = invoiceRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        if (invoiceQRCode == null) return new ApiResponse("fail","QR không tồn tại");
-
-        if (Boolean.TRUE.equals(invoiceQRCode.getIsUsed())) return new ApiResponse("fail", "QR đã được sử dụng");
-
-        Invoice invoice = invoiceQRCode.getInvoice();
-
-        if ("CHECKED_IN".equals(invoice.getStatus())) return new  ApiResponse("fail", "Hoá đơn đã được sử dụng");
-
-        invoiceQRCode.setIsUsed(true);
-        invoiceQRCode.setUsedAt(LocalDateTime.now());
-        invoice.setStatus("CHECKED_IN");
-        invoiceQRCodeRepository.save(invoiceQRCode);
-        invoiceRepository.save(invoice);
-
-        return new ApiResponse("success", "Soát vé thành công");
+        return toInvoiceDetailResponse(invoice);
     }
 
     private InvoiceDetailResponse toInvoiceDetailResponse(Invoice invoice) {
@@ -86,7 +70,6 @@ public class QrScanService {
         );
     }
 
-
     private QRCodeHistoryResponse toQRCodeHistoryResponse(InvoiceQRCode qrCode) {
         return new QRCodeHistoryResponse(
                 qrCode.getQrCode(),
@@ -115,18 +98,6 @@ public class QrScanService {
                 ticket.getPrice(),
                 ticket.getIsUsed(),
                 ticket.getUsedAt()
-        );
-    }
-
-    private InvoiceSummaryResponse toInvoiceSummaryResponse(Invoice invoice) {
-        return new InvoiceSummaryResponse(
-                invoice.getId(),
-                invoice.getCreatedAt(),
-                invoice.getStatus(),
-                invoice.getFinalAmount(),
-                invoice.getCreatedBy() != null ? invoice.getCreatedBy().getUsername() : invoice.getUsername().getUsername(),
-                invoice.getCustomerName(),
-                invoice.getCustomerPhone()
         );
     }
 }

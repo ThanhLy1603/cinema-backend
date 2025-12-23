@@ -1,6 +1,5 @@
-package com.example.backend.dto;
+package com.example.backend.dto.request;
 
-import com.example.backend.entity.Film;
 import com.example.backend.entity.Invoice;
 import com.example.backend.entity.InvoiceProduct;
 import com.example.backend.entity.InvoiceTicket;
