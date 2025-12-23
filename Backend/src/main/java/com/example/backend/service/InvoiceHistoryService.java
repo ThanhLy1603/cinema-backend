@@ -99,6 +99,7 @@ public class InvoiceHistoryService {
         return new TicketHistoryResponse(
                 ticket.getSchedule().getFilm().getName(),
                 ticket.getSchedule().getShowTime().getStartTime(),
+                ticket.getSchedule().getScheduleDate(),
                 ticket.getSchedule().getRoom().getName(),
                 ticket.getSeat().getPosition(),
                 ticket.getPrice(),

@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.request.ProductPriceRequest;
 import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.dto.response.ProductPriceResponse;
 import com.example.backend.entity.Product;
@@ -32,41 +33,52 @@ public class ProductPriceManageService {
 
     // ✅ Tạo mới giá cho sản phẩm
     @Transactional
-    public ApiResponse create(ProductPrice priceRequest) {
-
-        if (priceRequest.getProduct() == null || priceRequest.getProduct().getId() == null) {
-            throw new RuntimeException("Thiếu productId!");
-        }
-        if (priceRequest.getPrice() == null) {
-            throw new RuntimeException("Giá sản phẩm không được để trống!");
-        }
-        if (priceRequest.getStartDate() == null) {
-            throw new RuntimeException("Ngày bắt đầu không được để trống!");
-        }
+    public ApiResponse create(ProductPriceRequest priceRequest) {
 
         // Lấy product thật từ DB
-        Product product = productRepo.findById(priceRequest.getProduct().getId())
+        Product product = productRepo.findById(priceRequest.productId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm!"));
+
+        if (product == null) {
+            return new ApiResponse("fail", "Không tìm thấy sản phẩm");
+        }
 
         // Nếu đang có giá hiện tại (endDate = null) thì tự động đóng
         ProductPrice current = productPriceRepo.findByProductIdAndEndDateIsNullAndIsDeletedFalse(product.getId());
         if (current != null) {
-            current.setEndDate(priceRequest.getStartDate().minusDays(1));
+            current.setEndDate(priceRequest.startDate().minusDays(1));
             productPriceRepo.save(current);
         }
 
         // Tạo giá mới
         ProductPrice newPrice = ProductPrice.builder()
                 .product(product)
-                .price(priceRequest.getPrice())
-                .startDate(priceRequest.getStartDate())
-                .endDate(priceRequest.getEndDate())
+                .price(priceRequest.price())
+                .startDate(priceRequest.startDate())
+                .endDate(priceRequest.endDate())
                 .isDeleted(false)
                 .build();
 
         productPriceRepo.save(newPrice);
 
         return new ApiResponse("success", "Thêm giá sản phẩm thành công!");
+    }
+
+    public ApiResponse update(ProductPriceRequest priceRequest) {
+        Product product = productRepo.findById(priceRequest.productId()).orElse(null);
+
+        ProductPrice productPrice = productPriceRepo.findByProductIdAndEndDateIsNullAndIsDeletedFalse(priceRequest.productId());
+
+        if (product == null) return new ApiResponse("fail", "Không tìm thấy sản phẩm");
+        if (productPrice == null) return new ApiResponse("fail", "Không tìm thấy giá sản phẩm");
+
+        productPrice.setProduct(product);
+        productPrice.setPrice(priceRequest.price());
+        productPrice.setStartDate(priceRequest.startDate());
+        productPrice.setEndDate(priceRequest.endDate());
+        productPriceRepo.save(productPrice);
+
+        return new ApiResponse("success", "Thêm sản phẩm thành công");
     }
 
     // ✅ Soft delete

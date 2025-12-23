@@ -1,8 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.request.CheckoutRequest;
-import com.example.backend.dto.request.StaffSellTicketRequest;
-import com.example.backend.dto.request.StaffTicketItem;
+import com.example.backend.dto.request.*;
 import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
@@ -22,7 +20,9 @@ public class SellTicketService {
     private final PriceTicketRepository priceTicketRepository;
     private final InvoiceTicketRepository invoiceTicketRepository;
     private final InvoiceRepository invoiceRepository;
+    private final ProductRepository productRepository;
     private final InvoiceQRCodeRepository invoiceQRCodeRepository;
+    private final InvoiceProductRepository invoiceProductRepository;
     private final SeatReservationService seatReservationService;
     private final QRCodeService qrCodeService;
 
@@ -58,9 +58,15 @@ public class SellTicketService {
             Seat seat = seatRepository.findById(ticketItem.seatId()).orElse(null);
             PriceTicket priceTicket = priceTicketRepository.findById(ticketItem.ticketPriceId()).orElse(null);
 
-            if (seat == null) return new ApiResponse("fail", "Không tìm thấy ghế ngồi");
-            if (priceTicket == null) return new ApiResponse("fail", "Không tìm thấy giá vé");
-            if (schedule == null) return new ApiResponse("fail", "Không tìm thấy lịch chiếu");
+            if (seat == null)
+                throw new RuntimeException("Không tìm thấy ghế ngồi");
+
+            if (priceTicket == null)
+                throw new RuntimeException("Không tìm thấy giá vé");
+
+            if (schedule == null)
+                throw new RuntimeException("Không tìm thấy lịch chiếu");
+
 
             InvoiceTicket invoiceTicket = new InvoiceTicket();
             invoiceTicket.setInvoice(savedInvoice);
@@ -96,6 +102,45 @@ public class SellTicketService {
 
         System.out.println("schedule id: " + scheduleId);
         System.out.println("checkoutRequest: " + checkoutRequest.getSeatIds() + " " + checkoutRequest.getHolderId());
+
+        return new ApiResponse("success", "Tạo hoá đơn thành công");
+    }
+
+
+    @Transactional
+    public ApiResponse sellProduct(StaffSellProductRequest staffSellProductRequest) {
+        System.out.println("sellProduct: " + staffSellProductRequest);
+        Users user = userRepository.findByUsername(staffSellProductRequest.invoice().username()).orElse(null);
+
+        if (user == null) return new ApiResponse("fail", "Không tìm thấy Username");
+
+        Invoice invoice = new Invoice();
+        invoice.setUsername(user);
+        invoice.setCreatedBy(user);
+        invoice.setCreatedAt(LocalDateTime.now());
+        invoice.setCustomerAddress(staffSellProductRequest.invoice().customerAddress());
+        invoice.setCustomerName(staffSellProductRequest.invoice().customerName());
+        invoice.setCustomerPhone(staffSellProductRequest.invoice().customerPhone());
+        invoice.setTotalAmount(staffSellProductRequest.invoice().totalAmount());
+        invoice.setDiscountAmount(staffSellProductRequest.invoice().discount());
+        invoice.setFinalAmount(staffSellProductRequest.invoice().finalAmount());
+        invoice.setStatus("PAID");
+
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+
+        for (StaffProductItem staffProductItem : staffSellProductRequest.products()) {
+            Product product = productRepository.findById(staffProductItem.productId()).orElse(null);
+
+            if (product == null) return new ApiResponse("fail", "Không tìm thấy sản phẩm");
+
+            InvoiceProduct invoiceProduct = new InvoiceProduct();
+            invoiceProduct.setProduct(product);
+            invoiceProduct.setPrice(staffProductItem.price());
+            invoiceProduct.setQuantity(staffProductItem.quantity());
+            invoiceProduct.setInvoice(savedInvoice);
+
+            invoiceProductRepository.save(invoiceProduct);
+        }
 
         return new ApiResponse("success", "Tạo hoá đơn thành công");
     }

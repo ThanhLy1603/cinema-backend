@@ -14,4 +14,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     List<Invoice> findAllByUsernameUsername(String username);
 
     List<Invoice> findByIsDeletedFalseOrderByCreatedAtDesc();
+
+    List<Invoice> findAllByUsername_UsernameOrderByCreatedAtDesc(String username);
 }
