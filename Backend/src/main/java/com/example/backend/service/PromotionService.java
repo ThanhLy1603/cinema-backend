@@ -1,6 +1,11 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.PromotionItemRequest;
+import com.example.backend.dto.request.PromotionRequest;
+import com.example.backend.dto.request.PromotionRuleRequest;
+import com.example.backend.dto.response.PromotionItemResponse;
+import com.example.backend.dto.response.PromotionResponse;
+import com.example.backend.dto.response.PromotionRuleResponse;
 import com.example.backend.entity.*;
 import com.example.backend.enums.PromotionRuleType;
 import com.example.backend.repository.*;
@@ -10,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 

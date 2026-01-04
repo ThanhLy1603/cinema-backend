@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -19,10 +20,12 @@ public class InvoiceProduct {
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
+    @JsonIgnore
     private Invoice invoice;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+
     private Product product;
 
     private Integer quantity;
@@ -30,5 +33,6 @@ public class InvoiceProduct {
 
     @ManyToOne
     @JoinColumn(name = "promotion_id")
+    @JsonIgnore
     private Promotion promotion;
 }

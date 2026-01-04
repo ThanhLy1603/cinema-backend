@@ -90,20 +90,35 @@ public interface PriceTicketRepository extends JpaRepository<PriceTicket, UUID> 
     //    Đã sửa điều kiện endDate để chính xác hơn
     // ---------------------------------------------------------------------
     @Query("""
-        SELECT pt FROM PriceTicket pt
-        WHERE pt.film.id = :filmId
-          AND pt.seatType.id = :seatTypeId
-          AND pt.showTime.id = :showTimeId
-          AND pt.dayType = :dayType
-          AND pt.startDate <= :scheduleDate
-          AND (pt.endDate IS NULL OR pt.endDate >= :scheduleDate)
-          AND pt.isDeleted = false
-        ORDER BY pt.startDate DESC
-        """)
-    Optional<PriceTicket> findTicketPrice(
+    SELECT pt FROM PriceTicket pt
+    WHERE pt.film.id = :filmId
+      AND pt.seatType.id = :seatTypeId
+      AND pt.showTime.id = :showTimeId
+      AND pt.dayType = :dayType
+      AND pt.startDate <= :scheduleDate
+      AND (pt.endDate IS NULL OR pt.endDate >= :scheduleDate)
+      AND pt.isDeleted = false
+    ORDER BY pt.startDate DESC
+    """)
+    List<PriceTicket> findTicketPrices(
             @Param("filmId") UUID filmId,
             @Param("seatTypeId") UUID seatTypeId,
             @Param("showTimeId") UUID showTimeId,
             @Param("dayType") PriceTicket.DayType dayType,
-            @Param("scheduleDate") LocalDate scheduleDate);
+            @Param("scheduleDate") LocalDate scheduleDate
+    );
+
+
+    boolean existsByFilmIdAndSeatTypeIdAndShowTimeIdAndStartDate(
+            UUID filmId,
+            UUID seatTypeId,
+            UUID showTimeId,
+            LocalDate startDate
+    );
+
+    List<PriceTicket> findByFilmIdAndShowTimeIdAndStartDateAndIsDeletedFalse(
+            UUID filmId,
+            UUID showTimeId,
+            LocalDate startDate
+    );
 }

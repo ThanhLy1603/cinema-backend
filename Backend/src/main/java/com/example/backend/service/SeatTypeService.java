@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.SeatTypeManageResponse;
+import com.example.backend.dto.response.SeatTypeManageResponse;
 import com.example.backend.entity.SeatType;
 import com.example.backend.repository.SeatTypeRepository;
 import lombok.RequiredArgsConstructor;

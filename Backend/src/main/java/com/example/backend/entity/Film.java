@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -53,6 +54,7 @@ public class Film {
     private boolean isDeleted = true;
 
     @OneToMany(mappedBy = "film")
+    @JsonIgnore
     private List<Schedule> schedules;
 
     @Builder.Default

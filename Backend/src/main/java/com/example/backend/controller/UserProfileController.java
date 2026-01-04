@@ -1,9 +1,8 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ChangePasswordRequest;
-import com.example.backend.dto.UserProfileResponse;
-import com.example.backend.dto.UserProfileUpdateRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ChangePasswordRequest;
+import com.example.backend.dto.request.UserProfileUpdateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

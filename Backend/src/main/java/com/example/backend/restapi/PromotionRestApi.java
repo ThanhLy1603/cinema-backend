@@ -1,7 +1,10 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.PromotionController;
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.PromotionItemRequest;
+import com.example.backend.dto.request.PromotionRequest;
+import com.example.backend.dto.request.PromotionRuleRequest;
+import com.example.backend.dto.response.PromotionResponse;
 import com.example.backend.service.PromotionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

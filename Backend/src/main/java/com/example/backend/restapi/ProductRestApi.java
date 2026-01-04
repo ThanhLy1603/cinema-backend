@@ -1,7 +1,7 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.ProductController;
-import com.example.backend.dto.ProductResponse;
+import com.example.backend.dto.response.ProductResponse;
 import com.example.backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,14 +1,12 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.RoomManageResponse;
-import com.example.backend.dto.RoomMangeRequest;
-import com.example.backend.entity.Room;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.RoomManageResponse;
+import com.example.backend.dto.request.RoomMangeRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.security.PublicKey;
 import java.util.List;
 import java.util.UUID;
 

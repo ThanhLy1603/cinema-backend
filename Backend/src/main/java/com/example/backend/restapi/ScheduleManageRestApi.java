@@ -1,8 +1,8 @@
 package com.example.backend.restapi;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ScheduleManageRequest;
-import com.example.backend.dto.ScheduleManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ScheduleManageRequest;
+import com.example.backend.dto.response.ScheduleManageResponse;
 import com.example.backend.service.ScheduleManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

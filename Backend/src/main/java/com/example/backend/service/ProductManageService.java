@@ -1,8 +1,8 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ProductManageRequest;
-import com.example.backend.dto.ProductManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ProductManageRequest;
+import com.example.backend.dto.response.ProductManageResponse;
 import com.example.backend.entity.Product;
 import com.example.backend.repository.ProductRepository;
 import jakarta.transaction.Transactional;

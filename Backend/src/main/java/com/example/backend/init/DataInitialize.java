@@ -1065,46 +1065,40 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
     @Override
     @Transactional
     public void initializePriceTickets() {
-        LocalDate startDate = LocalDate.of(2025, 11, 14);
+
+        LocalDate start = LocalDate.of(2025, 11, 5);
+        int totalDays = 7;
+
         BigDecimal basePrice = new BigDecimal("100000.00");
 
-        // Nếu đã có dữ liệu cho ngày này thì bỏ qua
-        long count = priceTicketRepository.countByStartDate(startDate);
-        if (count > 0) {
-            System.out.println("ℹ️ Bảng PRICE_TICKETS đã có dữ liệu cho ngày " + startDate + ", bỏ qua.");
-            return;
-        }
-
-        // Lấy dữ liệu cần thiết
-//        List<Film> films = filmRepository.findByStatusIn(List.of("active", "upcoming"));
         List<Film> films = filmRepository.findAll();
         List<SeatType> seatTypes = seatTypeRepository.findAll();
         List<ShowTime> showTimes = showTimeRepository.findAll();
 
-        // Duyệt trực tiếp enum DayType để đảm bảo kiểu đúng
-        PriceTicket.DayType[] dayTypes = PriceTicket.DayType.values();
-
         List<PriceTicket> listToInsert = new ArrayList<>();
 
-        for (Film film : films) {
-            for (SeatType seat : seatTypes) {
-                for (ShowTime showTime : showTimes) {
-                    for (PriceTicket.DayType dayType : dayTypes) {
+        for (int d = 0; d < totalDays; d++) {
 
-                        // Kiểm tra tồn tại (lưu ý: repository method phải có signature đúng)
-//                        boolean exists = priceTicketRepository.existsByFilmIdAndSeatTypeIdAndShowTimeIdAndDayTypeAndStartDate(
-//                                film.getId(),
-//                                seat.getId(),
-//                                showTime.getId(),
-//                                dayType.toString(),
-//                                startDate
-//                        );
+            LocalDate currentDate = start.plusDays(d);
 
-//                        if (exists) continue;
+            for (Film film : films) {
+                for (SeatType seat : seatTypes) {
+                    for (ShowTime showTime : showTimes) {
+
+                        // ⛔ Nếu trùng → bỏ qua
+                        boolean exists = priceTicketRepository
+                                .existsByFilmIdAndSeatTypeIdAndShowTimeIdAndStartDate(
+                                        film.getId(),
+                                        seat.getId(),
+                                        showTime.getId(),
+                                        currentDate
+                                );
+
+                        if (exists) continue;
 
                         BigDecimal price = basePrice;
 
-                        // 1. PHỤ THU LOẠI GHẾ
+                        // Phụ thu loại ghế
                         if (seat.getName() != null) {
                             if (seat.getName().equalsIgnoreCase("Ghế VIP")) {
                                 price = price.add(new BigDecimal("20000"));
@@ -1113,34 +1107,32 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
                             }
                         }
 
-                        // 2. PHỤ THU THEO LOẠI NGÀY
-                        switch (dayType) {
-                            case WEEKEND -> price = price.add(new BigDecimal("20000"));
-                            case HOLIDAY -> price = price.add(new BigDecimal("40000"));
-                            case SPECIAL -> price = price.add(new BigDecimal("60000"));
-                            default -> { /* WEEKDAY -> no change */ }
-                        }
+                        // DayType cố định = WEEKDAY
+                        PriceTicket.DayType dayType = PriceTicket.DayType.WEEKDAY;
 
-                        // 3. GIỜ VÀNG 19:00–22:00 (giả định showTime.getStartTime() trả về LocalTime)
+                        // Phụ thu giờ vàng
                         LocalTime t = showTime.getStartTime();
-                        if (t != null && !t.isBefore(LocalTime.of(19, 0)) && !t.isAfter(LocalTime.of(22, 0))) {
+                        if (t != null &&
+                                !t.isBefore(LocalTime.of(19, 0)) &&
+                                !t.isAfter(LocalTime.of(22, 0))) {
                             price = price.add(new BigDecimal("10000"));
                         }
 
-                        // 4. PHIM BOM TẤN
-                        List<String> blockbusters = List.of("Deadpool 3", "Avatar 3", "Fast and Furious 7");
+                        // Phụ thu phim bom tấn
+                        List<String> blockbusters = List.of(
+                                "Deadpool 3", "Avatar 3", "Fast and Furious 7"
+                        );
                         if (film.getName() != null && blockbusters.contains(film.getName())) {
                             price = price.add(new BigDecimal("10000"));
                         }
 
-                        // Tạo PriceTicket (dayType là enum, phù hợp với builder)
                         PriceTicket pt = PriceTicket.builder()
                                 .film(film)
                                 .seatType(seat)
                                 .showTime(showTime)
-                                .dayType(dayType)           // <-- now passes enum, no error
+                                .dayType(dayType)
                                 .price(price)
-                                .startDate(startDate)
+                                .startDate(currentDate)
                                 .endDate(null)
                                 .isDeleted(false)
                                 .build();
@@ -1155,8 +1147,11 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
             priceTicketRepository.saveAll(listToInsert);
         }
 
-        System.out.println("✅ Đã khởi tạo PRICE_TICKETS (" + listToInsert.size() + " dòng) thành công!");
+        System.out.println("✅ Đã khởi tạo PRICE_TICKETS cho 7 ngày từ "
+                + start + " đến " + start.plusDays(totalDays - 1)
+                + " — Tổng số dòng: " + listToInsert.size());
     }
+
 
     @Override
     @Transactional
@@ -1208,13 +1203,20 @@ public class DataInitialize implements EntityInitialize, CommandLineRunner {
                 ? PriceTicket.DayType.WEEKEND
                 : PriceTicket.DayType.WEEKDAY;
 
-        PriceTicket ticketPrice = priceTicketRepository.findTicketPrice(
+        List<PriceTicket> prices = priceTicketRepository.findTicketPrices(
                 schedule.getFilm().getId(),
                 seat1.getSeatType().getId(),
                 schedule.getShowTime().getId(),
                 dayType,
                 scheduleDate
-        ).orElseGet(() -> priceTicketRepository.findTopByFilmIdAndSeatTypeId(schedule.getFilm().getId(), seat1.getSeatType().getId()).orElse(null));
+        );
+
+        PriceTicket ticketPrice = !prices.isEmpty()
+                ? prices.get(0) // lấy bản mới nhất (startDate lớn nhất do ORDER BY DESC)
+                : priceTicketRepository.findTopByFilmIdAndSeatTypeId(
+                schedule.getFilm().getId(),
+                seat1.getSeatType().getId()
+        ).orElse(null);
 
         Product pepsi = productRepository.findByName("Pepsi 220z").orElseGet(() -> productRepository.findTopByIsDeletedFalse().orElse(null));
         Product bap = productRepository.findByNameStartingWith("Bắp rang vị ngọt 440z").orElse(pepsi);

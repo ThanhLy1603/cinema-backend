@@ -1,8 +1,8 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.FilmController;
-import com.example.backend.dto.FilmResponse;
-import com.example.backend.dto.CategoryManageResponse;
+import com.example.backend.dto.response.FilmResponse;
+import com.example.backend.dto.response.CategoryManageResponse;
 import com.example.backend.service.FilmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

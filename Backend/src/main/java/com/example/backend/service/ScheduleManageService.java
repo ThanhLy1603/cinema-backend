@@ -1,14 +1,9 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.*;
-import com.example.backend.entity.Film;
-import com.example.backend.entity.Room;
-import com.example.backend.entity.Schedule;
-import com.example.backend.entity.ShowTime;
-import com.example.backend.repository.FilmRepository;
-import com.example.backend.repository.RoomRepository;
-import com.example.backend.repository.ScheduleRepository;
-import com.example.backend.repository.ShowTimeRepository;
+import com.example.backend.dto.request.ScheduleManageRequest;
+import com.example.backend.dto.response.*;
+import com.example.backend.entity.*;
+import com.example.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +21,8 @@ public class ScheduleManageService {
     private final FilmRepository filmRepository;
     private final RoomRepository roomRepository;
     private final ShowTimeRepository showTimeRepository;
+    private final SeatRepository seatRepository;
+    private final ScheduleSeatRepository scheduleSeatRepository;
     private final int CLEAN_TIME = 15;
 
     @Transactional
@@ -79,7 +76,31 @@ public class ScheduleManageService {
             System.out.println("schedule: " + schedule);
             schedules.add(schedule);
         }
-        scheduleRepository.saveAll(schedules);
+
+        List<Schedule> savedSchedules = scheduleRepository.saveAll(schedules);
+
+        List<ScheduleSeat> scheduleSeats = new ArrayList<>();
+
+        for (Schedule schedule : savedSchedules) {
+            UUID roomId = schedule.getRoom().getId();
+
+            List<Seat> seats = seatRepository.findByRoomIdAndIsDeletedFalseOrderByPositionAsc(roomId);
+
+            for (Seat seat : seats) {
+                ScheduleSeat scheduleSeat = new ScheduleSeat();
+                scheduleSeat.setSchedule(schedule);
+                scheduleSeat.setSeat(seat);
+                scheduleSeat.setHolderId(null);
+                scheduleSeat.setStatus("available");
+                scheduleSeat.setHoldExpiresAt(null);
+                scheduleSeat.setDeleted(false);
+
+                scheduleSeats.add(scheduleSeat);
+            }
+        }
+
+        scheduleSeatRepository.saveAll(scheduleSeats);
+
         return new ApiResponse("success", "Thêm lịch chiếu thành công");
     }
 

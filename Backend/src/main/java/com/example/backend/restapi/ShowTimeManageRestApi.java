@@ -1,9 +1,9 @@
 package com.example.backend.restapi;
 
 import com.example.backend.controller.ShowTimeManageController;
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ShowTimeManageRequest;
-import com.example.backend.dto.ShowTimeManageResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.request.ShowTimeManageRequest;
+import com.example.backend.dto.response.ShowTimeManageResponse;
 import com.example.backend.service.ShowTimeManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

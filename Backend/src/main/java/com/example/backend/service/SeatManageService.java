@@ -1,6 +1,10 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.SeatManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.RoomManageResponse;
+import com.example.backend.dto.response.SeatManageResponse;
+import com.example.backend.dto.response.SeatTypeManageResponse;
 import com.example.backend.entity.Room;
 import com.example.backend.entity.Seat;
 import com.example.backend.entity.SeatType;
@@ -113,27 +117,25 @@ public class SeatManageService {
     }
 
     public ApiResponse updateSeat(UUID id, SeatManageRequest request) {
-        Seat existSeat = seatRepository.findById(id).orElse(null);
-        SeatType seatType = seatTypeRepository.findById(request.seatTypeId()).orElse(null);
+        Seat seat = seatRepository.findById(id)
+                .orElse(null);
 
-        if (existSeat == null) {
+        if (seat == null) {
             return new ApiResponse("error", "Không tìm thấy ghế cần sửa");
         }
+
+        SeatType seatType = seatTypeRepository.findById(request.seatTypeId())
+                .orElse(null);
 
         if (seatType == null) {
             return new ApiResponse("error", "Không tìm loại ghế");
         }
 
-        existSeat.setDeleted(true);
-        seatRepository.save(existSeat);
+        seat.setSeatType(seatType);
+        seat.setActive(request.active());
+        seat.setDeleted(false);
 
-        Seat newSeat = new Seat();
-        newSeat.setPosition(existSeat.getPosition());
-        newSeat.setRoom(existSeat.getRoom());
-        newSeat.setSeatType(seatType);
-        newSeat.setActive(request.active());
-        newSeat.setDeleted(false);
-        seatRepository.save(newSeat);
+        seatRepository.save(seat);
 
         return new ApiResponse("success", "Chỉnh sửa thông tin ghế thành công");
     }

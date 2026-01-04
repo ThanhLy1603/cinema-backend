@@ -1,8 +1,11 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.*;
+import com.example.backend.dto.request.SeatManageRequest;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.RoomManageResponse;
+import com.example.backend.dto.response.SeatManageResponse;
+import com.example.backend.dto.response.SeatTypeManageResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 

@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.ProductPriceResponse;
+import com.example.backend.dto.response.ApiResponse;
+import com.example.backend.dto.response.ProductPriceResponse;
 import com.example.backend.entity.ProductPrice;
 import org.springframework.http.ResponseEntity;
 
